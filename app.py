@@ -159,7 +159,7 @@ with r_c1:
         """
         <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:1rem;text-align:center;">
             <div style="font-size:2rem;">👤</div>
-            <strong>Citizen</strong>
+            <strong style="color:#1A202C;">Citizen</strong>
             <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
                 Register &amp; sign in to report civic issues in your ward.
             </p>
@@ -173,7 +173,7 @@ with r_c2:
         """
         <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:1rem;text-align:center;">
             <div style="font-size:2rem;">🚧</div>
-            <strong>Field Officer</strong>
+            <strong style="color:#1A202C;">Field Officer</strong>
             <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
                 Register with your Employee Code &amp; sign in to manage assigned grievances.
             </p>
@@ -187,7 +187,7 @@ with r_c3:
         """
         <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:1rem;text-align:center;">
             <div style="font-size:2rem;">🏢</div>
-            <strong>Dept Admin</strong>
+            <strong style="color:#1A202C;">Dept Admin</strong>
             <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
                 Requires credentials + confidential <strong>Dept Admin Access Code</strong>.
             </p>
@@ -201,7 +201,7 @@ with r_c4:
         """
         <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:1rem;text-align:center;">
             <div style="font-size:2rem;">👑</div>
-            <strong>Super Admin</strong>
+            <strong style="color:#1A202C;">Super Admin</strong>
             <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
                 Requires credentials + <strong>Commissioner's Authorisation Code</strong>.
             </p>
