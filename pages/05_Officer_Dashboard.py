@@ -24,11 +24,12 @@ from backend.repositories.category_repo import CategoryRepository
 from backend.repositories.ward_repo import WardRepository
 from backend.utils.formatting import format_status_badge, format_severity_badge, format_datetime
 from backend.utils.session import init_session_state, get_current_user, require_auth, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">👷 Government Officer Portal</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("hard-hat", size=28, color="#1E3A8A")} Government Officer Portal</h1>', unsafe_allow_html=True)
 
 # RBAC Guard
 if not require_auth(allowed_roles=[UserRole.OFFICER.value, UserRole.DEPARTMENT_ADMIN.value, UserRole.SUPER_ADMIN.value]):

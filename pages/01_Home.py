@@ -13,6 +13,7 @@ if str(BASE_DIR) not in sys.path:
 from backend.config import settings
 from backend.database import get_db_session
 from backend.utils.session import init_session_state, apply_custom_css
+from backend.utils.icons import icon_svg
 from backend.services.analytics_service import AnalyticsService
 
 init_session_state()
@@ -20,9 +21,9 @@ apply_custom_css()
 
 # Header
 st.markdown(
-    """
+    f"""
     <div class="hero-banner">
-        <div class="hero-title">🏛️ Civic Grievance Redressal Portal</div>
+        <div class="hero-title">{icon_svg('landmark', size=32, color='#FFFFFF')} Civic Grievance Redressal Portal</div>
         <div class="hero-subtitle">
             Direct civic problem reporting with transparent tracking, automated department routing, and verified field resolutions.
         </div>
@@ -34,13 +35,13 @@ st.markdown(
 # Navigation Cards
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    st.page_link("pages/02_Report_Problem.py", label="📢 Report a Problem", icon="🚀", use_container_width=True)
+    st.page_link("pages/02_Report_Problem.py", label="Report a Problem", use_container_width=True)
 with c2:
-    st.page_link("pages/03_Track_Complaint.py", label="🔍 Track Complaint", icon="📍", use_container_width=True)
+    st.page_link("pages/03_Track_Complaint.py", label="Track Complaint", use_container_width=True)
 with c3:
-    st.page_link("pages/11_Evaluation_Dossier.py", label="🏆 Evaluation Dossier", icon="📑", use_container_width=True)
+    st.page_link("pages/11_Evaluation_Dossier.py", label="Evaluation Dossier", use_container_width=True)
 with c4:
-    st.page_link("pages/07_Analytics.py", label="📊 Transparency Portal", icon="📈", use_container_width=True)
+    st.page_link("pages/07_Analytics.py", label="Transparency Portal", use_container_width=True)
 
 st.divider()
 

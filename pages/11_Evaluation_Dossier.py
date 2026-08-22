@@ -19,15 +19,16 @@ from backend.repositories.category_repo import CategoryRepository
 from backend.repositories.ward_repo import WardRepository
 from backend.repositories.department_repo import DepartmentRepository
 from backend.utils.session import init_session_state, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
 # Header Banner
 st.markdown(
-    """
+    f"""
     <div class="hero-banner">
-        <div class="hero-title">🏆 Platform Evaluation & Architectural Dossier</div>
+        <div class="hero-title">{icon_svg('file-code', size=32, color='#FFFFFF')} Platform Evaluation & Architectural Dossier</div>
         <div class="hero-subtitle">
             A comprehensive technical breakdown of <b>CivicPulse (NagarVani)</b> showcasing Novelty, Technical Complexity, Practicability, Sustainability, UX, Scale, and Future Scalability.
         </div>
@@ -39,16 +40,16 @@ st.markdown(
 # Navigation Tabs mapping directly to all 9 evaluation criteria
 tab_overview, tab_novelty, tab_depth, tab_clarity, tab_feasibility, tab_sustain, tab_scale, tab_ux, tab_future, tab_demo = st.tabs(
     [
-        "📌 Executive Summary",
-        "💡 Novelty & Innovation",
-        "⚙️ Complexity & Depth",
-        "🎯 Solution Clarity",
-        "🛠️ Feasibility & Practicality",
-        "🌱 Sustainability",
-        "📈 Scale & Impact",
-        "✨ User Experience (UX)",
-        "🚀 Future Scope",
-        "🧪 Live Interactive Hub",
+        "Executive Summary",
+        "Novelty & Innovation",
+        "Complexity & Depth",
+        "Solution Clarity",
+        "Feasibility & Practicality",
+        "Sustainability",
+        "Scale & Impact",
+        "User Experience (UX)",
+        "Future Scope",
+        "Live Interactive Hub",
     ]
 )
 
@@ -56,7 +57,7 @@ tab_overview, tab_novelty, tab_depth, tab_clarity, tab_feasibility, tab_sustain,
 # TAB 1: EXECUTIVE SUMMARY
 # -----------------------------------------------------------------------------
 with tab_overview:
-    st.markdown("### 🏛️ **Platform Overview & Problem Statement**")
+    st.markdown(f"### {icon_svg('landmark', size=20, color='#1E3A8A')} **Platform Overview & Problem Statement**", unsafe_allow_html=True)
     st.markdown(
         """
         In urban municipalities across India and global smart cities, citizens face broken infrastructure, hazardous open sewage, uncollected solid waste, and dangerous potholes. However, existing municipal grievance systems suffer from:
@@ -117,12 +118,12 @@ with tab_overview:
 # TAB 2: NOVELTY & INNOVATION
 # -----------------------------------------------------------------------------
 with tab_novelty:
-    st.markdown("### 💡 **Novelty and Innovation**")
+    st.markdown(f"### {icon_svg('sparkles', size=20, color='#7C3AED')} **Novelty and Innovation**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">📍 1. Proactive Geospatial & NLP Deduplication Engine</div>
+            <div class="eval-title">1. Proactive Geospatial & NLP Deduplication Engine</div>
             <div class="eval-body">
                 Unlike traditional grievance portals that blindly accept duplicate tickets and flood field engineers, CivicPulse runs a <b>proactive dual-heuristic scanner</b> at the instant of reporting:
                 <ul>
@@ -134,7 +135,7 @@ with tab_novelty:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">⚡ 2. Zero-Code Dynamic Database Routing Matrix</div>
+            <div class="eval-title">2. Zero-Code Dynamic Database Routing Matrix</div>
             <div class="eval-body">
                 Traditional portals hardcode routing rules into codebase logic. CivicPulse features a <b>dynamic priority-order database routing engine</b>:
                 <ul>
@@ -145,7 +146,7 @@ with tab_novelty:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🤖 3. Heuristic + Multi-Modal AI Co-Pilot</div>
+            <div class="eval-title">3. Heuristic + Multi-Modal AI Co-Pilot</div>
             <div class="eval-body">
                 AI is designed as an <b>advisory co-pilot rather than an autonomous black box</b>:
                 <ul>
@@ -157,7 +158,7 @@ with tab_novelty:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">📊 4. Open Citizen Accountability Leaderboard</div>
+            <div class="eval-title">4. Open Citizen Accountability Leaderboard</div>
             <div class="eval-body">
                 Brings radical transparency to civic administration by publishing live ward heatmaps, average resolution velocity, department response scores, and verified before-and-after photo proof without exposing private citizen PII.
             </div>
@@ -170,12 +171,12 @@ with tab_novelty:
 # TAB 3: COMPLEXITY & TECHNICAL DEPTH
 # -----------------------------------------------------------------------------
 with tab_depth:
-    st.markdown("### ⚙️ **Complexity and Technical Depth**")
+    st.markdown(f"### {icon_svg('cpu', size=20, color='#2563EB')} **Complexity and Technical Depth**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">🏗️ 1. Decoupled 3-Tier Layered Architecture</div>
+            <div class="eval-title">1. Decoupled 3-Tier Layered Architecture</div>
             <div class="eval-body">
                 The platform is engineered with strict separation of concerns across 5 core software layers:
                 <ul>
@@ -189,7 +190,7 @@ with tab_depth:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🔒 2. Enterprise Cryptography & RBAC Hierarchy</div>
+            <div class="eval-title">2. Enterprise Cryptography & RBAC Hierarchy</div>
             <div class="eval-body">
                 <ul>
                     <li><b>Argon2id Hashing:</b> State-of-the-art password hashing using <code>argon2-cffi</code> with memory-cost (64MB) and 2-pass parallelism to defend against GPU/ASIC rainbow attacks.</li>
@@ -200,7 +201,7 @@ with tab_depth:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🛡️ 3. Media Integrity & Path Traversal Defense</div>
+            <div class="eval-title">3. Media Integrity & Path Traversal Defense</div>
             <div class="eval-body">
                 <ul>
                     <li><b>Header Magic-Byte Inspection:</b> Uses PIL byte headers rather than naive file extensions to verify genuine JPEG/PNG/WEBP binaries, blocking disguised executables.</li>
@@ -211,7 +212,7 @@ with tab_depth:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🔄 4. Multi-Dialect Database & Alembic Migrations</div>
+            <div class="eval-title">4. Multi-Dialect Database & Alembic Migrations</div>
             <div class="eval-body">
                 Zero configuration required: Auto-detects and seamlessly runs on either <b>PostgreSQL 16</b> in production or <b>SQLite</b> in local development, supported by automated batch-mode Alembic migration scripts.
             </div>
@@ -224,12 +225,12 @@ with tab_depth:
 # TAB 4: SOLUTION CLARITY
 # -----------------------------------------------------------------------------
 with tab_clarity:
-    st.markdown("### 🎯 **Clarity of the Proposed Solution**")
+    st.markdown(f"### {icon_svg('target', size=20, color='#0F766E')} **Clarity of the Proposed Solution**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">🔄 Complete Grievance Redressal State Machine</div>
+            <div class="eval-title">Complete Grievance Redressal State Machine</div>
             <div class="eval-body">
                 CivicPulse models every grievance through a deterministic, transparent lifecycle:
             </div>
@@ -294,12 +295,12 @@ with tab_clarity:
 # TAB 5: FEASIBILITY & PRACTICABILITY
 # -----------------------------------------------------------------------------
 with tab_feasibility:
-    st.markdown("### 🛠️ **Feasibility and Practicability**")
+    st.markdown(f"### {icon_svg('wrench', size=20, color='#D97706')} **Feasibility and Practicability**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">🚀 1. Immediate Zero-Friction Deployment</div>
+            <div class="eval-title">1. Immediate Zero-Friction Deployment</div>
             <div class="eval-body">
                 <ul>
                     <li><b>Zero External Paid API Lock-In:</b> Can operate 100% offline with built-in OpenStreetMap cartography and local heuristic NLP classifiers.</li>
@@ -310,7 +311,7 @@ with tab_feasibility:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">📱 2. High Citizen Adoption Factors</div>
+            <div class="eval-title">2. High Citizen Adoption Factors</div>
             <div class="eval-body">
                 <ul>
                     <li><b>No App Download Required:</b> Fully responsive web interface that opens instantaneously in mobile browsers.</li>
@@ -327,26 +328,26 @@ with tab_feasibility:
 # TAB 6: SUSTAINABILITY
 # -----------------------------------------------------------------------------
 with tab_sustain:
-    st.markdown("### 🌱 **Sustainability and Environmental Impact**")
+    st.markdown(f"### {icon_svg('leaf', size=20, color='#16A34A')} **Sustainability and Environmental Impact**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">💧 1. Preserving Potable Drinking Water</div>
+            <div class="eval-title">1. Preserving Potable Drinking Water</div>
             <div class="eval-body">
                 Urban pipeline leaks waste hundreds of thousands of liters of clean drinking water daily. CivicPulse prioritizes water leakage with urgent 8-hour SLAs, preventing resource depletion and soil erosion.
             </div>
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🚛 2. Reducing Municipal Carbon Footprint</div>
+            <div class="eval-title">2. Reducing Municipal Carbon Footprint</div>
             <div class="eval-body">
                 By grouping nearby complaints and eliminating duplicate inspection trips through geospatial deduplication, municipal utility trucks save an estimated <b>30-40% in fuel consumption</b> and vehicle emissions.
             </div>
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">💻 3. Green Computing Architecture</div>
+            <div class="eval-title">3. Green Computing Architecture</div>
             <div class="eval-body">
                 Unlike massive LLMs running 24/7 on energy-heavy GPU servers, CivicPulse's deterministic heuristic NLP uses negligible CPU cycles, ensuring minimal carbon footprint per transaction.
             </div>
@@ -359,12 +360,12 @@ with tab_sustain:
 # TAB 7: SCALE & IMPACT
 # -----------------------------------------------------------------------------
 with tab_scale:
-    st.markdown("### 📈 **Scale and Potential Impact**")
+    st.markdown(f"### {icon_svg('chart', size=20, color='#2563EB')} **Scale and Potential Impact**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">🏙️ 1. Multi-Ward & Multi-City Horizontal Scalability</div>
+            <div class="eval-title">1. Multi-Ward & Multi-City Horizontal Scalability</div>
             <div class="eval-body">
                 Designed to support massive urban local bodies (e.g. BBMP Bengaluru, BMC Mumbai, MCD Delhi):
                 <ul>
@@ -375,7 +376,7 @@ with tab_scale:
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🎯 2. Measurable Civic Impact KPIs</div>
+            <div class="eval-title">2. Measurable Civic Impact KPIs</div>
             <div class="eval-body">
                 <ul>
                     <li><b>65% Reduction in Resolution Turnaround Time:</b> Direct automated routing removes bureaucratic administrative middlemen.</li>
@@ -392,12 +393,12 @@ with tab_scale:
 # TAB 8: USER EXPERIENCE (UX/UI)
 # -----------------------------------------------------------------------------
 with tab_ux:
-    st.markdown("### ✨ **User Experience (UX/UI)**")
+    st.markdown(f"### {icon_svg('sparkles', size=20, color='#7C3AED')} **User Experience (UX/UI)**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">🎨 Modern Glassmorphic Civic Design System</div>
+            <div class="eval-title">Modern Glassmorphic Civic Design System</div>
             <div class="eval-body">
                 <ul>
                     <li><b>Visual Category Selector:</b> Emoji-tagged, high-contrast category cards with pre-configured severity levels.</li>
@@ -415,26 +416,26 @@ with tab_ux:
 # TAB 9: FUTURE SCOPE & DEVELOPMENT
 # -----------------------------------------------------------------------------
 with tab_future:
-    st.markdown("### 🚀 **Scope for Future Development & Scalability**")
+    st.markdown(f"### {icon_svg('route', size=20, color='#2563EB')} **Scope for Future Development & Scalability**", unsafe_allow_html=True)
 
     st.markdown(
         """
         <div class="eval-card">
-            <div class="eval-title">💬 1. WhatsApp & Telegram Conversational Reporting</div>
+            <div class="eval-title">1. WhatsApp & Telegram Conversational Reporting</div>
             <div class="eval-body">
                 Integration with WhatsApp Business API allowing citizens to simply send a photo and live location pin over chat to auto-generate a structured ticket.
             </div>
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🛰️ 2. Drone & Computer Vision Road Inundation Scanning</div>
+            <div class="eval-title">2. Drone & Computer Vision Road Inundation Scanning</div>
             <div class="eval-body">
                 Automated ingestion of CCTV footage and municipal drone surveys to autonomously detect potholes and stormwater drain overflow prior to monsoon storms.
             </div>
         </div>
 
         <div class="eval-card">
-            <div class="eval-title">🇮🇳 3. National Grievance Portal Federation (CPGRAMS / IGRS)</div>
+            <div class="eval-title">3. National Grievance Portal Federation (CPGRAMS / IGRS)</div>
             <div class="eval-body">
                 Bi-directional API sync with Central and State grievance redressal platforms for seamless escalation to higher urban development authorities.
             </div>
@@ -447,20 +448,20 @@ with tab_future:
 # TAB 10: LIVE INTERACTIVE PROTOTYPE & DEMONSTRATION HUB
 # -----------------------------------------------------------------------------
 with tab_demo:
-    st.markdown("### 🧪 **Live Interactive Technology Demonstration Hub**")
+    st.markdown(f"### {icon_svg('cpu', size=20, color='#7C3AED')} **Live Interactive Technology Demonstration Hub**", unsafe_allow_html=True)
     st.caption("Interact with the core underlying algorithms and simulation engines in real time:")
 
     demo_choice = st.radio(
         "Select Interactive Simulation:",
-        options=["🤖 AI Classifier & Briefing Sandbox", "⚡ Dynamic Routing Rules Simulator", "⏱️ SLA Deadline & Risk Calculator"],
+        options=["AI Classifier & Briefing Sandbox", "Dynamic Routing Rules Simulator", "SLA Deadline & Risk Calculator"],
         horizontal=True,
     )
 
     st.divider()
 
     # 1. AI Classifier Sandbox
-    if demo_choice == "🤖 AI Classifier & Briefing Sandbox":
-        st.markdown("#### 🤖 **Test the Deterministic AI NLP Co-Pilot**")
+    if demo_choice == "AI Classifier & Briefing Sandbox":
+        st.markdown("#### **Test the Deterministic AI NLP Co-Pilot**")
         st.caption("Type any real-world civic complaint text to observe category classification, severity estimation, and officer briefing generation:")
 
         test_title = st.text_input("Sample Complaint Title", value="Water pipeline leaking heavily on main road")
@@ -470,7 +471,7 @@ with tab_demo:
         )
         test_landmark = st.text_input("Landmark", value="Opposite Metro Station")
 
-        if st.button("✨ Run NLP Inference & Analysis", type="primary"):
+        if st.button("Run NLP Inference & Analysis", type="primary"):
             ai_svc = AIService(provider=HeuristicAIProvider())
             bundle = ai_svc.get_suggestions(test_title, test_desc, test_landmark)
 
@@ -493,8 +494,8 @@ with tab_demo:
             )
 
     # 2. Dynamic Routing Matrix Simulator
-    elif demo_choice == "⚡ Dynamic Routing Rules Simulator":
-        st.markdown("#### ⚡ **Test the Dynamic Routing Engine**")
+    elif demo_choice == "Dynamic Routing Rules Simulator":
+        st.markdown("#### **Test the Dynamic Routing Engine**")
         st.caption("Simulate complaint routing to see how database rules dynamically resolve the responsible department and engineer:")
 
         with get_db_session() as session:
@@ -514,7 +515,7 @@ with tab_demo:
             with r_col2:
                 sel_ward_label = st.selectbox("Select Ward Location", list(ward_map.keys()))
 
-            if st.button("⚡ Evaluate Routing Rules", type="primary"):
+            if st.button("Evaluate Routing Rules", type="primary"):
                 dept_id, reason, officer_id = routing_svc.route_complaint(
                     category_id=cat_map[sel_cat_label],
                     ward_id=ward_map[sel_ward_label],
@@ -523,19 +524,19 @@ with tab_demo:
                 dept_repo = DepartmentRepository(session)
                 dept = dept_repo.get_by_id(dept_id)
 
-                st.success(f"🎯 **Target Department:** `{dept.name if dept else dept_id}`")
-                st.info(f"📋 **Resolution Path:** {reason}")
+                st.success(f"**Target Department:** `{dept.name if dept else dept_id}`")
+                st.info(f"**Resolution Path:** {reason}")
 
     # 3. SLA Calculator
-    elif demo_choice == "⏱️ SLA Deadline & Risk Calculator":
-        st.markdown("#### ⏱️ **Test the SLA Target & Risk Engine**")
+    elif demo_choice == "SLA Deadline & Risk Calculator":
+        st.markdown("#### **Test the SLA Target & Risk Engine**")
         st.caption("Calculate target response and resolution turnaround hours by severity:")
 
         with get_db_session() as session:
             sla_svc = SLAService(session)
             test_sev = st.selectbox("Select Severity Level", ["CRITICAL", "HIGH", "MEDIUM", "LOW"])
 
-            if st.button("⏱️ Calculate SLA Thresholds", type="primary"):
+            if st.button("Calculate SLA Thresholds", type="primary"):
                 deadline, resp, res = sla_svc.calculate_deadline(category_id=None, severity=test_sev)
                 s1, s2, s3 = st.columns(3)
                 with s1:

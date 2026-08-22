@@ -17,11 +17,12 @@ from backend.services.analytics_service import AnalyticsService
 from backend.repositories.department_repo import DepartmentRepository
 from backend.repositories.complaint_repo import ComplaintRepository
 from backend.utils.session import init_session_state, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">📊 Public Transparency & Analytics</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("chart", size=28, color="#1E3A8A")} Public Transparency & Analytics</h1>', unsafe_allow_html=True)
 st.caption("Open municipal data portal showing grievance trends, resolution velocity, and departmental accountability.")
 
 with get_db_session() as session:

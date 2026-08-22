@@ -24,11 +24,12 @@ from backend.repositories.category_repo import CategoryRepository
 from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">📢 Report a Civic Problem</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("file-text", size=28, color="#1E3A8A")} Report a Civic Problem</h1>', unsafe_allow_html=True)
 st.caption("Help local authorities resolve issues in your neighborhood in ~2 minutes.")
 
 # Ensure session state variables for wizard

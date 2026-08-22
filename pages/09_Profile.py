@@ -14,15 +14,16 @@ from backend.database import get_db_session
 from backend.repositories.user_repo import UserRepository
 from backend.utils.formatting import format_datetime
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, logout_user, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">👤 User Profile</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("user", size=28, color="#1E3A8A")} User Profile</h1>', unsafe_allow_html=True)
 
 if not is_logged_in():
-    st.info("🔒 Please log in to view and manage your profile.")
-    st.page_link("pages/10_Auth.py", label="🔐 Login / Register", icon="👉")
+    st.info("Please log in to view and manage your profile.")
+    st.page_link("pages/10_Auth.py", label="Login / Register")
     st.stop()
 
 user_sess = get_current_user()
@@ -39,7 +40,7 @@ with get_db_session() as session:
         f"""
         <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:20px; margin-bottom:20px;">
             <h3>{user_db.full_name}</h3>
-            <p style="color:#64748B; margin-bottom:8px;">📧 {user_db.email} | 📞 {user_db.phone or 'No phone registered'}</p>
+            <p style="color:#64748B; margin-bottom:8px;">{user_db.email} | {user_db.phone or 'No phone registered'}</p>
             <span style="background:#DBEAFE; color:#1E40AF; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.85rem;">Role: {user_db.role}</span>
         </div>
         """,
@@ -48,7 +49,7 @@ with get_db_session() as session:
 
     if user_db.officer_profile:
         off = user_db.officer_profile
-        st.markdown("#### 🏢 **Government Officer Profile**")
+        st.markdown(f"#### {icon_svg('building', color='#1E3A8A')} **Government Officer Profile**", unsafe_allow_html=True)
         st.write(f"**Department:** {off.department.name if off.department else 'N/A'}")
         st.write(f"**Designation:** {off.designation}")
         st.write(f"**Employee Code:** `{off.employee_code}`")
@@ -59,9 +60,9 @@ with get_db_session() as session:
 
     col1, col2 = st.columns(2)
     with col1:
-        st.write(f"📅 **Member Since:** {format_datetime(user_db.created_at)}")
+        st.write(f"**Member Since:** {format_datetime(user_db.created_at)}")
     with col2:
-        if st.button("🚪 Log Out", type="secondary"):
+        if st.button("Log Out", type="secondary"):
             logout_user()
             st.success("Logged out.")
             st.rerun()

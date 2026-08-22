@@ -15,11 +15,12 @@ from backend.services.complaint_service import ComplaintService
 from backend.services.sla_service import SLAService
 from backend.utils.formatting import format_status_badge, format_severity_badge, format_datetime
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">📋 My Complaints</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("file-text", size=28, color="#1E3A8A")} My Complaints</h1>', unsafe_allow_html=True)
 
 if not is_logged_in():
     st.info("🔒 Please log in with your citizen account to view and manage your filed complaints.")

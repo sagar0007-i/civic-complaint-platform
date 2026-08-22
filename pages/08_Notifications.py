@@ -14,15 +14,16 @@ from backend.database import get_db_session
 from backend.services.notification_service import NotificationService
 from backend.utils.formatting import format_datetime
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">🔔 Notification Center</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("circle-check", size=28, color="#1E3A8A")} Notification Center</h1>', unsafe_allow_html=True)
 
 if not is_logged_in():
-    st.info("🔒 Please log in to view your complaint alerts and status notifications.")
-    st.page_link("pages/10_Auth.py", label="🔐 Login / Register", icon="👉")
+    st.info("Please log in to view your complaint alerts and status notifications.")
+    st.page_link("pages/10_Auth.py", label="Login / Register")
     st.stop()
 
 user = get_current_user()
@@ -41,12 +42,12 @@ with get_db_session() as session:
             st.rerun()
 
     if not notifications:
-        st.info("📭 You have no notifications at this time.")
+        st.info("You have no notifications at this time.")
     else:
         for n in notifications:
             bg_color = "#FFFFFF" if n.is_read else "#EFF6FF"
             border_color = "#E2E8F0" if n.is_read else "#3B82F6"
-            badge = "⚪ Read" if n.is_read else "🔵 **NEW**"
+            badge = "Read" if n.is_read else "**NEW**"
 
             with st.container():
                 st.markdown(

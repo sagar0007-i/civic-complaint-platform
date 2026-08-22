@@ -32,6 +32,10 @@ _PATHS = {
     "file-code": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6M10 13l-2 2 2 2M14 17l2-2-2-2"/>',
     "chart": '<path d="M3 3v18h18"/><path d="m7 16 4-5 3 2 5-7"/>',
     "eye": '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2"/>',
+    "cpu": '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
+    "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    "wrench": '<path d="M14.7 6.3a4 4 0 0 0-5 5L3 18a2.1 2.1 0 1 0 3 3l6.7-6.7a4 4 0 0 0 5-5L15 12l-3-3 2.7-2.7Z"/>',
+    "leaf": '<path d="M11 20A7 7 0 0 1 4 13C4 6 12 3 20 3c0 8-3 16-9 17Z"/><path d="M4 20c3-3 7-5 12-7"/>',
     "log-out": '<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-6"/>',
 }
 

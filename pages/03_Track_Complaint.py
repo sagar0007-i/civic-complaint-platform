@@ -20,11 +20,12 @@ from backend.services.sla_service import SLAService
 from backend.services.storage_service import get_storage_provider
 from backend.utils.formatting import format_status_badge, format_severity_badge, format_datetime
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
+from backend.utils.icons import icon_svg
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">🔍 Track Complaint Status</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("search", size=28, color="#1E3A8A")} Track Complaint Status</h1>', unsafe_allow_html=True)
 st.caption("Enter your unique Complaint ID to check real-time field progress, department responses, and timeline updates.")
 
 # Prefill from session if redirected from submission

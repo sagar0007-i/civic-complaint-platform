@@ -21,12 +21,13 @@ from backend.repositories.routing_repo import RoutingRepository
 from backend.repositories.sla_repo import SLARepository
 from backend.repositories.user_repo import UserRepository
 from backend.utils.session import init_session_state, get_current_user, require_auth, apply_custom_css
+from backend.utils.icons import icon_svg
 from backend.utils.formatting import format_datetime
 
 init_session_state()
 apply_custom_css()
 
-st.markdown('<h1 class="main-header">⚙️ System Administration Console</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-header">{icon_svg("building", size=28, color="#1E3A8A")} System Administration Console</h1>', unsafe_allow_html=True)
 
 # RBAC Guard
 if not require_auth(allowed_roles=[UserRole.SUPER_ADMIN.value, UserRole.DEPARTMENT_ADMIN.value]):
