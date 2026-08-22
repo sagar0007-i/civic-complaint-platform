@@ -284,8 +284,8 @@ if categories:
             st.markdown(
                 f"""
                 <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px; margin-bottom:10px;">
-                    <span style="font-size:1.1rem;">{c.icon}</span> <b>{c.name}</b><br>
-                    <span style="font-size:0.8rem; color:#64748B;">Default SLA Priority: <b>{c.default_severity}</b></span>
+                    <span style="font-size:1.1rem;">{c.icon}</span> <b style="color:#0F172A;">{c.name}</b><br>
+                    <span style="font-size:0.8rem; color:#1E293B;">Default SLA Priority: <b style="color:#0F172A;">{c.default_severity}</b></span>
                 </div>
                 """,
                 unsafe_allow_html=True,
