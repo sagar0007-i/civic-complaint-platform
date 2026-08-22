@@ -91,29 +91,33 @@ st.markdown(
 # Quick Action Hub
 cta_c1, cta_c2, cta_c3, cta_c4 = st.columns(4)
 with cta_c1:
-    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
-    with nav_icon:
-        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("file-text", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
-    with nav_link:
-        st.page_link("pages/02_Report_Problem.py", label="File Complaint (2 Min)", use_container_width=True)
+    st.page_link(
+        "pages/02_Report_Problem.py",
+        label="File Complaint (2 Min)",
+        icon=":material/description:",
+        use_container_width=True,
+    )
 with cta_c2:
-    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
-    with nav_icon:
-        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("search", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
-    with nav_link:
-        st.page_link("pages/03_Track_Complaint.py", label="Track Grievance Status", use_container_width=True)
+    st.page_link(
+        "pages/03_Track_Complaint.py",
+        label="Track Grievance Status",
+        icon=":material/search:",
+        use_container_width=True,
+    )
 with cta_c3:
-    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
-    with nav_icon:
-        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("file-code", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
-    with nav_link:
-        st.page_link("pages/11_Evaluation_Dossier.py", label="Evaluation & Tech Dossier", use_container_width=True)
+    st.page_link(
+        "pages/11_Evaluation_Dossier.py",
+        label="Evaluation & Tech Dossier",
+        icon=":material/code:",
+        use_container_width=True,
+    )
 with cta_c4:
-    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
-    with nav_icon:
-        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("eye", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
-    with nav_link:
-        st.page_link("pages/07_Analytics.py", label="Public Transparency", use_container_width=True)
+    st.page_link(
+        "pages/07_Analytics.py",
+        label="Public Transparency",
+        icon=":material/visibility:",
+        use_container_width=True,
+    )
 
 st.write("")
 
