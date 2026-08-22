@@ -105,6 +105,10 @@ def apply_custom_css() -> None:
         vertical-align: -0.18em;
         flex: 0 0 auto;
     }
+    .nav-icon {
+        display: block;
+        margin-top: 0.4rem;
+    }
     .hero-subtitle {
         font-size: 1.05rem;
         color: #E0E7FF;
