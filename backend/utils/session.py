@@ -100,6 +100,11 @@ def apply_custom_css() -> None:
         margin-bottom: 0.4rem;
         color: #FFFFFF;
     }
+    .civic-icon {
+        display: inline-block;
+        vertical-align: -0.18em;
+        flex: 0 0 auto;
+    }
     .hero-subtitle {
         font-size: 1.05rem;
         color: #E0E7FF;
