@@ -86,11 +86,11 @@ def apply_custom_css() -> None:
 
     /* Hero Banner */
     .hero-banner {
-        background: #111827;
+        background: #1e3a5f;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 2rem 2rem;
-        color: #f8fafc;
+        color: #ffffff;
         margin-bottom: 1.6rem;
     }
     .hero-title {
@@ -98,11 +98,11 @@ def apply_custom_css() -> None:
         font-weight: 700;
         letter-spacing: -0.02em;
         margin-bottom: 0.35rem;
-        color: #f8fafc;
+        color: #ffffff;
     }
     .hero-subtitle {
         font-size: 0.95rem;
-        color: #94a3b8;
+        color: #e2e8f0;
         font-weight: 400;
         max-width: 800px;
         line-height: 1.55;
@@ -110,21 +110,23 @@ def apply_custom_css() -> None:
 
     /* Civic & Evaluation Cards */
     .civic-card, .eval-card, .role-card {
-        background: #18181b;
-        border: 1px solid #27272a;
+        background: #ffffff;
+        border: 1px solid #e8edf5;
         border-radius: 10px;
         padding: 1.25rem;
         margin-bottom: 1rem;
-        transition: border-color 0.15s ease, transform 0.15s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
     }
     .civic-card:hover, .eval-card:hover, .role-card:hover {
-        border-color: #3f3f46;
+        border-color: #2563eb;
         transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .eval-title {
         font-size: 1.15rem;
         font-weight: 600;
-        color: #f8fafc;
+        color: #1e293b;
         margin-bottom: 0.4rem;
         display: flex;
         align-items: center;
@@ -133,23 +135,31 @@ def apply_custom_css() -> None:
     .eval-subhead {
         font-size: 0.92rem;
         font-weight: 600;
-        color: #cbd5e1;
+        color: #64748b;
         margin-top: 0.7rem;
         margin-bottom: 0.25rem;
     }
     .eval-body {
         font-size: 0.88rem;
-        color: #94a3b8;
+        color: #64748b;
         line-height: 1.55;
     }
 
     /* Metric Cards */
     .glass-metric {
-        background: #18181b;
-        border: 1px solid #27272a;
+        background: #ffffff;
+        border: 1px solid #e8edf5;
         border-radius: 10px;
         padding: 1rem;
         text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    [data-testid="stMetricValue"] {
+        font-weight: 700 !important;
+        color: #1e293b !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #64748b !important;
     }
 
     /* Minimal Badge Pills with Dot Indicators */
@@ -161,9 +171,9 @@ def apply_custom_css() -> None:
         border-radius: 9999px;
         font-size: 0.78rem;
         font-weight: 600;
-        background: #27272a;
-        color: #f8fafc;
-        border: 1px solid #3f3f46;
+        background: #f8fafc;
+        color: #1e293b;
+        border: 1px solid #e8edf5;
     }
     .dot-indicator {
         width: 6px;
@@ -173,38 +183,38 @@ def apply_custom_css() -> None:
     }
     .dot-low, .dot-res { background-color: #10b981; }
     .dot-med, .dot-prog, .dot-sub { background-color: #f59e0b; }
-    .dot-high, .dot-crit { background-color: #f43f5e; }
+    .dot-high, .dot-crit { background-color: #ef4444; }
 
     /* =========================================================================
        HIGH-CONTRAST VISIBLE BUTTON STYLES
        ========================================================================= */
 
-    /* Primary Buttons (Solid Sharp White with Dark High-Contrast Text) */
+    /* Primary Buttons (Government Blue) */
     div.stButton > button[kind="primary"],
     div.stButton > button[data-testid="baseButton-primary"],
     button[data-testid="baseButton-primary"],
     button[kind="primary"],
     div[data-testid="stFormSubmitButton"] > button[kind="primary"],
     div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"] {
-        background-color: #ffffff !important;
-        color: #09090b !important;
-        border: 1px solid #ffffff !important;
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        border: 1px solid #2563eb !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
         font-size: 0.95rem !important;
         padding: 0.55rem 1.25rem !important;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25) !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
         transition: all 0.15s ease-in-out !important;
     }
 
-    /* Force all child text/spans in primary buttons to be dark black */
+    /* Force all child text/spans in primary buttons to be white */
     div.stButton > button[kind="primary"] *,
     div.stButton > button[data-testid="baseButton-primary"] *,
     button[data-testid="baseButton-primary"] *,
     button[kind="primary"] *,
     div[data-testid="stFormSubmitButton"] > button[kind="primary"] *,
     div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"] * {
-        color: #09090b !important;
+        color: #ffffff !important;
         font-weight: 600 !important;
     }
 
@@ -215,9 +225,9 @@ def apply_custom_css() -> None:
     button[kind="primary"]:hover,
     div[data-testid="stFormSubmitButton"] > button[kind="primary"]:hover,
     div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"]:hover {
-        background-color: #e4e4e7 !important;
-        color: #09090b !important;
-        border-color: #e4e4e7 !important;
+        background-color: #1d4ed8 !important;
+        color: #ffffff !important;
+        border-color: #1d4ed8 !important;
         transform: translateY(-1px) !important;
     }
 
@@ -225,18 +235,18 @@ def apply_custom_css() -> None:
     div.stButton > button[data-testid="baseButton-primary"]:hover *,
     button[data-testid="baseButton-primary"]:hover *,
     button[kind="primary"]:hover * {
-        color: #09090b !important;
+        color: #ffffff !important;
     }
 
-    /* Secondary Buttons (Dark Zinc with White High-Contrast Text) */
+    /* Secondary Buttons (White with Slate Text) */
     div.stButton > button[kind="secondary"],
     div.stButton > button[data-testid="baseButton-secondary"],
     button[data-testid="baseButton-secondary"],
     button[kind="secondary"],
     div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) {
-        background-color: #18181b !important;
-        color: #f8fafc !important;
-        border: 1px solid #3f3f46 !important;
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #e8edf5 !important;
         border-radius: 8px !important;
         font-weight: 500 !important;
         font-size: 0.95rem !important;
@@ -246,20 +256,20 @@ def apply_custom_css() -> None:
     div.stButton > button[kind="secondary"] *,
     div.stButton > button[data-testid="baseButton-secondary"] *,
     div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) * {
-        color: #f8fafc !important;
+        color: #1e293b !important;
     }
 
     div.stButton > button[kind="secondary"]:hover,
     div.stButton > button[data-testid="baseButton-secondary"]:hover,
     div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]):hover {
-        background-color: #27272a !important;
-        border-color: #71717a !important;
-        color: #ffffff !important;
+        background-color: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
     }
 
     /* Timeline Stepper */
     .timeline-node {
-        border-left: 2px solid #3f3f46;
+        border-left: 2px solid #e2e8f0;
         padding-left: 1.2rem;
         margin-bottom: 1.2rem;
         position: relative;
@@ -272,7 +282,7 @@ def apply_custom_css() -> None:
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background-color: #3b82f6;
+        background-color: #2563eb;
     }
     </style>
     """

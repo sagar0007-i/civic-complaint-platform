@@ -91,27 +91,27 @@ st.markdown(
 # Quick Action Hub
 cta_c1, cta_c2, cta_c3, cta_c4 = st.columns(4)
 with cta_c1:
-    nav_icon, nav_link = st.columns([0.12, 0.88], gap="small")
+    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
     with nav_icon:
-        st.markdown(f'<span class="nav-icon">{icon_svg("file-text", size=18, color="#1E3A8A")}</span>', unsafe_allow_html=True)
+        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("file-text", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
     with nav_link:
         st.page_link("pages/02_Report_Problem.py", label="File Complaint (2 Min)", use_container_width=True)
 with cta_c2:
-    nav_icon, nav_link = st.columns([0.12, 0.88], gap="small")
+    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
     with nav_icon:
-        st.markdown(f'<span class="nav-icon">{icon_svg("search", size=18, color="#1E3A8A")}</span>', unsafe_allow_html=True)
+        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("search", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
     with nav_link:
         st.page_link("pages/03_Track_Complaint.py", label="Track Grievance Status", use_container_width=True)
 with cta_c3:
-    nav_icon, nav_link = st.columns([0.12, 0.88], gap="small")
+    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
     with nav_icon:
-        st.markdown(f'<span class="nav-icon">{icon_svg("file-code", size=18, color="#1E3A8A")}</span>', unsafe_allow_html=True)
+        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("file-code", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
     with nav_link:
         st.page_link("pages/11_Evaluation_Dossier.py", label="Evaluation & Tech Dossier", use_container_width=True)
 with cta_c4:
-    nav_icon, nav_link = st.columns([0.12, 0.88], gap="small")
+    nav_icon, nav_link = st.columns([0.15, 0.85], gap="small", vertical_alignment="center")
     with nav_icon:
-        st.markdown(f'<span class="nav-icon">{icon_svg("eye", size=18, color="#1E3A8A")}</span>', unsafe_allow_html=True)
+        st.markdown(f'<div style="display:flex; justify-content:flex-end; align-items:center; transform:translateY(2px); padding-right:4px;">{icon_svg("eye", size=20, color="#2563eb")}</div>', unsafe_allow_html=True)
     with nav_link:
         st.page_link("pages/07_Analytics.py", label="Public Transparency", use_container_width=True)
 
@@ -154,9 +154,9 @@ with r_c1:
     st.markdown(
         f"""
         <div class="role-card" style="text-align:center;">
-            <div>{icon_svg('user', size=26, color='#60a5fa')}</div>
-            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Citizen</strong>
-            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+            <div>{icon_svg('user', size=26, color='#2563eb')}</div>
+            <strong style="color:#1e293b; font-size:1rem; display:block; margin:6px 0 2px 0;">Citizen</strong>
+            <p style="font-size:0.82rem; color:#64748b; margin:0;">
                 Register &amp; sign in to report civic issues in your ward.
             </p>
         </div>
@@ -168,9 +168,9 @@ with r_c2:
     st.markdown(
         f"""
         <div class="role-card" style="text-align:center;">
-            <div>{icon_svg('hard-hat', size=26, color='#4ade80')}</div>
-            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Field Officer</strong>
-            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+            <div>{icon_svg('hard-hat', size=26, color='#10b981')}</div>
+            <strong style="color:#1e293b; font-size:1rem; display:block; margin:6px 0 2px 0;">Field Officer</strong>
+            <p style="font-size:0.82rem; color:#64748b; margin:0;">
                 Register with Employee Code &amp; sign in to manage tasks.
             </p>
         </div>
@@ -182,9 +182,9 @@ with r_c3:
     st.markdown(
         f"""
         <div class="role-card" style="text-align:center;">
-            <div>{icon_svg('building', size=26, color='#fb923c')}</div>
-            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Dept Admin</strong>
-            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+            <div>{icon_svg('building', size=26, color='#f59e0b')}</div>
+            <strong style="color:#1e293b; font-size:1rem; display:block; margin:6px 0 2px 0;">Dept Admin</strong>
+            <p style="font-size:0.82rem; color:#64748b; margin:0;">
                 Credentials + confidential Dept Admin Access Code.
             </p>
         </div>
@@ -196,9 +196,9 @@ with r_c4:
     st.markdown(
         f"""
         <div class="role-card" style="text-align:center;">
-            <div>{icon_svg('shield-check', size=26, color='#f87171')}</div>
-            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Super Admin</strong>
-            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+            <div>{icon_svg('shield-check', size=26, color='#ef4444')}</div>
+            <strong style="color:#1e293b; font-size:1rem; display:block; margin:6px 0 2px 0;">Super Admin</strong>
+            <p style="font-size:0.82rem; color:#64748b; margin:0;">
                 Credentials + Commissioner's Authorisation Code.
             </p>
         </div>
@@ -221,9 +221,9 @@ w1, w2, w3, w4 = st.columns(4)
 with w1:
     st.markdown(
         f"""
-        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #3b82f6; height:100%;">
-            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('camera', color='#60a5fa')} 1. Fast Report</h4>
-            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Upload photos/video, pin GPS map coordinates, and describe the issue in under 2 minutes.</p>
+        <div style="background:#ffffff; border:1px solid #e8edf5; border-radius:10px; padding:1.25rem; border-left:4px solid #2563eb; height:100%; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color:#1e293b; margin-top:0; font-size:1.05rem;">{icon_svg('camera', color='#2563eb')} 1. Fast Report</h4>
+            <p style="font-size:0.88rem; color:#64748b; margin:0;">Upload photos/video, pin GPS map coordinates, and describe the issue in under 2 minutes.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -232,9 +232,9 @@ with w1:
 with w2:
     st.markdown(
         f"""
-        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #6366f1; height:100%;">
-            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('route', color='#818cf8')} 2. Auto Routing</h4>
-            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Database routing engine matches category + ward + city to immediately dispatch to the local zonal team.</p>
+        <div style="background:#ffffff; border:1px solid #e8edf5; border-radius:10px; padding:1.25rem; border-left:4px solid #f59e0b; height:100%; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color:#1e293b; margin-top:0; font-size:1.05rem;">{icon_svg('route', color='#f59e0b')} 2. Auto Routing</h4>
+            <p style="font-size:0.88rem; color:#64748b; margin:0;">Database routing engine matches category + ward + city to immediately dispatch to the local zonal team.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -243,9 +243,9 @@ with w2:
 with w3:
     st.markdown(
         f"""
-        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #f59e0b; height:100%;">
-            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('hard-hat', color='#fbbf24')} 3. Field Action</h4>
-            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Engineers inspect the site, use AI summaries for triage, and dispatch repair equipment.</p>
+        <div style="background:#ffffff; border:1px solid #e8edf5; border-radius:10px; padding:1.25rem; border-left:4px solid #ea580c; height:100%; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color:#1e293b; margin-top:0; font-size:1.05rem;">{icon_svg('hard-hat', color='#ea580c')} 3. Field Action</h4>
+            <p style="font-size:0.88rem; color:#64748b; margin:0;">Engineers inspect the site, use AI summaries for triage, and dispatch repair equipment.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -254,9 +254,9 @@ with w3:
 with w4:
     st.markdown(
         f"""
-        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #10b981; height:100%;">
-            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('circle-check', color='#34d399')} 4. Verified Fix</h4>
-            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Field engineer submits resolution proof photo, closes the SLA ticket, and notifies citizen in real time.</p>
+        <div style="background:#ffffff; border:1px solid #e8edf5; border-radius:10px; padding:1.25rem; border-left:4px solid #10b981; height:100%; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <h4 style="color:#1e293b; margin-top:0; font-size:1.05rem;">{icon_svg('circle-check', color='#10b981')} 4. Verified Fix</h4>
+            <p style="font-size:0.88rem; color:#64748b; margin:0;">Field engineer submits resolution proof photo, closes the SLA ticket, and notifies citizen in real time.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -279,9 +279,9 @@ if categories:
         with col:
             st.markdown(
                 f"""
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px; margin-bottom:10px;">
-                    {category_icon(c.slug)} <b style="color:#0F172A;">{c.name}</b><br>
-                    <span style="font-size:0.8rem; color:#1E293B;">Default SLA Priority: <b style="color:#0F172A;">{c.default_severity}</b></span>
+                <div style="background:#ffffff; border:1px solid #e8edf5; border-radius:8px; padding:10px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    {category_icon(c.slug)} <b style="color:#1e293b;">{c.name}</b><br>
+                    <span style="font-size:0.8rem; color:#64748b;">Default SLA Priority: <b style="color:#1e293b;">{c.default_severity}</b></span>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -299,11 +299,11 @@ if showcase:
         with res_cols[idx]:
             st.markdown(
                 f"""
-                <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:12px;">
-                    <span style="font-size:0.8rem; font-weight:bold; color:#15803D;">{item['complaint_number']}</span>
-                    <h5 style="margin:4px 0; color:#166534;">{icon_svg('tag', size=18, color='#15803D')} {item['title']}</h5>
-                    <p style="font-size:0.85rem; color:#374151; margin-bottom:4px;">{icon_svg('map-pin', size=16, color='#475569')} {item['ward']}</p>
-                    <span style="font-size:0.75rem; color:#15803D; font-weight:600;">{icon_svg('circle-check', size=16, color='#15803D')} Resolved</span>
+                <div style="background:#ffffff; border:1px solid #e8edf5; border-left:4px solid #10b981; border-radius:8px; padding:12px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <span style="font-size:0.8rem; font-weight:bold; color:#10b981;">{item['complaint_number']}</span>
+                    <h5 style="margin:4px 0; color:#1e293b;">{icon_svg('tag', size=18, color='#1e293b')} {item['title']}</h5>
+                    <p style="font-size:0.85rem; color:#64748b; margin-bottom:4px;">{icon_svg('map-pin', size=16, color='#64748b')} {item['ward']}</p>
+                    <span style="font-size:0.75rem; color:#10b981; font-weight:600;">{icon_svg('circle-check', size=16, color='#10b981')} Resolved</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
