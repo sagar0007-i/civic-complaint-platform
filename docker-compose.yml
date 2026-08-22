@@ -1,0 +1,50 @@
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: civicpulse_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: civic_db
+      POSTGRES_USER: civic_user
+      POSTGRES_PASSWORD: civic_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civic_user -d civic_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # CivicPulse Streamlit Web Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: civicpulse_web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - APP_NAME=CivicPulse
+      - APP_ENV=production
+      - DEBUG=False
+      - SECRET_KEY=production_secret_key_civicpulse_2026_super_secure
+      - DATABASE_URL=postgresql+psycopg://civic_user:civic_secure_password_2026@postgres:5432/civic_db
+      - STORAGE_PROVIDER=local
+      - STORAGE_LOCAL_DIR=/app/uploads
+      - AI_PROVIDER=heuristic
+    ports:
+      - "8501:8501"
+    volumes:
+      - uploads_data:/app/uploads
+    command: >
+      sh -c "python scripts/seed_database.py &&
+             streamlit run app.py --server.port=8501 --server.address=0.0.0.0 --server.headless=true"
+
+volumes:
+  postgres_data:
+  uploads_data:
