@@ -145,7 +145,7 @@ st.divider()
 # -----------------------------------------------------------------------------
 # ACCESS PORTAL GUIDE
 # -----------------------------------------------------------------------------
-st.markdown(f"### {icon_svg('lock', color='#1E3A8A')} **Access the Portal — Choose Your Role**", unsafe_allow_html=True)
+st.markdown(f"### {icon_svg('lock', color='#cbd5e1')} **Access the Portal — Choose Your Role**", unsafe_allow_html=True)
 st.caption("Each role has a dedicated, secure authentication flow. Click below to navigate to the Sign In page.")
 
 r_c1, r_c2, r_c3, r_c4 = st.columns(4)
@@ -153,10 +153,10 @@ r_c1, r_c2, r_c3, r_c4 = st.columns(4)
 with r_c1:
     st.markdown(
         f"""
-        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:1rem;text-align:center;">
-            <div>{icon_svg('user', size=28, color='#2563EB')}</div>
-            <strong style="color:#1A202C;">Citizen</strong>
-            <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
+        <div class="role-card" style="text-align:center;">
+            <div>{icon_svg('user', size=26, color='#60a5fa')}</div>
+            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Citizen</strong>
+            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
                 Register &amp; sign in to report civic issues in your ward.
             </p>
         </div>
@@ -167,11 +167,11 @@ with r_c1:
 with r_c2:
     st.markdown(
         f"""
-        <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:1rem;text-align:center;">
-            <div>{icon_svg('hard-hat', size=28, color='#16A34A')}</div>
-            <strong style="color:#1A202C;">Field Officer</strong>
-            <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
-                Register with your Employee Code &amp; sign in to manage assigned grievances.
+        <div class="role-card" style="text-align:center;">
+            <div>{icon_svg('hard-hat', size=26, color='#4ade80')}</div>
+            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Field Officer</strong>
+            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+                Register with Employee Code &amp; sign in to manage tasks.
             </p>
         </div>
         """,
@@ -181,11 +181,11 @@ with r_c2:
 with r_c3:
     st.markdown(
         f"""
-        <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:1rem;text-align:center;">
-            <div>{icon_svg('building', size=28, color='#EA580C')}</div>
-            <strong style="color:#1A202C;">Dept Admin</strong>
-            <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
-                Requires credentials + confidential <strong>Dept Admin Access Code</strong>.
+        <div class="role-card" style="text-align:center;">
+            <div>{icon_svg('building', size=26, color='#fb923c')}</div>
+            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Dept Admin</strong>
+            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+                Credentials + confidential Dept Admin Access Code.
             </p>
         </div>
         """,
@@ -195,19 +195,19 @@ with r_c3:
 with r_c4:
     st.markdown(
         f"""
-        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:1rem;text-align:center;">
-            <div>{icon_svg('shield-check', size=28, color='#DC2626')}</div>
-            <strong style="color:#1A202C;">Super Admin</strong>
-            <p style="font-size:0.8rem;color:#475569;margin:0.4rem 0 0 0;">
-                Requires credentials + <strong>Commissioner's Authorisation Code</strong>.
+        <div class="role-card" style="text-align:center;">
+            <div>{icon_svg('shield-check', size=26, color='#f87171')}</div>
+            <strong style="color:#f8fafc; font-size:1rem; display:block; margin:6px 0 2px 0;">Super Admin</strong>
+            <p style="font-size:0.82rem; color:#94a3b8; margin:0;">
+                Credentials + Commissioner's Authorisation Code.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-st.markdown("<br>", unsafe_allow_html=True)
-if st.button("Go to Secure Sign In / Register Page", type="primary", use_container_width=False):
+st.write("")
+if st.button("Go to Secure Sign In / Register Page", icon=":material/login:", type="primary", use_container_width=False):
     st.switch_page("pages/10_Auth.py")
 
 st.divider()
@@ -221,9 +221,9 @@ w1, w2, w3, w4 = st.columns(4)
 with w1:
     st.markdown(
         f"""
-        <div class="eval-card" style="border-top: 4px solid #3B82F6;">
-            <h4 style="color:#1E3A8A; margin-top:0;">{icon_svg('camera', color='#1E3A8A')} 1. Fast Report</h4>
-            <p style="font-size:0.88rem; color:#475569;">Upload photos/video, pin GPS map coordinates, and describe the issue in under 2 minutes.</p>
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #3b82f6; height:100%;">
+            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('camera', color='#60a5fa')} 1. Fast Report</h4>
+            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Upload photos/video, pin GPS map coordinates, and describe the issue in under 2 minutes.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -232,9 +232,9 @@ with w1:
 with w2:
     st.markdown(
         f"""
-        <div class="eval-card" style="border-top: 4px solid #6366F1;">
-            <h4 style="color:#1E3A8A; margin-top:0;">{icon_svg('route', color='#1E3A8A')} 2. Auto Routing</h4>
-            <p style="font-size:0.88rem; color:#475569;">Database routing engine matches category + ward + city to immediately dispatch to the local zonal team.</p>
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #6366f1; height:100%;">
+            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('route', color='#818cf8')} 2. Auto Routing</h4>
+            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Database routing engine matches category + ward + city to immediately dispatch to the local zonal team.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -243,9 +243,9 @@ with w2:
 with w3:
     st.markdown(
         f"""
-        <div class="eval-card" style="border-top: 4px solid #F59E0B;">
-            <h4 style="color:#1E3A8A; margin-top:0;">{icon_svg('hard-hat', color='#1E3A8A')} 3. Field Action</h4>
-            <p style="font-size:0.88rem; color:#475569;">Authorized municipal engineers inspect the site, triage with AI summaries, and dispatch repair equipment.</p>
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #f59e0b; height:100%;">
+            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('hard-hat', color='#fbbf24')} 3. Field Action</h4>
+            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Engineers inspect the site, use AI summaries for triage, and dispatch repair equipment.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -254,9 +254,9 @@ with w3:
 with w4:
     st.markdown(
         f"""
-        <div class="eval-card" style="border-top: 4px solid #10B981;">
-            <h4 style="color:#1E3A8A; margin-top:0;">{icon_svg('circle-check', color='#1E3A8A')} 4. Verified Fix</h4>
-            <p style="font-size:0.88rem; color:#475569;">Field engineer submits resolution proof photo, closes the SLA ticket, and notifies citizen in real time.</p>
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:10px; padding:1.25rem; border-top:4px solid #10b981; height:100%;">
+            <h4 style="color:#f8fafc; margin-top:0; font-size:1.05rem;">{icon_svg('circle-check', color='#34d399')} 4. Verified Fix</h4>
+            <p style="font-size:0.88rem; color:#94a3b8; margin:0;">Field engineer submits resolution proof photo, closes the SLA ticket, and notifies citizen in real time.</p>
         </div>
         """,
         unsafe_allow_html=True,

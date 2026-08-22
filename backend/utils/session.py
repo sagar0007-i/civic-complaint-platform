@@ -74,121 +74,192 @@ def require_auth(allowed_roles: Optional[list[str]] = None) -> bool:
 
 
 def apply_custom_css() -> None:
-    """Inject catchy, modern, glassmorphic civic styling into Streamlit."""
+    """Inject modern, clean, dark-mode civic styling and high-contrast button styling into Streamlit."""
     custom_css = """
     <style>
     /* Google Fonts Import */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    /* Hero Banner Gradient */
+    /* Hero Banner */
     .hero-banner {
-        background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #0D9488 100%);
-        border-radius: 16px;
-        padding: 2.2rem 2rem;
-        color: white;
-        margin-bottom: 1.8rem;
-        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.25);
+        background: #111827;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem 2rem;
+        color: #f8fafc;
+        margin-bottom: 1.6rem;
     }
     .hero-title {
-        font-size: 2.2rem;
-        font-weight: 800;
+        font-size: 1.9rem;
+        font-weight: 700;
         letter-spacing: -0.02em;
-        margin-bottom: 0.4rem;
-        color: #FFFFFF;
-    }
-    .civic-icon {
-        display: inline-block;
-        vertical-align: -0.18em;
-        flex: 0 0 auto;
-    }
-    .nav-icon {
-        display: block;
-        margin-top: 0.4rem;
+        margin-bottom: 0.35rem;
+        color: #f8fafc;
     }
     .hero-subtitle {
-        font-size: 1.05rem;
-        color: #E0E7FF;
+        font-size: 0.95rem;
+        color: #94a3b8;
         font-weight: 400;
         max-width: 800px;
-        line-height: 1.5;
+        line-height: 1.55;
     }
 
-    /* Evaluation Dossier Card Styling */
-    .eval-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-top: 4px solid #2563EB;
-        border-radius: 12px;
-        padding: 1.4rem;
-        margin-bottom: 1.2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Civic & Evaluation Cards */
+    .civic-card, .eval-card, .role-card {
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        transition: border-color 0.15s ease, transform 0.15s ease;
     }
-    .eval-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    .civic-card:hover, .eval-card:hover, .role-card:hover {
+        border-color: #3f3f46;
+        transform: translateY(-1px);
     }
     .eval-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1E3A8A;
-        margin-bottom: 0.5rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #f8fafc;
+        margin-bottom: 0.4rem;
         display: flex;
         align-items: center;
         gap: 8px;
     }
     .eval-subhead {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         font-weight: 600;
-        color: #0F766E;
-        margin-top: 0.8rem;
-        margin-bottom: 0.3rem;
+        color: #cbd5e1;
+        margin-top: 0.7rem;
+        margin-bottom: 0.25rem;
     }
     .eval-body {
-        font-size: 0.9rem;
-        color: #334155;
-        line-height: 1.6;
+        font-size: 0.88rem;
+        color: #94a3b8;
+        line-height: 1.55;
     }
 
-    /* Modern Metric Cards */
+    /* Metric Cards */
     .glass-metric {
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 12px;
-        padding: 1.1rem;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 10px;
+        padding: 1rem;
         text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
-    /* Pill Badges */
+    /* Minimal Badge Pills with Dot Indicators */
     .pill-badge {
-        display: inline-block;
-        padding: 4px 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
         border-radius: 9999px;
         font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-    }
-    .badge-sub { background-color: #DBEAFE; color: #1E40AF; }
-    .badge-prog { background-color: #FEF3C7; color: #92400E; }
-    .badge-res { background-color: #D1FAE5; color: #065F46; }
-    .badge-crit { background-color: #FEE2E2; color: #991B1B; }
-
-    /* Polished Buttons */
-    div.stButton > button:first-child {
-        border-radius: 8px;
         font-weight: 600;
-        transition: all 0.15s ease-in-out;
+        background: #27272a;
+        color: #f8fafc;
+        border: 1px solid #3f3f46;
+    }
+    .dot-indicator {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .dot-low, .dot-res { background-color: #10b981; }
+    .dot-med, .dot-prog, .dot-sub { background-color: #f59e0b; }
+    .dot-high, .dot-crit { background-color: #f43f5e; }
+
+    /* =========================================================================
+       HIGH-CONTRAST VISIBLE BUTTON STYLES
+       ========================================================================= */
+
+    /* Primary Buttons (Solid Sharp White with Dark High-Contrast Text) */
+    div.stButton > button[kind="primary"],
+    div.stButton > button[data-testid="baseButton-primary"],
+    button[data-testid="baseButton-primary"],
+    button[kind="primary"],
+    div[data-testid="stFormSubmitButton"] > button[kind="primary"],
+    div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"] {
+        background-color: #ffffff !important;
+        color: #09090b !important;
+        border: 1px solid #ffffff !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        padding: 0.55rem 1.25rem !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25) !important;
+        transition: all 0.15s ease-in-out !important;
+    }
+
+    /* Force all child text/spans in primary buttons to be dark black */
+    div.stButton > button[kind="primary"] *,
+    div.stButton > button[data-testid="baseButton-primary"] *,
+    button[data-testid="baseButton-primary"] *,
+    button[kind="primary"] *,
+    div[data-testid="stFormSubmitButton"] > button[kind="primary"] *,
+    div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"] * {
+        color: #09090b !important;
+        font-weight: 600 !important;
+    }
+
+    /* Hover state for primary buttons */
+    div.stButton > button[kind="primary"]:hover,
+    div.stButton > button[data-testid="baseButton-primary"]:hover,
+    button[data-testid="baseButton-primary"]:hover,
+    button[kind="primary"]:hover,
+    div[data-testid="stFormSubmitButton"] > button[kind="primary"]:hover,
+    div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"]:hover {
+        background-color: #e4e4e7 !important;
+        color: #09090b !important;
+        border-color: #e4e4e7 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    div.stButton > button[kind="primary"]:hover *,
+    div.stButton > button[data-testid="baseButton-primary"]:hover *,
+    button[data-testid="baseButton-primary"]:hover *,
+    button[kind="primary"]:hover * {
+        color: #09090b !important;
+    }
+
+    /* Secondary Buttons (Dark Zinc with White High-Contrast Text) */
+    div.stButton > button[kind="secondary"],
+    div.stButton > button[data-testid="baseButton-secondary"],
+    button[data-testid="baseButton-secondary"],
+    button[kind="secondary"],
+    div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) {
+        background-color: #18181b !important;
+        color: #f8fafc !important;
+        border: 1px solid #3f3f46 !important;
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        transition: all 0.15s ease-in-out !important;
+    }
+
+    div.stButton > button[kind="secondary"] *,
+    div.stButton > button[data-testid="baseButton-secondary"] *,
+    div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) * {
+        color: #f8fafc !important;
+    }
+
+    div.stButton > button[kind="secondary"]:hover,
+    div.stButton > button[data-testid="baseButton-secondary"]:hover,
+    div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]):hover {
+        background-color: #27272a !important;
+        border-color: #71717a !important;
+        color: #ffffff !important;
     }
 
     /* Timeline Stepper */
     .timeline-node {
-        border-left: 3px solid #2563EB;
+        border-left: 2px solid #3f3f46;
         padding-left: 1.2rem;
         margin-bottom: 1.2rem;
         position: relative;
@@ -196,14 +267,12 @@ def apply_custom_css() -> None:
     .timeline-node::before {
         content: '';
         position: absolute;
-        left: -8px;
-        top: 2px;
-        width: 13px;
-        height: 13px;
+        left: -6px;
+        top: 4px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
-        background-color: #2563EB;
-        border: 2px solid #FFFFFF;
-        box-shadow: 0 0 0 2px #BFDBFE;
+        background-color: #3b82f6;
     }
     </style>
     """
