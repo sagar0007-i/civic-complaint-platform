@@ -75,10 +75,29 @@ with get_db_session() as session:
 
     st.divider()
 
-    # Queue Tabs
-    tab_assigned, tab_dept, tab_inspect = st.tabs(["🎯 Assigned to Me", "🏢 Department Queue", "🔍 Inspect & Resolve Grievance"])
+    # Queue Navigation Switcher
+    if "officer_tab" not in st.session_state:
+        st.session_state.officer_tab = "🏢 Department Queue"
 
-    with tab_assigned:
+    tab_c1, tab_c2, tab_c3 = st.columns(3)
+    with tab_c1:
+        if st.button("🎯 Assigned to Me", type="primary" if st.session_state.officer_tab == "🎯 Assigned to Me" else "secondary", use_container_width=True):
+            st.session_state.officer_tab = "🎯 Assigned to Me"
+            st.rerun()
+
+    with tab_c2:
+        if st.button("🏢 Department Queue", type="primary" if st.session_state.officer_tab == "🏢 Department Queue" else "secondary", use_container_width=True):
+            st.session_state.officer_tab = "🏢 Department Queue"
+            st.rerun()
+
+    with tab_c3:
+        if st.button("🔍 Inspect & Resolve Grievance", type="primary" if st.session_state.officer_tab == "🔍 Inspect & Resolve Grievance" else "secondary", use_container_width=True):
+            st.session_state.officer_tab = "🔍 Inspect & Resolve Grievance"
+            st.rerun()
+
+    st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
+
+    if st.session_state.officer_tab == "🎯 Assigned to Me":
         st.markdown("### 🎯 **My Assigned Grievances**")
         if not my_assigned:
             st.info("You currently have no complaints assigned directly to you.")
@@ -93,11 +112,12 @@ with get_db_session() as session:
                         st.write(f"⚡ **Severity:** {format_severity_badge(comp.severity)}")
                     with c2:
                         st.write(f"📅 **Date:** {format_datetime(comp.created_at)}")
-                        if st.button("Inspect & Take Action", key=f"act_my_{comp.id}", type="primary"):
+                        if st.button("🔍 Inspect & Take Action", key=f"act_my_{comp.id}", type="primary", use_container_width=True):
                             st.session_state.officer_inspect_id = comp.id
+                            st.session_state.officer_tab = "🔍 Inspect & Resolve Grievance"
                             st.rerun()
 
-    with tab_dept:
+    elif st.session_state.officer_tab == "🏢 Department Queue":
         st.markdown("### 🏢 **Department Queue & Filters**")
 
         f1, f2, f3 = st.columns(3)
@@ -129,12 +149,20 @@ with get_db_session() as session:
                     st.write(f"👤 **Assigned To:** {comp.assigned_officer.user.full_name if comp.assigned_officer and comp.assigned_officer.user else 'Unassigned'}")
                     st.write(f"⚡ **Priority:** {format_severity_badge(comp.severity)}")
                 with c3:
-                    if st.button("🔍 Open Grievance File", key=f"open_{comp.id}", type="primary"):
+                    if st.button("🔍 Open Grievance File", key=f"open_{comp.id}", type="primary", use_container_width=True):
                         st.session_state.officer_inspect_id = comp.id
+                        st.session_state.officer_tab = "🔍 Inspect & Resolve Grievance"
                         st.rerun()
 
-    with tab_inspect:
+    elif st.session_state.officer_tab == "🔍 Inspect & Resolve Grievance":
         st.markdown("### 🔍 **Grievance Inspection & Action Workbench**")
+
+        back_col, _ = st.columns([1, 3])
+        with back_col:
+            if st.button("⬅️ Back to Queue", use_container_width=True):
+                st.session_state.officer_tab = "🏢 Department Queue"
+                st.rerun()
+
         inspect_id = st.session_state.get("officer_inspect_id")
 
         if not inspect_id and dept_complaints:
