@@ -1,10 +1,10 @@
-"""Department, Ward, and Category Repositories."""
+"""Department and Ward Repositories."""
 
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from backend.models.department import Department
 from backend.models.ward import Ward
-from backend.models.category import ComplaintCategory
+
 
 
 class DepartmentRepository:
@@ -44,6 +44,35 @@ class DepartmentRepository:
         self.session.add(dept)
         self.session.flush()
         return dept
+
+    def get_by_code_exclude(self, code: str, exclude_id: Optional[str] = None) -> Optional[Department]:
+        query = self.session.query(Department).filter(Department.code == code.strip().upper())
+        if exclude_id:
+            query = query.filter(Department.id != exclude_id)
+        return query.first()
+
+    def update(
+        self,
+        dept_id: str,
+        name: str,
+        code: str,
+        description: Optional[str] = None,
+        contact_email: Optional[str] = None,
+        contact_phone: Optional[str] = None,
+        is_active: bool = True,
+    ) -> Optional[Department]:
+        dept = self.get_by_id(dept_id)
+        if not dept:
+            return None
+        dept.name = name.strip()
+        dept.code = code.strip().upper()
+        dept.description = description
+        dept.contact_email = contact_email
+        dept.contact_phone = contact_phone
+        dept.is_active = is_active
+        self.session.flush()
+        return dept
+
 
 
 class WardRepository:
@@ -87,43 +116,38 @@ class WardRepository:
         self.session.flush()
         return ward
 
-
-class CategoryRepository:
-    """Operations for Complaint Categories."""
-
-    def __init__(self, session: Session):
-        self.session = session
-
-    def get_all(self, active_only: bool = True) -> List[ComplaintCategory]:
-        query = self.session.query(ComplaintCategory)
-        if active_only:
-            query = query.filter(ComplaintCategory.is_active == True)
-        return query.order_by(ComplaintCategory.name.asc()).all()
-
-    def get_by_id(self, cat_id: str) -> Optional[ComplaintCategory]:
-        return self.session.query(ComplaintCategory).filter(ComplaintCategory.id == cat_id).first()
-
-    def get_by_slug(self, slug: str) -> Optional[ComplaintCategory]:
-        return self.session.query(ComplaintCategory).filter(ComplaintCategory.slug == slug).first()
-
-    def create(
+    def update(
         self,
+        ward_id: str,
         name: str,
-        slug: str,
-        department_id: str,
-        icon: str = "📌",
-        description: Optional[str] = None,
-        default_severity: str = "MEDIUM",
-    ) -> ComplaintCategory:
-        cat = ComplaintCategory(
-            name=name.strip(),
-            slug=slug.strip().lower(),
-            department_id=department_id,
-            icon=icon,
-            description=description,
-            default_severity=default_severity,
-            is_active=True,
-        )
-        self.session.add(cat)
+        zone: str,
+        ward_number: Optional[int] = None,
+        city: str = "Mumbai",
+        state: str = "Maharashtra",
+        pincode: Optional[str] = None,
+        center_lat: Optional[float] = None,
+        center_lng: Optional[float] = None,
+        is_active: bool = True,
+    ) -> Optional[Ward]:
+        ward = self.get_by_id(ward_id)
+        if not ward:
+            return None
+        ward.name = name.strip()
+        ward.zone = zone.strip()
+        ward.ward_number = ward_number
+        ward.city = city.strip()
+        ward.state = state.strip()
+        ward.pincode = pincode
+        ward.center_latitude = center_lat
+        ward.center_longitude = center_lng
+        ward.is_active = is_active
         self.session.flush()
-        return cat
+        return ward
+
+    def get_by_number_and_zone(self, ward_number: int, zone: str, exclude_id: Optional[str] = None) -> Optional[Ward]:
+        query = self.session.query(Ward).filter(Ward.ward_number == ward_number, Ward.zone == zone)
+        if exclude_id:
+            query = query.filter(Ward.id != exclude_id)
+        return query.first()
+
+

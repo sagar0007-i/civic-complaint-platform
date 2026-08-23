@@ -73,6 +73,42 @@ class UserRepository:
             self.session.flush()
         return user
 
+    def update_user(
+        self,
+        user_id: str,
+        full_name: str,
+        email: str,
+        role: str,
+        is_active: bool = True,
+        caller_id: Optional[str] = None,
+    ) -> tuple[Optional[User], Optional[str]]:
+        """Update user account details with security guards."""
+        user = self.get_by_id(user_id)
+        if not user:
+            return None, "User not found."
+
+        # Self-demotion / deactivation protection
+        if caller_id and user.id == caller_id:
+            if user.role == UserRole.SUPER_ADMIN.value and role != UserRole.SUPER_ADMIN.value:
+                return None, "You cannot demote yourself from Super Admin."
+            if not is_active:
+                return None, "You cannot deactivate your own account."
+
+        # Check unique email constraint
+        clean_email = email.strip().lower()
+        if user.email.lower() != clean_email:
+            existing = self.get_by_email(clean_email)
+            if existing:
+                return None, "A user with this email already exists."
+
+        user.full_name = full_name.strip()
+        user.email = clean_email
+        user.role = role
+        user.is_active = is_active
+        self.session.flush()
+        return user, None
+
+
 
     def create_officer_profile(
         self,

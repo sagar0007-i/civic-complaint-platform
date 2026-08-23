@@ -1,7 +1,7 @@
 """Pydantic schemas for Departments, Categories, and Wards."""
 
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class DepartmentCreateSchema(BaseModel):
@@ -36,3 +36,14 @@ class WardCreateSchema(BaseModel):
     pincode: Optional[str] = None
     center_latitude: Optional[float] = None
     center_longitude: Optional[float] = None
+
+    @field_validator("pincode")
+    @classmethod
+    def validate_indian_pincode(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v != "":
+            v_clean = v.strip()
+            if not v_clean.isdigit() or len(v_clean) != 6:
+                raise ValueError("Pincode must be a valid Indian pincode containing exactly 6 digits.")
+            return v_clean
+        return v
+
