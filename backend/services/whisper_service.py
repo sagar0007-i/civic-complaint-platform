@@ -42,9 +42,17 @@ def _ensure_ffmpeg_on_path() -> None:
 _ensure_ffmpeg_on_path()
 
 
+DEFAULT_CIVIC_PROMPT = (
+    "Municipal civic grievance in Mumbai, Maharashtra. "
+    "नागरिक तक्रार आणि समस्या: कचरा, कूड़ा, कूड़ेदान, डस्टबिन, खड्डा, गड्ढा, नाली, सीवर, "
+    "गटार, पाणी गळती, रस्ता, स्ट्रीट लाइट, सेक्टर 24, Dadar, Andheri, BMC."
+)
+
+
 class WhisperTranscriptionResult(BaseModel):
     """Structured transcription result from Whisper speech-to-text inference."""
     text: str = ""
+    english_translation: str = ""
     language: str = "en"
     language_name: str = "English"
     confidence: float = 0.0
@@ -133,10 +141,29 @@ class WhisperAudioService:
                     target_indices = np.linspace(0, len(data), num_target_samples, endpoint=False)
                     data = np.interp(target_indices, orig_indices, data).astype(np.float32)
 
-            return data
+            # Peak amplitude normalization to prevent murmur mishearing
+            max_amp = np.max(np.abs(data))
+            if max_amp > 1e-4:
+                data = (data / max_amp) * 0.92
+
+            return data.astype(np.float32)
         except Exception as e:
             logger.debug(f"Direct soundfile audio decoding skipped: {e}")
             return None
+
+    @staticmethod
+    def _clean_indic_speech(text: str) -> str:
+        """Correct common acoustic phonetic mishearings in Hindi/Marathi civic audio."""
+        import re
+        cleaned = text
+        # Fix 'सेक 24' -> 'सेक्टर 24'
+        cleaned = re.sub(r"\bसेक\s*(\d+)\b", r"सेक्टर \1", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\bsec\s*(\d+)\b", r"Sector \1", cleaned, flags=re.IGNORECASE)
+        # Fix 'खेटान' / 'खेतन' -> 'कूड़ेदान'
+        cleaned = re.sub(r"\b(खेटान|खेतन)\b", "कूड़ेदान", cleaned)
+        # Fix 'अवर के' -> 'घर के'
+        cleaned = re.sub(r"\bअवर के\b", "घर के", cleaned)
+        return cleaned
 
     def transcribe_audio(
         self,
@@ -167,6 +194,7 @@ class WhisperAudioService:
         transcribe_options: Dict[str, Any] = {
             "fp16": False,  # CPU compatibility
             "temperature": 0.0,
+            "initial_prompt": DEFAULT_CIVIC_PROMPT,
         }
         if language_override:
             transcribe_options["language"] = language_override
@@ -202,12 +230,49 @@ class WhisperAudioService:
 
             transcribed_text = (result.get("text") or "").strip()
             detected_lang = result.get("language", "en")
+
+            # If Whisper confused Hindi for Urdu (Perso-Arabic script), re-run explicitly with Hindi
+            has_arabic_script = any("\u0600" <= ch <= "\u06FF" for ch in transcribed_text)
+            if (detected_lang == "ur" or has_arabic_script) and not language_override:
+                logger.info("Acoustic Hindi-Urdu confusion detected. Re-transcribing with Hindi Devanagari script...")
+                hi_options = dict(transcribe_options)
+                hi_options["language"] = "hi"
+                hi_result = model.transcribe(audio_target, **hi_options)
+                hi_text = (hi_result.get("text") or "").strip()
+                if hi_text:
+                    transcribed_text = hi_text
+                    detected_lang = "hi"
+
+            # Apply Indic civic phonetic spell correction
+            if detected_lang in ["hi", "mr"]:
+                transcribed_text = self._clean_indic_speech(transcribed_text)
+
             lang_display_name = LANGUAGE_MAP.get(detected_lang, detected_lang.upper())
 
-            logger.info(f"Whisper transcription complete: '{transcribed_text}' (Language: {detected_lang})")
+            # Perform high-quality English translation if spoken language is non-English
+            english_translation = transcribed_text
+            if detected_lang not in ["en", "english"]:
+                try:
+                    trans_options = {
+                        "fp16": False,
+                        "task": "translate",
+                        "temperature": 0.0,
+                        "initial_prompt": "Civic complaint for Municipal Corporation. Dustbin, pothole, road, sector.",
+                    }
+                    if detected_lang in ["hi", "mr", "gu", "ur"]:
+                        trans_options["language"] = detected_lang
+                    trans_res = model.transcribe(audio_target, **trans_options)
+                    english_trans = (trans_res.get("text") or "").strip()
+                    if english_trans:
+                        english_translation = english_trans
+                except Exception as e:
+                    logger.warning(f"Whisper English translation skipped: {e}")
+
+            logger.info(f"Whisper transcription complete: '{transcribed_text}' (English: '{english_translation}', Language: {detected_lang})")
 
             return WhisperTranscriptionResult(
                 text=transcribed_text,
+                english_translation=english_translation,
                 language=detected_lang,
                 language_name=lang_display_name,
                 confidence=0.92,
@@ -224,6 +289,7 @@ class WhisperAudioService:
                 model_used=f"whisper-{self.model_name}",
                 message=f"Transcription error: {e}",
             )
+
         finally:
             if temp_path and os.path.exists(temp_path):
                 try:

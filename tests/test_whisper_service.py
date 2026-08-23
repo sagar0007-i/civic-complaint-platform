@@ -88,3 +88,20 @@ def test_voice_transcript_area_and_landmark():
     assert parsed["suggested_category_slug"] == "pothole"
     assert "Near Dadar Railway Station" in parsed["landmark"]
     assert parsed["title"] != parsed["description"]
+
+
+def test_hindi_voice_transcript_kudedaan_sector():
+    """Test Hindi grievance parsing with kudedaan, ghar ke aage, and sector 24."""
+    ai = AIService(provider=HeuristicAIProvider())
+
+    # User spoken Hindi: "मेरे घर के आगे एक कूड़ेदान है सेक्टर चौबीस"
+    # English translation: "There is a dustbin in front of my house at Sector 24."
+    parsed = ai.parse_voice_transcript(
+        raw_transcript="मेरे घर के आगे एक कूड़ेदान है सेक्टर चौबीस",
+        english_translation="There is a dustbin in front of my house at Sector 24.",
+    )
+
+    assert parsed["suggested_category_slug"] == "garbage"
+    assert "Sector 24" in parsed["address"] or "24" in parsed["address"]
+    assert "House" in parsed["landmark"] or "घर" in parsed["landmark"]
+    assert parsed["title"] != parsed["description"]

@@ -159,13 +159,30 @@ if st.session_state.report_step == 1:
                 unsafe_allow_html=True,
             )
 
+            # Language Selection Pill
+            lang_col1, _ = st.columns([1.5, 2.5])
+            with lang_col1:
+                selected_lang_label = st.selectbox(
+                    "🗣️ Spoken Language (भाषा निवडा / भाषा चुनें)",
+                    options=["🌐 Auto-Detect (स्वयंचलित)", "🇮🇳 हिन्दी (Hindi)", "🚩 मराठी (Marathi)", "🇬🇧 English"],
+                    key="voice_lang_choice",
+                    help="Select your spoken language for 100% accurate transcription.",
+                )
+            lang_code_map = {
+                "🌐 Auto-Detect (स्वयंचलित)": None,
+                "🇮🇳 हिन्दी (Hindi)": "hi",
+                "🚩 मराठी (Marathi)": "mr",
+                "🇬🇧 English": "en",
+            }
+            chosen_lang_code = lang_code_map.get(selected_lang_label)
+
             audio_source = None
             tab_mic, tab_upload_audio = st.tabs(["🎤 Record Live Voice", "📁 Upload Audio Clip"])
 
             with tab_mic:
                 if hasattr(st, "audio_input"):
                     audio_source = st.audio_input(
-                        "Click the microphone to record your complaint (e.g. 'रस्त्यावर मोठा खड्डा पडला आहे' or 'Garbage dump near hospital gate')",
+                        "Click the microphone to record your complaint (e.g. 'मेरे घर के आगे एक कूड़ेदान है सेक्टर 24' or 'Garbage dump near hospital gate')",
                         key="voice_audio_mic"
                     )
                 else:
@@ -184,49 +201,51 @@ if st.session_state.report_step == 1:
                 audio_bytes = audio_source.read() if hasattr(audio_source, "read") else audio_source.getvalue()
 
                 if audio_bytes:
-                    with st.spinner("🤖 Whisper is transcribing and understanding your voice grievance..."):
+                    with st.spinner("🤖 Whisper is transcribing and translating your voice grievance..."):
                         whisper_svc = WhisperAudioService()
-                        trans_res = whisper_svc.transcribe_audio(audio_bytes)
+                        trans_res = whisper_svc.transcribe_audio(audio_bytes, language_override=chosen_lang_code)
 
                     if trans_res.success and trans_res.text:
                         # Parse structured elements (distinct title, description, landmark, sector address)
                         ai_svc = AIService()
-                        parsed = ai_svc.parse_voice_transcript(trans_res.text)
+                        parsed = ai_svc.parse_voice_transcript(
+                            trans_res.text,
+                            english_translation=trans_res.english_translation,
+                        )
 
                         matched_slug = parsed.get("suggested_category_slug", "other")
                         matched_category = next((c for c in categories if c.slug == matched_slug), None)
                         if not matched_category and categories:
                             matched_category = categories[0]
 
+                        # Format translation display if spoken in Hindi / Marathi
+                        trans_html = ""
+                        if trans_res.english_translation and trans_res.english_translation != trans_res.text:
+                            trans_html = f"""<div style="font-size:0.86rem; color:#0369a1; margin-bottom:8px; background:#f0f9ff; padding:6px 10px; border-radius:6px; border:1px solid #bae6fd;"><b>🌐 English Translation:</b> "{trans_res.english_translation}"</div>"""
+
+                        landmark_html = f"""<div style="color:#0369a1; margin-bottom:4px;">📍 <b>Extracted Landmark:</b> {parsed["landmark"]}</div>""" if parsed["landmark"] else ""
+                        address_html = f"""<div style="color:#0369a1; margin-bottom:4px;">🏘️ <b>Extracted Sector/Address:</b> {parsed["address"]}</div>""" if parsed["address"] and parsed["address"] != settings.DEFAULT_CITY else ""
+
                         # 1-Click Review Card (Option 1 with Confirm & Next)
-                        st.markdown(
-                            f"""
-                            <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:14px; margin-top:10px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                    <span style="font-weight:700; color:#15803d; font-size:0.95rem;">
-                                        🗣️ Transcribed Voice Note ({trans_res.language_name}):
-                                    </span>
-                                    <span style="background:#dcfce7; color:#166534; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:600;">
-                                        AI Structured
-                                    </span>
-                                </div>
-                                <div style="font-style:italic; color:#166534; font-size:0.92rem; margin-bottom:10px; background:#ffffff; padding:10px 14px; border-radius:6px; border:1px solid #bbf7d0; line-height:1.5;">
-                                    "{trans_res.text}"
-                                </div>
-                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:0.88rem;">
-                                    <div style="color:#0f2d6b; margin-bottom:4px;">📌 <b>Auto-Generated Title:</b> {parsed['title']}</div>
-                                    <div style="color:#334155; margin-bottom:4px;">📝 <b>Auto-Formatted Description:</b> {parsed['description']}</div>
-                                    {f'<div style="color:#0369a1; margin-bottom:4px;">📍 <b>Extracted Landmark:</b> {parsed["landmark"]}</div>' if parsed["landmark"] else ''}
-                                    {f'<div style="color:#0369a1; margin-bottom:4px;">🏘️ <b>Extracted Sector/Address:</b> {parsed["address"]}</div>' if parsed["address"] and parsed["address"] != settings.DEFAULT_CITY else ''}
-                                    <div style="display:flex; flex-wrap:wrap; gap:16px; margin-top:6px; color:#1e3a8a;">
-                                        <span>🎯 <b>Category:</b> {matched_category.icon if matched_category else '📌'} {matched_category.name if matched_category else 'Other'}</span>
-                                        <span>⚡ <b>Severity:</b> <b>{parsed['suggested_severity']}</b></span>
-                                    </div>
-                                </div>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
+                        card_html = f"""<div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:14px; margin-top:10px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+<span style="font-weight:700; color:#15803d; font-size:0.95rem;">🗣️ Spoken Voice Note ({trans_res.language_name}):</span>
+<span style="background:#dcfce7; color:#166534; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:600;">AI Structured</span>
+</div>
+<div style="font-style:italic; color:#166534; font-size:0.92rem; margin-bottom:8px; background:#ffffff; padding:10px 14px; border-radius:6px; border:1px solid #bbf7d0; line-height:1.5;">"{trans_res.text}"</div>
+{trans_html}
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:0.88rem;">
+<div style="color:#0f2d6b; margin-bottom:4px;">📌 <b>Auto-Generated Title:</b> {parsed['title']}</div>
+<div style="color:#334155; margin-bottom:4px;">📝 <b>Auto-Formatted Description:</b> {parsed['description']}</div>
+{landmark_html}
+{address_html}
+<div style="display:flex; flex-wrap:wrap; gap:16px; margin-top:6px; color:#1e3a8a;">
+<span>🎯 <b>Category:</b> {matched_category.icon if matched_category else '📌'} {matched_category.name if matched_category else 'Other'}</span>
+<span>⚡ <b>Severity:</b> <b>{parsed['suggested_severity']}</b></span>
+</div>
+</div>
+</div>"""
+                        st.markdown(card_html, unsafe_allow_html=True)
 
                         st.write("")
                         col_conf, col_edit = st.columns([2, 1])
@@ -262,6 +281,7 @@ if st.session_state.report_step == 1:
                                 st.rerun()
                     elif trans_res.message:
                         st.warning(f"🎙️ {trans_res.message}")
+
 
 
         st.markdown(

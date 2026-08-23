@@ -74,7 +74,7 @@ class Settings(BaseSettings):
 
     # Whisper Multilingual Voice Transcription Model (Marathi, Hindi, English)
     WHISPER_ENABLED: bool = True
-    WHISPER_MODEL_NAME: str = "base"
+    WHISPER_MODEL_NAME: str = "small"
     WHISPER_DEVICE: str = "cpu"
 
     # Maps & Location

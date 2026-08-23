@@ -39,7 +39,7 @@ class HeuristicAIProvider(BaseAIProvider):
     """
 
     KEYWORD_MAPPINGS = {
-        "garbage": ["garbage", "trash", "waste", "dump", "debris", "litter", "kachra", "bin", "dustbin", "rubbish", "कचरा", "कचऱ्याचा ढीग", "घाण", "कूड़ा", "गंदगी"],
+        "garbage": ["garbage", "trash", "waste", "dump", "debris", "litter", "kachra", "bin", "dustbin", "rubbish", "कूड़ेदान", "कूड़ेदान", "कूड़ादान", "डस्टबिन", "कचरा", "कचऱ्याचा ढीग", "घाण", "कूड़ा", "गंदगी", "कचरा कुंडी"],
         "open-sewage": ["sewage", "gutter", "drain line", "overflowing sewage", "manhole", "sewer", "blackwater", "गटार", "गटाराचे पाणी", "सीवर", "नाली ओवरफ्लो"],
         "drainage": ["drain", "drainage", "stormwater", "culvert", "blocked drain", "nallah", "clogged", "ड्रेनेज", "तुंबलेला नाला", "नाली जाम"],
         "water-leakage": ["leak", "leaking pipe", "broken pipe", "burst pipe", "water gushing", "pipeline", "पाणी गळती", "पाईप फुटली", "पानी का रिसाव", "पाइपलाइन"],
@@ -241,17 +241,24 @@ class AIService:
             "vision": vision_data,
         }
 
-    def parse_voice_transcript(self, raw_transcript: str) -> Dict[str, Any]:
+    def parse_voice_transcript(
+        self,
+        raw_transcript: str,
+        english_translation: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Intelligently parses spoken voice transcript into structured complaint elements:
         - Crisp, distinct Title (e.g. 'Garbage Dump & Waste Accumulation Near Hospital Gate (Sector 24)')
-        - Detailed Description (e.g. 'Garbage dump and waste accumulation near the hospital gate at sector 24...')
-        - Landmark (e.g. 'Near Hospital Gate')
+        - Detailed Description (e.g. 'There is a dustbin in front of my house at Sector 24...')
+        - Landmark (e.g. 'In Front of House')
         - Sector / Area Location (e.g. 'Sector 24, Mumbai')
         - Category slug & Estimated Severity
         """
         text_clean = raw_transcript.strip()
-        if not text_clean:
+        eng_clean = (english_translation or "").strip()
+        combined_analysis_text = f"{text_clean} {eng_clean}".strip()
+
+        if not text_clean and not eng_clean:
             return {
                 "title": "Civic Complaint",
                 "description": "",
@@ -261,26 +268,36 @@ class AIService:
                 "suggested_severity": "MEDIUM",
             }
 
-        # 1. Classify Category and Severity
-        sugg = self.get_suggestions(title=text_clean[:60], description=text_clean)
+        # 1. Classify Category and Severity from both native & English texts
+        sugg = self.get_suggestions(title=combined_analysis_text[:80], description=combined_analysis_text)
         cat_slug = sugg.get("suggested_category_slug", "other")
         severity = sugg.get("suggested_severity", "MEDIUM")
 
-        # 2. Extract Sector / Plot / Phase
+        # 2. Extract Sector / Plot / Phase (from English or Hindi text)
         sector = None
+        HINDI_NUMBERS = {
+            "एक": "1", "दो": "2", "तीन": "3", "चार": "4", "पांच": "5", "पाँच": "5",
+            "छह": "6", "सात": "7", "आठ": "8", "नौ": "9", "दस": "10",
+            "चौबीस": "24", "chobis": "24", "chaubees": "24", "पच्चीस": "25", "pachees": "25",
+        }
+        normalized_combined = combined_analysis_text
+        for w, num in HINDI_NUMBERS.items():
+            normalized_combined = re.sub(rf"\b{w}\b", num, normalized_combined, flags=re.IGNORECASE)
+
         sec_m = re.search(
-            r"\b(?:at\s+|in\s+)?(sector\s*\d+[a-zA-Z]?|plot\s*(?:no\.?|number)?\s*\d+|phase\s*\d+|road\s*(?:no\.?|number)?\s*\d+|ward\s*[a-zA-Z0-9]+)\b",
-            text_clean,
+            r"\b(?:at\s+|in\s+)?(sector\s*\d+[a-zA-Z]?|सेक्टर\s*\d+[a-zA-Z]?|plot\s*(?:no\.?|number)?\s*\d+|phase\s*\d+|road\s*(?:no\.?|number)?\s*\d+|ward\s*[a-zA-Z0-9]+)\b",
+            normalized_combined,
             re.IGNORECASE,
         )
         if sec_m:
-            sector = sec_m.group(1).strip().title()
+            raw_sec = sec_m.group(1).strip()
+            sector = raw_sec.replace("सेक्टर", "Sector").title()
 
         # 3. Extract Known Area
         area = None
         area_m = re.search(
             r"\b(Dadar|Andheri|Bandra|Kurla|Thane|Vashi|Nerul|Kharghar|Panvel|Belapur|Ghatkopar|Powai|Chembur|Colaba|Worli|Malad|Borivali|Kandivali|Santacruz|Juhu|Byculla|Parel|Sion)\b",
-            text_clean,
+            combined_analysis_text,
             re.IGNORECASE,
         )
         if area_m:
@@ -288,9 +305,10 @@ class AIService:
 
         # 4. Extract Landmark
         landmark = None
+        target_for_lm = eng_clean if eng_clean else text_clean
         lm_m = re.search(
             r"\b(near|opposite to|opposite|opp\.?|in front of|adjacent to|beside|outside|behind|close to|around)\s+(?:the\s+)?([a-zA-Z0-9\s\-\']+?)(?=(?:\s+at\s+sector|\s+in\s+sector|\s+sector\s*\d+|\s+at\s+plot|\s+in\s+plot|\s+phase\s*\d+)|[\.\,]|\s*$)",
-            text_clean,
+            target_for_lm,
             re.IGNORECASE,
         )
         if lm_m:
@@ -299,9 +317,9 @@ class AIService:
             if len(spot) > 1:
                 landmark = f"{prep} {spot}" if not spot.lower().startswith(prep.lower()) else spot
 
-        # Check for Marathi/Hindi landmark terms (e.g. 'हॉस्पिटलच्या गेट समोर')
+        # Check for Marathi/Hindi landmark terms (e.g. 'हॉस्पिटलच्या गेट समोर', 'घर के आगे', 'घर के सामने', 'दुकान के पास')
         if not landmark:
-            dev_lm = re.search(r"([^\.\,]+?)\s+(?:च्या\s+)?(?:समोर|जवळ|लगत|पाठीमागे|के सामने|के पास)", text_clean)
+            dev_lm = re.search(r"([^\.\,]+?)\s+(?:च्या\s+|के\s+)?(?:समोर|जवळ|लगत|पाठीमागे|सामने|पास|आगे|पीछे)", text_clean)
             if dev_lm:
                 landmark = dev_lm.group(0).strip()
 
@@ -332,17 +350,19 @@ class AIService:
         elif area:
             title = f"{core_headline} in {area}"
         else:
-            words = text_clean.split()
+            words = (eng_clean if eng_clean else text_clean).split()
             title = " ".join(words[:6]).title()
             if len(title) < 5:
                 title = f"{core_headline} Reported"
 
         # 7. Formulate full, distinct Description
-        clean_text = text_clean[0].upper() + text_clean[1:] if len(text_clean) > 1 else text_clean
+        primary_desc = eng_clean if eng_clean and eng_clean != text_clean else text_clean
+        clean_text = primary_desc[0].upper() + primary_desc[1:] if len(primary_desc) > 1 else primary_desc
         if not clean_text.endswith((".", "!", "?")):
             clean_text += "."
 
         description = f"{clean_text} Immediate inspection and municipal redressal requested."
+
 
         # 8. Formulate Address
         address_parts = []
