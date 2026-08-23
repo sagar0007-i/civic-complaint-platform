@@ -148,3 +148,14 @@ class UserRepository:
             .filter(Officer.department_id == department_id, Officer.is_available == True)
             .all()
         )
+
+    def get_officer_by_employee_code(self, employee_code: str) -> Optional[Officer]:
+        """Fetch officer profile by employee code."""
+        if not employee_code:
+            return None
+        return (
+            self.session.query(Officer)
+            .filter(Officer.employee_code == employee_code.strip())
+            .first()
+        )
+

@@ -3,6 +3,7 @@
 import json
 import secrets
 import time
+import uuid
 from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 from backend.repositories.user_repo import UserRepository
@@ -128,39 +129,50 @@ class AuthService:
         admin_user_id: Optional[str] = None,
     ) -> tuple[Optional[User], Optional[str]]:
         """Admin helper to create an officer user account with profile."""
-        existing = self.user_repo.get_by_email(email)
-        if existing:
+        existing_email = self.user_repo.get_by_email(email)
+        if existing_email:
             return None, "A user with this email already exists."
+
+        clean_code = (employee_code or "").strip()
+        if not clean_code:
+            clean_code = f"EMP-{uuid.uuid4().hex[:6].upper()}"
+
+        existing_code = self.user_repo.get_officer_by_employee_code(clean_code)
+        if existing_code:
+            clean_code = f"{clean_code}-{uuid.uuid4().hex[:4].upper()}"
 
         is_valid, msg = validate_password_strength(password)
         if not is_valid:
             return None, msg
 
-        hashed = hash_password(password)
-        user = self.user_repo.create_user(
-            email=email,
-            full_name=full_name,
-            hashed_password=hashed,
-            role=role,
-        )
+        try:
+            hashed = hash_password(password)
+            user = self.user_repo.create_user(
+                email=email,
+                full_name=full_name,
+                hashed_password=hashed,
+                role=role,
+            )
 
-        self.user_repo.create_officer_profile(
-            user_id=user.id,
-            department_id=department_id,
-            employee_code=employee_code,
-            designation=designation,
-            ward_id=ward_id,
-        )
+            self.user_repo.create_officer_profile(
+                user_id=user.id,
+                department_id=department_id,
+                employee_code=clean_code,
+                designation=designation,
+                ward_id=ward_id,
+            )
 
-        self.audit_repo.log(
-            action="CREATE_OFFICER",
-            entity_type="Officer",
-            entity_id=user.id,
-            user_id=admin_user_id,
-            details_json=json.dumps({"email": email, "role": role, "dept": department_id}),
-        )
-
-        return user, None
+            self.audit_repo.log(
+                action="CREATE_OFFICER",
+                entity_type="Officer",
+                entity_id=user.id,
+                user_id=admin_user_id,
+                details_json=json.dumps({"email": email, "role": role, "dept": department_id, "emp_code": clean_code}),
+            )
+            return user, None
+        except Exception as e:
+            logger.error(f"Failed to create officer account: {e}")
+            return None, "Could not create officer account due to a database constraint conflict. Please check officer details."
 
     def request_password_reset(self, email: str) -> tuple[bool, str]:
         """Generate a 6-digit OTP code and send password reset email."""

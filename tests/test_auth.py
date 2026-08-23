@@ -118,3 +118,38 @@ def test_password_reset_flow(db_session, seed_test_data):
     assert payload is not None
     assert payload["email"] == email
 
+
+def test_officer_creation_employee_code_collision_handling(db_session, seed_test_data):
+    """Test creating an officer account with duplicate employee code handles collision gracefully."""
+    auth_service = AuthService(db_session)
+    data = seed_test_data
+
+    # Create officer 1
+    user1, err1 = auth_service.create_officer_account(
+        email="officer1@civicpulse.gov.in",
+        full_name="Officer One",
+        password="Password@123",
+        department_id=data["dept_roads"].id,
+        employee_code="BMC-DUP-001",
+    )
+    db_session.commit()
+    assert err1 is None
+    assert user1 is not None
+
+    # Create officer 2 with SAME employee_code
+    user2, err2 = auth_service.create_officer_account(
+        email="officer2@civicpulse.gov.in",
+        full_name="Officer Two",
+        password="Password@123",
+        department_id=data["dept_roads"].id,
+        employee_code="BMC-DUP-001",
+    )
+    db_session.commit()
+    assert err2 is None
+    assert user2 is not None
+
+    off2 = auth_service.user_repo.get_officer_by_user_id(user2.id)
+    assert off2 is not None
+    assert off2.employee_code.startswith("BMC-DUP-001-")
+
+
