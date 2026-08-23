@@ -95,6 +95,7 @@ class AuthService:
             officer_info = {
                 "officer_id": user.officer_profile.id,
                 "department_id": user.officer_profile.department_id,
+                "department_code": user.officer_profile.department.code if user.officer_profile.department else "",
                 "department_name": user.officer_profile.department.name if user.officer_profile.department else "",
                 "ward_id": user.officer_profile.ward_id,
                 "designation": user.officer_profile.designation,

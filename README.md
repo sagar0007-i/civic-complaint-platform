@@ -110,17 +110,22 @@ Open your browser at: **`http://localhost:8501`**
 
 ---
 
-## 🔑 Demo Accounts (Pre-Seeded)
+## 🔑 Department-Specific Access Codes & Demo Accounts
 
-| Role | Email | Password | Description |
-| :--- | :--- | :--- | :--- |
-| **Super Admin** | `admin@civicpulse.gov.in` | `Admin@123` | Municipal Commissioner, BMC (Full Access) |
-| **Dept Admin** | `admin.sanitation@civicpulse.gov.in` | `Admin@123` | Chief Engineer, Solid Waste Management (BMC) |
-| **Field Officer** | `officer.roads@civicpulse.gov.in` | `Officer@123` | AE Roads (Andheri West Ward K/West) |
-| **Field Officer** | `officer.sanitation@civicpulse.gov.in` | `Officer@123` | Sanitary Inspector (Bandra West Ward H/West) |
-| **Field Officer** | `officer.water@civicpulse.gov.in` | `Officer@123` | Sub-Engineer Water Works (Colaba Ward A) |
-| **Citizen** | `citizen.rahul@example.com` | `Citizen@123` | Amit Deshmukh (Resident, Bandra West, Mumbai) |
-| **Citizen** | `citizen.priya@example.com` | `Citizen@123` | Neha Kulkarni (Resident, Andheri West, Mumbai) |
+| Role / Department | Login Email | Password | Access Code Required | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **👑 Super Admin** | `admin@civicpulse.gov.in` | `Admin@123` | **`COMMISH2026`** | Municipal Commissioner, BMC (Full Citywide Control) |
+| **🏢 Master Dept Admin** | Any Dept Admin email | `Admin@123` | **`CIVICBMC2026`** | Works across any department head account |
+| **🗑️ Solid Waste Management (SWM)** | `officer.swm@civicpulse.gov.in` | `Officer@123` | **`BMC-SWM-2026`** | Sanitary Inspector (Ward H/West Bandra) |
+| **🚰 Water Works (Hydraulic)** | `officer.water@civicpulse.gov.in` | `Officer@123` | **`BMC-WATER-2026`** | Sub-Engineer (Ward A Colaba) |
+| **🛣️ Roads & Traffic Infrastructure** | `officer.roads@civicpulse.gov.in` | `Officer@123` | **`BMC-ROADS-2026`** | Assistant Engineer (Ward K/West Andheri) |
+| **🌧️ Storm Water Drains (SWD)** | `officer.swd@civicpulse.gov.in` | `Officer@123` | **`BMC-DRAINS-2026`** | Junior Engineer (Ward L Kurla) |
+| **💡 BEST & Street Lighting** | `officer.lighting@civicpulse.gov.in` | `Officer@123` | **`BMC-LIGHT-2026`** | Electrical Inspector (Ward G/South Worli) |
+| **🏥 Public Health & Sanitation** | `officer.health@civicpulse.gov.in` | `Officer@123` | **`BMC-HEALTH-2026`** | Medical Officer of Health (Ward P/North Malad) |
+| **🏗️ Public Works Department (PWD)** | `officer.pwd@civicpulse.gov.in` | `Officer@123` | **`BMC-PWD-2026`** | Executive Engineer (Ward D Malabar Hill) |
+| **🏘️ Citizen** | `citizen.rahul@example.com` | `Citizen@123` | *None* | Amit Deshmukh (Resident, Mumbai) |
+| **🏘️ Citizen** | `citizen.priya@example.com` | `Citizen@123` | *None* | Neha Kulkarni (Resident, Mumbai) |
+
 
 ---
 

@@ -410,15 +410,18 @@ def apply_custom_css() -> None:
         font-weight: 700 !important;
     }
 
-    /* ── Main Header ────────────────────────────────────────────────────────── */
-    .main-header {
-        font-family: 'Rajdhani', sans-serif !important;
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #0f2d6b !important;
-        letter-spacing: 0.03em;
-        margin-bottom: 0.3rem;
-    }
+    /* ── Hide Streamlit Developer Menu, Header & Footer ───────────────────── */
+    #MainMenu {visibility: hidden !important; display: none !important;}
+    header {visibility: hidden !important; display: none !important;}
+    footer {visibility: hidden !important; display: none !important;}
+    [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+    [data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
+    [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
+    [data-testid="stHeader"] {visibility: hidden !important; display: none !important; height: 0px !important;}
+    .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
+    .styles_viewerBadge__1yB5_ {visibility: hidden !important; display: none !important;}
+    button[title="View app in Streamlit Community Cloud"] {visibility: hidden !important; display: none !important;}
+    #manage-app-button {display: none !important;}
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)

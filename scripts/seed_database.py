@@ -249,6 +249,95 @@ def seed_database(force_reseed: bool = True) -> None:
         )
         session.add(off3)
 
+        # 6. Field Officer 4 (Storm Water Drains - Kurla Ward L)
+        off_user4 = User(
+            email="officer.swd@civicpulse.gov.in",
+            full_name="Kishore More",
+            phone="+91 98200 22004",
+            hashed_password=officer_pass,
+            role=UserRole.OFFICER.value,
+            is_active=True,
+        )
+        session.add(off_user4)
+        session.flush()
+
+        off4 = Officer(
+            user_id=off_user4.id,
+            department_id=dept_objs["DEPT_SWD"].id,
+            ward_id=ward_objs["Ward L (Kurla, Sakinaka, Chandivali)"].id,
+            designation="Junior Engineer (SWD Monsoon Cell, Ward L)",
+            employee_code="BMC-SWD-L-055",
+            is_available=True,
+        )
+        session.add(off4)
+
+        # 7. Field Officer 5 (BEST & Street Lighting - Worli Ward G/South)
+        off_user5 = User(
+            email="officer.lighting@civicpulse.gov.in",
+            full_name="Anand Pawar",
+            phone="+91 98200 22005",
+            hashed_password=officer_pass,
+            role=UserRole.OFFICER.value,
+            is_active=True,
+        )
+        session.add(off_user5)
+        session.flush()
+
+        off5 = Officer(
+            user_id=off_user5.id,
+            department_id=dept_objs["DEPT_ELEC"].id,
+            ward_id=ward_objs["Ward G/South (Worli, Lower Parel, Mahalaxmi)"].id,
+            designation="Assistant Electrical Inspector (BEST Lighting)",
+            employee_code="BEST-LGT-GS-033",
+            is_available=True,
+        )
+        session.add(off5)
+
+        # 8. Field Officer 6 (Public Health & Vector Control - Malad Ward P/North)
+        off_user6 = User(
+            email="officer.health@civicpulse.gov.in",
+            full_name="Dr. Rupali Mane",
+            phone="+91 98200 22006",
+            hashed_password=officer_pass,
+            role=UserRole.OFFICER.value,
+            is_active=True,
+        )
+        session.add(off_user6)
+        session.flush()
+
+        off6 = Officer(
+            user_id=off_user6.id,
+            department_id=dept_objs["DEPT_HEALTH"].id,
+            ward_id=ward_objs["Ward P/North (Malad West, Marve Road)"].id,
+            designation="Medical Officer of Health (Ward P/North)",
+            employee_code="BMC-MOH-PN-019",
+            is_available=True,
+        )
+        session.add(off6)
+
+        # 9. Field Officer 7 (Public Works Department - Malabar Hill Ward D)
+        off_user7 = User(
+            email="officer.pwd@civicpulse.gov.in",
+            full_name="Sunil Joshi",
+            phone="+91 98200 22007",
+            hashed_password=officer_pass,
+            role=UserRole.OFFICER.value,
+            is_active=True,
+        )
+        session.add(off_user7)
+        session.flush()
+
+        off7 = Officer(
+            user_id=off_user7.id,
+            department_id=dept_objs["DEPT_PWD"].id,
+            ward_id=ward_objs["Ward D (Malabar Hill, Walkeshwar, Girgaon)"].id,
+            designation="Executive Engineer (PWD Civics, Ward D)",
+            employee_code="BMC-PWD-D-071",
+            is_available=True,
+        )
+        session.add(off7)
+
+
         # 6. Citizens
         citizen1 = User(
             email="citizen.rahul@example.com",

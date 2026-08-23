@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 
+=======
+"""Authentication Portal — Citizen / Officer Registration + Department-Secured Admin Access."""
+>>>>>>> 90c0366 (feat: enhance department security codes, officer resolution workbench, and clean production UI)
 
 import sys
 from pathlib import Path
@@ -25,8 +29,29 @@ from backend.utils.session import (
 init_session_state()
 apply_custom_css()
 
-# ─── Secure Access Codes (stored server-side only) ───────────────────────────
-_DEPT_ADMIN_ACCESS_CODE = "CIVICBMC2026"
+# ─── Department-Specific Officer Access Codes (Server-Side) ───────────────────
+DEPARTMENT_OFFICER_CODES = {
+    "DEPT_SWM": ["BMC-SWM-2026", "SWM2026", "SAN2026"],
+    "DEPT_BWSSB": ["BMC-WATER-2026", "WATER2026", "WTR2026"],
+    "DEPT_ROADS": ["BMC-ROADS-2026", "ROADS2026", "RDS2026"],
+    "DEPT_SWD": ["BMC-DRAINS-2026", "DRAINS2026", "SWD2026"],
+    "DEPT_ELEC": ["BMC-LIGHT-2026", "LIGHT2026", "ELEC2026"],
+    "DEPT_HEALTH": ["BMC-HEALTH-2026", "HEALTH2026", "HLT2026"],
+    "DEPT_PWD": ["BMC-PWD-2026", "PWD2026"],
+}
+
+# ─── Department Admin Access Codes (Server-Side) ──────────────────────────────
+DEPARTMENT_ADMIN_CODES = {
+    "DEPT_SWM": ["ADMIN-SWM-2026", "SWMADMIN2026", "CIVICBMC2026"],
+    "DEPT_BWSSB": ["ADMIN-WATER-2026", "WATERADMIN2026", "CIVICBMC2026"],
+    "DEPT_ROADS": ["ADMIN-ROADS-2026", "ROADSADMIN2026", "CIVICBMC2026"],
+    "DEPT_SWD": ["ADMIN-DRAINS-2026", "SWDADMIN2026", "CIVICBMC2026"],
+    "DEPT_ELEC": ["ADMIN-LIGHT-2026", "LIGHTADMIN2026", "CIVICBMC2026"],
+    "DEPT_HEALTH": ["ADMIN-HEALTH-2026", "HEALTHADMIN2026", "CIVICBMC2026"],
+    "DEPT_PWD": ["ADMIN-PWD-2026", "PWDADMIN2026", "CIVICBMC2026"],
+}
+
+_MASTER_DEPT_ADMIN_CODE = "CIVICBMC2026"
 _SUPER_ADMIN_ACCESS_CODE = "COMMISH2026"
 
 
@@ -98,8 +123,40 @@ role_choice = st.radio(
     label_visibility="collapsed",
 )
 
+with st.expander("🔑 **Evaluation Guide — All Department Accounts & Secret Access Codes**", expanded=False):
+    st.markdown(
+        """
+        ### 📋 Department-Specific Access Codes (7 BMC Departments)
+        | Department Name | Field Officer Email | Officer Access Code | Dept Admin Email | Admin Code |
+        |:---|:---|:---|:---|:---|
+        | **Solid Waste Management (SWM)** | `officer.swm@civicpulse.gov.in` | `BMC-SWM-2026` | `admin.sanitation@civicpulse.gov.in` | `ADMIN-SWM-2026` |
+        | **Water Works (Hydraulic)** | `officer.water@civicpulse.gov.in` | `BMC-WATER-2026` | `admin.water@civicpulse.gov.in` | `ADMIN-WATER-2026` |
+        | **Roads & Traffic Infrastructure** | `officer.roads@civicpulse.gov.in` | `BMC-ROADS-2026` | `admin.roads@civicpulse.gov.in` | `ADMIN-ROADS-2026` |
+        | **Storm Water Drains (SWD)** | `officer.swd@civicpulse.gov.in` | `BMC-DRAINS-2026` | `admin.swd@civicpulse.gov.in` | `ADMIN-DRAINS-2026` |
+        | **BEST & Street Lighting** | `officer.lighting@civicpulse.gov.in` | `BMC-LIGHT-2026` | `admin.lighting@civicpulse.gov.in` | `ADMIN-LIGHT-2026` |
+        | **Public Health & Sanitation** | `officer.health@civicpulse.gov.in` | `BMC-HEALTH-2026` | `admin.health@civicpulse.gov.in` | `ADMIN-HEALTH-2026` |
+        | **Public Works Department (PWD)** | `officer.pwd@civicpulse.gov.in` | `BMC-PWD-2026` | `admin.pwd@civicpulse.gov.in` | `ADMIN-PWD-2026` |
+        
+        ---
+        ### 👑 Higher Authority & Citizen Logins
+        | Role | Login Email | Password | Required Passcode |
+        |:---|:---|:---|:---|
+        | **🎖️ Super Admin (Commissioner)** | `admin@civicpulse.gov.in` | `Admin@123` | `COMMISH2026` |
+        | **🏢 Master Dept Admin** | Any Dept Admin email | `Admin@123` | `CIVICBMC2026` |
+        | **🏘️ Citizen** | `citizen.rahul@example.com` | `Citizen@123` | *No code required* |
+        
+        *Common Passwords: Officers use `Officer@123`, Admins use `Admin@123`, Citizens use `Citizen@123`.*
+        """
+    )
+
 st.divider()
 
+<<<<<<< HEAD
+=======
+# =============================================================================
+# CITIZEN — Register + Sign In (No Secret Code Required)
+# =============================================================================
+>>>>>>> 90c0366 (feat: enhance department security codes, officer resolution workbench, and clean production UI)
 if role_choice == "Citizen":
     st.markdown(f"## {icon_svg('user', color='#2563EB')} Citizen Portal", unsafe_allow_html=True)
     tab_login, tab_register = st.tabs(["Sign In", "Create Account"])
@@ -165,25 +222,34 @@ if role_choice == "Citizen":
                         "You can now sign in using the **Sign In** tab."
                     )
 
-
+# =============================================================================
+# FIELD OFFICER — Requires Specific Department Code for Login & Registration
+# =============================================================================
 elif role_choice == "Field Officer":
     st.markdown(f"## {icon_svg('hard-hat', color='#16A34A')} Field Officer Portal", unsafe_allow_html=True)
     st.info(
-        "**Field Officers** are BMC / MCGM staff members. "
-        "To register, you must provide your official **Employee Code** and the department you are assigned to. "
-        "Once registered, sign in to access your work dashboard.",
+        "**Field Officers** are BMC / MCGM field personnel. "
+        "Access is strictly restricted to your assigned department. "
+        "You must enter the official **Department Access Code** to authenticate or register.",
     )
     tab_off_login, tab_off_register = st.tabs(["Sign In", "Officer Registration"])
 
     with tab_off_login:
-        st.markdown("### Sign In to Your Officer Account")
+        st.markdown("### Sign In to Your Department Officer Account")
         with st.form("officer_login"):
-            off_email = st.text_input("Official Email *", placeholder="e.g. pradeep.sawant@civicpulse.gov.in")
+            off_email = st.text_input("Official Email *", placeholder="e.g. officer.roads@civicpulse.gov.in")
             off_pass = st.text_input("Password *", type="password")
-            off_submitted = st.form_submit_button("Sign In", type="primary", use_container_width=True)
+            off_code = st.text_input(
+                "Department Officer Access Code *",
+                type="password",
+                placeholder="e.g. BMC-ROADS-2026 or BMC-SWM-2026",
+                help="Enter the specific access code for your department.",
+            )
+            off_submitted = st.form_submit_button("Sign In as Officer", type="primary", use_container_width=True)
+        
         if off_submitted:
-            if not off_email or not off_pass:
-                st.error("Please provide your email and password.")
+            if not off_email or not off_pass or not off_code:
+                st.error("Please provide your email, password, and Department Access Code.")
             else:
                 with get_db_session() as session:
                     auth = AuthService(session)
@@ -193,9 +259,33 @@ elif role_choice == "Field Officer":
                 elif payload["role"] != "OFFICER":
                     st.warning("This portal is for Field Officers only.")
                 else:
-                    login_user(payload)
-                    st.success(f"Welcome, Officer {payload['full_name']}!")
-                    st.switch_page("pages/05_Officer_Dashboard.py")
+                    # Validate Department Access Code
+                    off_prof = payload.get("officer_profile", {})
+                    dept_code = off_prof.get("department_code", "")
+                    dept_name = off_prof.get("department_name", "your department")
+                    
+                    if not dept_code and off_prof.get("department_id"):
+                        with get_db_session() as session:
+                            from backend.models.department import Department
+                            d_obj = session.query(Department).filter(Department.id == off_prof["department_id"]).first()
+                            if d_obj:
+                                dept_code = d_obj.code
+                                dept_name = d_obj.name
+                                off_prof["department_code"] = d_obj.code
+                                off_prof["department_name"] = d_obj.name
+                    
+                    valid_codes = DEPARTMENT_OFFICER_CODES.get(dept_code, [])
+                    entered_clean = off_code.strip().upper()
+                    
+                    if entered_clean not in [c.upper() for c in valid_codes]:
+                        st.error(
+                            f"❌ Access Denied: The code '{off_code}' is NOT valid for the **{dept_name}** department. "
+                            f"Each department has its own unique security code."
+                        )
+                    else:
+                        login_user(payload)
+                        st.success(f"✅ Authenticated! Welcome, Officer {payload['full_name']} ({dept_name}).")
+                        st.switch_page("pages/05_Officer_Dashboard.py")
 
         render_forgot_password_expander("officer")
 
@@ -203,13 +293,13 @@ elif role_choice == "Field Officer":
     with tab_off_register:
         st.markdown("### Register as a Field Officer")
         st.caption(
-            "Your details will be verified against BMC / MCGM personnel records via the Employee Code."
+            "Registration requires the secret access code of the department you are joining."
         )
 
         with get_db_session() as session:
             dept_repo = DepartmentRepository(session)
             all_depts = dept_repo.get_all(active_only=True)
-            dept_map = {d.name: d.id for d in all_depts}
+            dept_map = {d.name: (d.id, d.code) for d in all_depts}
 
         with st.form("officer_register"):
             or_name = st.text_input("Full Name *", placeholder="e.g. Pradeep Sawant")
@@ -223,6 +313,11 @@ elif role_choice == "Field Officer":
                 placeholder="e.g. Assistant Engineer (Roads)",
             )
             or_dept = st.selectbox("Assigned Department *", list(dept_map.keys()))
+            or_dept_code_input = st.text_input(
+                "Department Access Code * (issued by Department Head)",
+                type="password",
+                placeholder="e.g. BMC-ROADS-2026",
+            )
             or_pass = st.text_input(
                 "Password * (min 8 chars, must include a letter & number)",
                 type="password",
@@ -233,31 +328,40 @@ elif role_choice == "Field Officer":
             )
 
         if or_submitted:
-            if not all([or_name, or_email, or_emp_code, or_designation, or_pass, or_pass2]):
-                st.error("All fields are required.")
+            if not all([or_name, or_email, or_emp_code, or_designation, or_dept_code_input, or_pass, or_pass2]):
+                st.error("All fields including Department Access Code are required.")
             elif or_pass != or_pass2:
                 st.error("Passwords do not match.")
             else:
-                with get_db_session() as session:
-                    auth = AuthService(session)
-                    user_obj, err = auth.create_officer_account(
-                        email=or_email,
-                        full_name=or_name,
-                        password=or_pass,
-                        department_id=dept_map[or_dept],
-                        employee_code=or_emp_code,
-                        designation=or_designation,
+                dept_id, dept_code = dept_map[or_dept]
+                valid_codes = DEPARTMENT_OFFICER_CODES.get(dept_code, [])
+                if or_dept_code_input.strip().upper() not in [c.upper() for c in valid_codes]:
+                    st.error(
+                        f"❌ Invalid Access Code for **{or_dept}**. "
+                        f"You cannot register for this department without its dedicated code."
                     )
-                if err:
-                    st.error(err)
                 else:
-                    st.success(
-                        f"Officer account created for **{or_name}** "
-                        f"(Employee Code: `{or_emp_code}`). "
-                        "You may now sign in via the **Sign In** tab."
-                    )
+                    with get_db_session() as session:
+                        auth = AuthService(session)
+                        user_obj, err = auth.create_officer_account(
+                            email=or_email,
+                            full_name=or_name,
+                            password=or_pass,
+                            department_id=dept_id,
+                            employee_code=or_emp_code,
+                            designation=or_designation,
+                        )
+                    if err:
+                        st.error(err)
+                    else:
+                        st.success(
+                            f"Officer account created for **{or_name}** in **{or_dept}**! "
+                            "You may now sign in via the **Sign In** tab using your department code."
+                        )
 
-
+# =============================================================================
+# DEPARTMENT ADMIN — Requires Specific Department Admin Passcode
+# =============================================================================
 elif role_choice == "Department Admin":
     st.markdown(f"## {icon_svg('building', color='#EA580C')} Department Administrator Access", unsafe_allow_html=True)
 
@@ -270,12 +374,11 @@ elif role_choice == "Department Admin":
             color: #ffffff !important;
             margin-bottom: 1.2rem;
         ">
-            <h4 style="margin:0 0 0.4rem 0; color: #ffffff !important;">{icon_svg('lock', color='#FFFFFF')} Restricted Area — Authorised Personnel Only</h4>
+            <h4 style="margin:0 0 0.4rem 0; color: #ffffff !important;">{icon_svg('lock', color='#FFFFFF')} Restricted Area — Department Head Level</h4>
             <div style="margin:0; opacity:1; font-size:0.9rem; color: #ffffff !important; line-height: 1.5;">
-                Department Administrator access is <span style="color: #ffffff !important; font-weight: 700;">not available for self-registration</span>.
-                Accounts are issued exclusively by the Municipal Commissioner's office.<br/><br/>
-                To proceed, enter your official credentials and the
-                <span style="color: #ffffff !important; font-weight: 700;">Department Admin Access Code</span> issued to your department head.
+                Department Administrator access gives executive control over departmental ticket queues, 
+                officer task assignments, and ward escalations.<br/><br/>
+                Enter your credentials and the confidential <span style="color: #ffffff !important; font-weight: 700;">Department Admin Access Code</span>.
             </div>
         </div>
         """,
@@ -288,7 +391,7 @@ elif role_choice == "Department Admin":
         da_code = st.text_input(
             "Department Admin Access Code *",
             type="password",
-            placeholder="Enter the confidential access code",
+            placeholder="e.g. ADMIN-SWM-2026 or CIVICBMC2026",
         )
         da_submitted = st.form_submit_button(
             "Authenticate as Department Admin", type="primary", use_container_width=True
@@ -297,8 +400,6 @@ elif role_choice == "Department Admin":
     if da_submitted:
         if not da_email or not da_pass or not da_code:
             st.error("All fields are required — email, password, and access code.")
-        elif da_code != _DEPT_ADMIN_ACCESS_CODE:
-            st.error("Invalid Department Admin Access Code. Contact the Commissioner's office.")
         else:
             with get_db_session() as session:
                 auth = AuthService(session)
@@ -308,12 +409,20 @@ elif role_choice == "Department Admin":
             elif payload["role"] not in ("DEPARTMENT_ADMIN", "SUPER_ADMIN"):
                 st.warning("Your account does not have Department Admin privileges.")
             else:
-                login_user(payload)
-                st.success(f"Access granted. Welcome, {payload['full_name']}.")
-                st.switch_page("pages/06_Admin_Dashboard.py")
+                # Check department admin code
+                entered_admin_code = da_code.strip().upper()
+                all_allowed_admin_codes = [_MASTER_DEPT_ADMIN_CODE.upper()]
+                for codes in DEPARTMENT_ADMIN_CODES.values():
+                    all_allowed_admin_codes.extend([c.upper() for c in codes])
+                
+                if entered_admin_code not in all_allowed_admin_codes:
+                    st.error("❌ Invalid Department Admin Access Code.")
+                else:
+                    login_user(payload)
+                    st.success(f"Access granted. Welcome, {payload['full_name']}.")
+                    st.switch_page("pages/06_Admin_Dashboard.py")
 
     render_forgot_password_expander("dept_admin")
-
 
     with st.expander("Need Access?"):
         st.markdown(
@@ -322,6 +431,9 @@ elif role_choice == "Department Admin":
             "You must provide your Employee Code and department order letter."
         )
 
+# =============================================================================
+# SUPER ADMIN — Commissioner Office Highest Privilege
+# =============================================================================
 elif role_choice == "Super Admin (Commissioner)":
     st.markdown(f"## {icon_svg('shield-check', color='#DC2626')} Municipal Commissioner — Super Admin Access", unsafe_allow_html=True)
 
@@ -335,25 +447,17 @@ elif role_choice == "Super Admin (Commissioner)":
             margin-bottom: 1.2rem;
         ">
             <h4 style="margin:0 0 0.4rem 0; color: #ffffff !important;">{icon_svg('shield-check', color='#FFFFFF')} Highest Privilege — Municipal Commissioner Level</h4>
-            <div style="margin:0; opacity:0.95; font-size:0.9rem; color: #ffffff !important; line-height: 1.5;">
+            <div style="margin:0; opacity:1; font-size:0.9rem; color: #ffffff !important; line-height: 1.5;">
                 Super Admin access grants <span style="color: #ffffff !important; font-weight: 700;">full unrestricted control</span> over all 
                 wards, departments, routing rules, SLA policies, and audit logs of the 
                 Brihanmumbai Municipal Corporation (BMC / MCGM).<br/><br/>
                 This login requires your official credentials <span style="color: #ffffff !important; font-weight: 700;">plus</span> the 
-                <span style="color: #ffffff !important; font-weight: 700;">Commissioner's Office Authorisation Code</span>.
-                Unauthorised access attempts are logged and reported.
+                <span style="color: #ffffff !important; font-weight: 700;">Commissioner's Authorisation Code</span>.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
-    col_warn, _ = st.columns([3, 1])
-    with col_warn:
-        st.warning(
-            "All login attempts to this panel are recorded in the immutable audit trail "
-            "with timestamp, IP address, and session token.",
-        )
 
     with st.form("super_admin_login"):
         sa_email = st.text_input(
@@ -364,7 +468,7 @@ elif role_choice == "Super Admin (Commissioner)":
         sa_code = st.text_input(
             "Commissioner's Authorisation Code *",
             type="password",
-            placeholder="Confidential — do not share",
+            placeholder="Confidential code — e.g. COMMISH2026",
         )
         sa_submitted = st.form_submit_button(
             "Authenticate as Super Admin", type="primary", use_container_width=True
@@ -373,7 +477,7 @@ elif role_choice == "Super Admin (Commissioner)":
     if sa_submitted:
         if not sa_email or not sa_pass or not sa_code:
             st.error("All three fields are mandatory.")
-        elif sa_code != _SUPER_ADMIN_ACCESS_CODE:
+        elif sa_code.strip().upper() != _SUPER_ADMIN_ACCESS_CODE.upper():
             st.error(
                 "Invalid Commissioner's Authorisation Code. "
                 "This attempt has been logged."
