@@ -21,6 +21,7 @@ from backend.services.storage_service import get_storage_provider
 from backend.utils.formatting import format_status_badge, format_severity_badge, format_datetime
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
 from backend.utils.icons import icon_svg
+from backend.utils.india_boundary import add_india_boundary_layer
 
 init_session_state()
 apply_custom_css()
@@ -140,19 +141,15 @@ with get_db_session() as session:
                 if c.location.landmark:
                     st.write(f"**Landmark:** {c.location.landmark}")
 
-                # Leaflet Map with Mumbai Municipal Boundary constraints & clean Positron tiles
+                # Leaflet World Map with clean Positron tiles and Official India Boundary
                 m_track = folium.Map(
                     location=[c.location.latitude, c.location.longitude],
-                    zoom_start=15,
-                    min_zoom=11,
+                    zoom_start=14,
+                    min_zoom=2,
                     max_zoom=18,
                     tiles="CartoDB positron",
-                    max_bounds=True,
-                    min_lat=18.85,
-                    max_lat=19.35,
-                    min_lon=72.70,
-                    max_lon=73.10,
                 )
+                add_india_boundary_layer(m_track)
                 folium.Marker(
                     [c.location.latitude, c.location.longitude],
                     popup=c.complaint_number,

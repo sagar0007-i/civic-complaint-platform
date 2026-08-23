@@ -25,6 +25,7 @@ from backend.repositories.ward_repo import WardRepository
 from backend.utils.formatting import format_status_badge, format_severity_badge, format_datetime
 from backend.utils.session import init_session_state, get_current_user, require_auth, apply_custom_css
 from backend.utils.icons import icon_svg
+from backend.utils.india_boundary import add_india_boundary_layer
 
 init_session_state()
 apply_custom_css()
@@ -166,26 +167,15 @@ with get_db_session() as session:
                         if complaint.location.landmark:
                             st.write(f"**Landmark:** {complaint.location.landmark}")
 
-                        # Interactive Map with Mumbai Municipal Boundary constraints & clean Positron tiles
+                        # Interactive World Map with clean Positron tiles and Official India Boundary
                         m_officer = folium.Map(
                             location=[complaint.location.latitude, complaint.location.longitude],
-                            zoom_start=15,
-                            min_zoom=11,
+                            zoom_start=14,
+                            min_zoom=2,
                             max_zoom=18,
                             tiles="CartoDB positron",
-                            max_bounds=True,
-                            min_lat=18.85,
-                            max_lat=19.35,
-                            min_lon=72.70,
-                            max_lon=73.10,
                         )
-                        folium.Marker(
-                            [complaint.location.latitude, complaint.location.longitude],
-                            popup=complaint.complaint_number,
-                            tooltip=complaint.title,
-                            icon=folium.Icon(color="red", icon="wrench"),
-                        ).add_to(m_officer)
-                        st_folium(m_officer, height=220, width=None, key="officer_map")
+                        add_india_boundary_layer(m_officer)
                         folium.Marker(
                             [complaint.location.latitude, complaint.location.longitude],
                             popup=complaint.complaint_number,

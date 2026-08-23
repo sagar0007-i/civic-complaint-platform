@@ -26,6 +26,7 @@ from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
 from backend.utils.icons import icon_svg
+from backend.utils.india_boundary import add_india_boundary_layer
 
 init_session_state()
 apply_custom_css()
@@ -432,19 +433,15 @@ elif st.session_state.report_step == 4:
             st.session_state.report_lng = c_lng
             st.session_state.report_ward_id = w_obj.id
 
-    # Interactive Folium Map with Mumbai Municipal Boundary constraints & clean Positron tiles
+    # Interactive Folium World Map with clean Positron tiles and Official India Boundary
     m = folium.Map(
         location=[c_lat, c_lng],
-        zoom_start=14,
-        min_zoom=11,
+        zoom_start=13,
+        min_zoom=2,
         max_zoom=18,
         tiles="CartoDB positron",
-        max_bounds=True,
-        min_lat=18.85,
-        max_lat=19.35,
-        min_lon=72.70,
-        max_lon=73.10,
     )
+    add_india_boundary_layer(m)
     folium.Marker(
         [c_lat, c_lng],
         popup="Pinned Location",
