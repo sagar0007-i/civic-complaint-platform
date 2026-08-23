@@ -97,3 +97,8 @@ class LocationService:
     def is_within_mumbai_bounds(lat: float, lon: float) -> bool:
         """Verify if coordinates fall within Greater Mumbai (BMC) municipal boundaries."""
         return 18.85 <= lat <= 19.35 and 72.70 <= lon <= 73.10
+
+    @staticmethod
+    def is_within_maharashtra_bounds(lat: float, lon: float) -> bool:
+        """Verify if coordinates fall within Maharashtra state boundaries."""
+        return 15.50 <= lat <= 22.20 and 72.50 <= lon <= 81.00

@@ -26,7 +26,7 @@ from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
 from backend.utils.icons import icon_svg
-from backend.utils.india_boundary import add_india_boundary_layer
+from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
 
 init_session_state()
 apply_custom_css()
@@ -417,15 +417,15 @@ elif st.session_state.report_step == 4:
 
     c_lat, c_lng = st.session_state.report_lat, st.session_state.report_lng
 
-    # Quick Ward Selector to center map
-    ward_options = {w.name: w for w in wards}
-    selected_ward_name = st.selectbox(
-        "Quick Focus on Ward / Locality",
+    # Quick Ward Selector to focus location across all wards of Maharashtra & BMC
+    ward_options = {f"[{w.city}] {w.name} ({w.zone})": w for w in wards}
+    selected_ward_label = st.selectbox(
+        "Quick Focus on Ward / Municipal Locality (All Maharashtra & Mumbai Wards)",
         options=["(Current Map Center)"] + list(ward_options.keys()),
     )
 
-    if selected_ward_name in ward_options:
-        w_obj = ward_options[selected_ward_name]
+    if selected_ward_label in ward_options:
+        w_obj = ward_options[selected_ward_label]
         if w_obj.center_latitude and w_obj.center_longitude:
             c_lat = w_obj.center_latitude
             c_lng = w_obj.center_longitude
@@ -433,23 +433,24 @@ elif st.session_state.report_step == 4:
             st.session_state.report_lng = c_lng
             st.session_state.report_ward_id = w_obj.id
 
-    # Interactive Folium World Map with clean Positron tiles and Official India Boundary
+    # Interactive Folium Map centered on Maharashtra / Mumbai
     m = folium.Map(
         location=[c_lat, c_lng],
-        zoom_start=13,
-        min_zoom=2,
+        zoom_start=12,
+        min_zoom=5,
         max_zoom=18,
         tiles="CartoDB positron",
     )
+    add_maharashtra_boundary_layer(m)
     add_india_boundary_layer(m)
     folium.Marker(
         [c_lat, c_lng],
-        popup="Pinned Location",
+        popup=f"Pinned Location ({c_lat:.4f}, {c_lng:.4f})",
         tooltip="Complaint Location",
         icon=folium.Icon(color="red", icon="info-sign"),
     ).add_to(m)
 
-    map_output = st_folium(m, height=350, width=None)
+    map_output = st_folium(m, height=350, width=None, key=f"rep_map_{st.session_state.report_step}")
 
     # If citizen clicks map, update coordinates
     if map_output and map_output.get("last_clicked"):
@@ -468,10 +469,24 @@ elif st.session_state.report_step == 4:
         if nearest_w:
             st.session_state.report_ward_id = nearest_w.id
 
-    st.write(f"📌 **Selected Coordinates:** `{c_lat:.5f}, {c_lng:.5f}`")
+    # Fine-tune coordinates & Address
+    coord_col1, coord_col2 = st.columns(2)
+    with coord_col1:
+        st.write(f"📌 **Selected Coordinates:** `{c_lat:.5f}, {c_lng:.5f}`")
+    with coord_col2:
+        with st.popover("⚙️ Fine-Tune Coordinates Manually"):
+            man_lat = st.number_input("Latitude", value=float(c_lat), format="%.5f")
+            man_lng = st.number_input("Longitude", value=float(c_lng), format="%.5f")
+            if st.button("Apply Coordinates"):
+                st.session_state.report_lat = man_lat
+                st.session_state.report_lng = man_lng
+                c_lat, c_lng = man_lat, man_lng
+                rev = loc_service.reverse_geocode(c_lat, c_lng)
+                st.session_state.report_address = rev["address"]
+                st.rerun()
 
-    if not loc_service.is_within_mumbai_bounds(c_lat, c_lng):
-        st.warning("⚠️ The selected location is outside the Greater Mumbai Municipal (BMC) jurisdiction. Please click within Mumbai limits.")
+    if not loc_service.is_within_maharashtra_bounds(c_lat, c_lng):
+        st.warning("⚠️ The selected location is outside the State of Maharashtra municipal jurisdiction. Please select a location within Maharashtra.")
 
     # Address field
     addr_val = st.text_input(

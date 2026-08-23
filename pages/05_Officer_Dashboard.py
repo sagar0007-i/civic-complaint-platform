@@ -25,7 +25,7 @@ from backend.repositories.ward_repo import WardRepository
 from backend.utils.formatting import format_status_badge, format_severity_badge, format_datetime
 from backend.utils.session import init_session_state, get_current_user, require_auth, apply_custom_css
 from backend.utils.icons import icon_svg
-from backend.utils.india_boundary import add_india_boundary_layer
+from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
 
 init_session_state()
 apply_custom_css()
@@ -167,14 +167,15 @@ with get_db_session() as session:
                         if complaint.location.landmark:
                             st.write(f"**Landmark:** {complaint.location.landmark}")
 
-                        # Interactive World Map with clean Positron tiles and Official India Boundary
+                        # Interactive World Map with clean Positron tiles and Official Maharashtra & India Boundary
                         m_officer = folium.Map(
                             location=[complaint.location.latitude, complaint.location.longitude],
                             zoom_start=14,
-                            min_zoom=2,
+                            min_zoom=5,
                             max_zoom=18,
                             tiles="CartoDB positron",
                         )
+                        add_maharashtra_boundary_layer(m_officer)
                         add_india_boundary_layer(m_officer)
                         folium.Marker(
                             [complaint.location.latitude, complaint.location.longitude],

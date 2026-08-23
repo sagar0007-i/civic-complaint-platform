@@ -438,6 +438,20 @@ def apply_custom_css() -> None:
         box-shadow: 0 0 0 3px rgba(255,153,0,0.15) !important;
     }
 
+    /* ── Hide 'Press Ctrl+Enter to apply' watermark overlap ────────────────── */
+    [data-testid="InputInstructions"],
+    .stTextArea [data-testid="InputInstructions"],
+    .stTextInput [data-testid="InputInstructions"],
+    div:has(> [data-testid="InputInstructions"]) > [data-testid="InputInstructions"],
+    .stTextArea small,
+    .stTextInput small {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+
     /* ── Status Badges ──────────────────────────────────────────────────────── */
     .badge-critical {
         background: #fef2f2 !important;

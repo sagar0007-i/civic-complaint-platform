@@ -82,3 +82,64 @@ def add_india_boundary_layer(
         },
         tooltip="🇮🇳 Republic of India (Official Survey of India Boundary)",
     ).add_to(folium_map)
+
+
+# Simplified Maharashtra State Sovereign Geographic Boundary Coordinates
+MAHARASHTRA_COORDINATES = [
+    [
+        # South Coast & Goa border
+        [73.65, 15.75], [74.25, 15.80], [74.50, 15.95],
+        # Karnataka Border
+        [75.20, 16.50], [75.90, 16.85], [76.50, 17.30], [77.20, 17.65], [77.80, 18.05],
+        # Telangana Border
+        [78.40, 18.50], [79.20, 18.80], [80.00, 18.90], [80.40, 19.50],
+        # East / Gadchiroli / Chhattisgarh Border
+        [80.85, 20.30], [80.30, 21.20], [79.90, 21.45],
+        # North / Madhya Pradesh Border
+        [79.20, 21.65], [78.30, 21.40], [77.00, 21.30], [75.80, 21.75], [74.50, 21.90],
+        # North-West / Gujarat Border
+        [73.50, 21.45], [73.00, 20.50], [72.75, 20.15],
+        # Konkan / Western Coastline (Dahanu, Mumbai, Alibag, Ratnagiri, Sindhudurg)
+        [72.82, 19.80], [72.82, 18.95], [72.95, 18.20], [73.20, 17.30], [73.45, 16.20], [73.65, 15.75],
+    ]
+]
+
+MAHARASHTRA_GEOJSON: Dict[str, Any] = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "State of Maharashtra",
+                "authority": "Government of Maharashtra Municipal Jurisdiction",
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": MAHARASHTRA_COORDINATES,
+            },
+        }
+    ],
+}
+
+
+def add_maharashtra_boundary_layer(
+    folium_map: folium.Map,
+    highlight_color: str = "#ff9900",
+    fill_color: str = "#0f2d6b",
+    fill_opacity: float = 0.08,
+    weight: int = 3,
+) -> None:
+    """Overlay the official State of Maharashtra municipal boundary onto any Folium map."""
+    folium.GeoJson(
+        MAHARASHTRA_GEOJSON,
+        name="🏛️ State of Maharashtra Municipal Boundary",
+        style_function=lambda feature: {
+            "fillColor": fill_color,
+            "color": highlight_color,
+            "weight": weight,
+            "fillOpacity": fill_opacity,
+            "dashArray": "1, 0",
+        },
+        tooltip="🏛️ State of Maharashtra (Municipal Jurisdiction)",
+    ).add_to(folium_map)
+

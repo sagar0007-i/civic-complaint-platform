@@ -44,17 +44,47 @@ def seed_database(force_reseed: bool = True) -> None:
             logger.info("Database already seeded. Skipping seed execution.")
             return
 
-        logger.info("Seeding Mumbai Municipal Wards and Zones (BMC / MCGM)...")
+        logger.info("Seeding Mumbai & Maharashtra Municipal Wards and Zones (BMC & Maharashtra)...")
         wards_data = [
-            {"name": "Ward A (Colaba, Fort, Marine Drive)", "ward_number": 1, "zone": "South Mumbai Zone", "pincode": "400001", "lat": 18.9220, "lng": 72.8347},
-            {"name": "Ward D (Malabar Hill, Walkeshwar, Girgaon)", "ward_number": 7, "zone": "South Mumbai Zone", "pincode": "400006", "lat": 18.9554, "lng": 72.8052},
-            {"name": "Ward G/South (Worli, Lower Parel, Mahalaxmi)", "ward_number": 14, "zone": "City Zone", "pincode": "400018", "lat": 19.0020, "lng": 72.8250},
-            {"name": "Ward H/West (Bandra West, Khar, Santacruz)", "ward_number": 18, "zone": "Western Suburbs", "pincode": "400050", "lat": 19.0596, "lng": 72.8295},
-            {"name": "Ward K/West (Andheri West, Juhu, Versova)", "ward_number": 22, "zone": "Western Suburbs", "pincode": "400058", "lat": 19.1136, "lng": 72.8295},
-            {"name": "Ward K/East (Andheri East, MIDC, Chakala)", "ward_number": 23, "zone": "Western Suburbs", "pincode": "400069", "lat": 19.1197, "lng": 72.8664},
-            {"name": "Ward L (Kurla, Sakinaka, Chandivali)", "ward_number": 25, "zone": "Eastern Suburbs", "pincode": "400070", "lat": 19.0726, "lng": 72.8845},
-            {"name": "Ward P/North (Malad West, Marve Road)", "ward_number": 31, "zone": "Western Suburbs", "pincode": "400064", "lat": 19.1860, "lng": 72.8485},
-            {"name": "Ward R/Central (Borivali, Gorai, Eksar)", "ward_number": 35, "zone": "Western Suburbs", "pincode": "400092", "lat": 19.2307, "lng": 72.8567},
+            # ── All 24 BMC Mumbai Municipal Administrative Wards (A to T) ──
+            {"name": "Ward A (Colaba, Fort, Marine Drive, Nariman Point)", "ward_number": 1, "zone": "South Mumbai Zone", "city": "Mumbai", "pincode": "400001", "lat": 18.9220, "lng": 72.8347},
+            {"name": "Ward B (Dongri, Masjid Bunder, Sandhurst Road)", "ward_number": 2, "zone": "South Mumbai Zone", "city": "Mumbai", "pincode": "400009", "lat": 18.9535, "lng": 72.8385},
+            {"name": "Ward C (Chandanwadi, Bhuleshwar, Marine Lines, Kalbadevi)", "ward_number": 3, "zone": "South Mumbai Zone", "city": "Mumbai", "pincode": "400002", "lat": 18.9480, "lng": 72.8250},
+            {"name": "Ward D (Malabar Hill, Walkeshwar, Girgaon, Grant Road)", "ward_number": 4, "zone": "South Mumbai Zone", "city": "Mumbai", "pincode": "400006", "lat": 18.9554, "lng": 72.8052},
+            {"name": "Ward E (Byculla, Mazgaon, Nagpada, Mumbai Central)", "ward_number": 5, "zone": "South Mumbai Zone", "city": "Mumbai", "pincode": "400008", "lat": 18.9750, "lng": 72.8300},
+            {"name": "Ward F/North (Matunga, Sion, Wadala East, Antop Hill)", "ward_number": 6, "zone": "City Zone", "city": "Mumbai", "pincode": "400019", "lat": 19.0300, "lng": 72.8600},
+            {"name": "Ward F/South (Parel, Sewri, Naigaon, Lalbaug)", "ward_number": 7, "zone": "City Zone", "city": "Mumbai", "pincode": "400012", "lat": 19.0050, "lng": 72.8400},
+            {"name": "Ward G/North (Dharavi, Mahim, Dadar West)", "ward_number": 8, "zone": "City Zone", "city": "Mumbai", "pincode": "400017", "lat": 19.0400, "lng": 72.8450},
+            {"name": "Ward G/South (Worli, Lower Parel, Mahalaxmi, Prabhadevi)", "ward_number": 9, "zone": "City Zone", "city": "Mumbai", "pincode": "400018", "lat": 19.0020, "lng": 72.8250},
+            {"name": "Ward H/East (Santacruz East, Kalina, Vakola, Bandra East)", "ward_number": 10, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400055", "lat": 19.0800, "lng": 72.8550},
+            {"name": "Ward H/West (Bandra West, Khar West, Santacruz West)", "ward_number": 11, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400050", "lat": 19.0596, "lng": 72.8295},
+            {"name": "Ward K/East (Andheri East, MIDC, Chakala, Marol)", "ward_number": 12, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400069", "lat": 19.1197, "lng": 72.8664},
+            {"name": "Ward K/West (Andheri West, Juhu, Versova, Oshiwara)", "ward_number": 13, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400058", "lat": 19.1136, "lng": 72.8295},
+            {"name": "Ward L (Kurla, Sakinaka, Chandivali, Asalpha)", "ward_number": 14, "zone": "Eastern Suburbs", "city": "Mumbai", "pincode": "400070", "lat": 19.0726, "lng": 72.8845},
+            {"name": "Ward M/East (Govandi, Mankhurd, Trombay, Deonar)", "ward_number": 15, "zone": "Eastern Suburbs", "city": "Mumbai", "pincode": "400088", "lat": 19.0550, "lng": 72.9150},
+            {"name": "Ward M/West (Chembur, Mahul, Tilak Nagar)", "ward_number": 16, "zone": "Eastern Suburbs", "city": "Mumbai", "pincode": "400071", "lat": 19.0600, "lng": 72.8980},
+            {"name": "Ward N (Ghatkopar, Vidyavihar, Pant Nagar)", "ward_number": 17, "zone": "Eastern Suburbs", "city": "Mumbai", "pincode": "400077", "lat": 19.0850, "lng": 72.9080},
+            {"name": "Ward P/North (Malad West, Marve Road, Dindoshi)", "ward_number": 18, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400064", "lat": 19.1860, "lng": 72.8485},
+            {"name": "Ward P/South (Goregaon West, Bangur Nagar, Aarey)", "ward_number": 19, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400104", "lat": 19.1650, "lng": 72.8450},
+            {"name": "Ward R/Central (Borivali West, Gorai, Eksar, Shimpoli)", "ward_number": 20, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400092", "lat": 19.2307, "lng": 72.8567},
+            {"name": "Ward R/North (Dahisar, Rawalpada, Ketkipada)", "ward_number": 21, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400068", "lat": 19.2550, "lng": 72.8600},
+            {"name": "Ward R/South (Kandivali West, Charkop, Mahavir Nagar)", "ward_number": 22, "zone": "Western Suburbs", "city": "Mumbai", "pincode": "400067", "lat": 19.2050, "lng": 72.8350},
+            {"name": "Ward S (Bhandup, Powai, Kanjurmarg, Vikhroli)", "ward_number": 23, "zone": "Eastern Suburbs", "city": "Mumbai", "pincode": "400078", "lat": 19.1450, "lng": 72.9250},
+            {"name": "Ward T (Mulund West, Nahur, Yogi Hills)", "ward_number": 24, "zone": "Eastern Suburbs", "city": "Mumbai", "pincode": "400080", "lat": 19.1750, "lng": 72.9550},
+
+            # ── Major Maharashtra Municipal Corporation Wards & Zones ──
+            {"name": "Thane Municipal Corporation - TMC (Naupada, Majiwada, Ghodbunder)", "ward_number": 101, "zone": "Thane District", "city": "Thane", "pincode": "400601", "lat": 19.2183, "lng": 72.9781},
+            {"name": "Navi Mumbai Municipal Corporation - NMMC (Vashi, Nerul, Belapur, CBD)", "ward_number": 102, "zone": "Navi Mumbai District", "city": "Navi Mumbai", "pincode": "400703", "lat": 19.0330, "lng": 73.0297},
+            {"name": "Pune Municipal Corporation - PMC (Shivajinagar, Kothrud, Hadapsar, Aundh)", "ward_number": 103, "zone": "Pune Metropolitan", "city": "Pune", "pincode": "411005", "lat": 18.5204, "lng": 73.8567},
+            {"name": "Pimpri-Chinchwad Municipal Corporation - PCMC (Bhosari, Hinjawadi, Nigdi)", "ward_number": 104, "zone": "Pune Metropolitan", "city": "Pimpri-Chinchwad", "pincode": "411018", "lat": 18.6279, "lng": 73.8131},
+            {"name": "Nagpur Municipal Corporation - NMC (Sitabuldi, Dharampeth, Sadar)", "ward_number": 105, "zone": "Vidarbha Region", "city": "Nagpur", "pincode": "440001", "lat": 21.1458, "lng": 79.0882},
+            {"name": "Nashik Municipal Corporation - NMC (Panchavati, CIDCO, Satpur, Nashik Road)", "ward_number": 106, "zone": "Northern Maharashtra", "city": "Nashik", "pincode": "422001", "lat": 19.9975, "lng": 73.7898},
+            {"name": "Chhatrapati Sambhajinagar Corporation - CSMC (Cidco, Cantonment, Waluj)", "ward_number": 107, "zone": "Marathwada Region", "city": "Chhatrapati Sambhajinagar", "pincode": "431001", "lat": 19.8762, "lng": 75.3433},
+            {"name": "Kalyan-Dombivli Corporation - KDMC (Kalyan West, Dombivli East)", "ward_number": 108, "zone": "Thane District", "city": "Kalyan-Dombivli", "pincode": "421301", "lat": 19.2403, "lng": 73.1305},
+            {"name": "Vasai-Virar Municipal Corporation - VVMC (Vasai West, Nalasopara, Virar)", "ward_number": 109, "zone": "Palghar District", "city": "Vasai-Virar", "pincode": "401201", "lat": 19.3919, "lng": 72.8397},
+            {"name": "Mira-Bhayandar Municipal Corporation - MBMC (Mira Road, Bhayandar East/West)", "ward_number": 110, "zone": "Thane District", "city": "Mira-Bhayandar", "pincode": "401107", "lat": 19.2952, "lng": 72.8544},
+            {"name": "Solapur Municipal Corporation - SMC (Navi Peth, Ashok Nagar, Saat Rasta)", "ward_number": 111, "zone": "Western Maharashtra", "city": "Solapur", "pincode": "413001", "lat": 17.6599, "lng": 75.9064},
+            {"name": "Kolhapur Municipal Corporation - KMC (Rajarampuri, Shahupuri, Tarabai Park)", "ward_number": 112, "zone": "Western Maharashtra", "city": "Kolhapur", "pincode": "416003", "lat": 16.7050, "lng": 74.2433},
         ]
         ward_objs = {}
         for w in wards_data:
@@ -62,7 +92,7 @@ def seed_database(force_reseed: bool = True) -> None:
                 name=w["name"],
                 ward_number=w["ward_number"],
                 zone=w["zone"],
-                city="Mumbai",
+                city=w.get("city", "Mumbai"),
                 state="Maharashtra",
                 pincode=w["pincode"],
                 center_latitude=w["lat"],
@@ -72,6 +102,23 @@ def seed_database(force_reseed: bool = True) -> None:
             session.add(ward)
             session.flush()
             ward_objs[w["name"]] = ward
+            prefix = w["name"].split("(")[0].strip()
+            ward_objs[prefix] = ward
+            # Also store with any old name formatting
+            if "Ward H/West" in w["name"]:
+                ward_objs["Ward H/West (Bandra West, Khar, Santacruz)"] = ward
+            if "Ward K/West" in w["name"]:
+                ward_objs["Ward K/West (Andheri West, Juhu, Versova)"] = ward
+            if "Ward A" in w["name"]:
+                ward_objs["Ward A (Colaba, Fort, Marine Drive)"] = ward
+            if "Ward L" in w["name"]:
+                ward_objs["Ward L (Kurla, Sakinaka, Chandivali)"] = ward
+            if "Ward G/South" in w["name"]:
+                ward_objs["Ward G/South (Worli, Lower Parel, Mahalaxmi)"] = ward
+            if "Ward P/North" in w["name"]:
+                ward_objs["Ward P/North (Malad West, Marve Road)"] = ward
+            if "Ward D" in w["name"]:
+                ward_objs["Ward D (Malabar Hill, Walkeshwar, Girgaon)"] = ward
 
         logger.info("Seeding Mumbai Civic Departments (BMC / MCGM)...")
         depts_data = [
