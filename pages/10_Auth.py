@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-
-=======
 """Authentication Portal — Citizen / Officer Registration + Department-Secured Admin Access."""
->>>>>>> 90c0366 (feat: enhance department security codes, officer resolution workbench, and clean production UI)
 
 import sys
 from pathlib import Path
@@ -151,12 +147,9 @@ with st.expander("🔑 **Evaluation Guide — All Department Accounts & Secret A
 
 st.divider()
 
-<<<<<<< HEAD
-=======
 # =============================================================================
 # CITIZEN — Register + Sign In (No Secret Code Required)
 # =============================================================================
->>>>>>> 90c0366 (feat: enhance department security codes, officer resolution workbench, and clean production UI)
 if role_choice == "Citizen":
     st.markdown(f"## {icon_svg('user', color='#2563EB')} Citizen Portal", unsafe_allow_html=True)
     tab_login, tab_register = st.tabs(["Sign In", "Create Account"])
