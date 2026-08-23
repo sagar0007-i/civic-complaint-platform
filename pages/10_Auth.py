@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+from pydantic import ValidationError
 from backend.database import get_db_session
 from backend.services.auth_service import AuthService
 from backend.schemas.user import UserLoginSchema, UserRegisterSchema
@@ -111,20 +112,28 @@ if role_choice == "Citizen":
             password = st.text_input("Password *", type="password")
             submitted = st.form_submit_button("Sign In", type="primary", width="stretch")
         if submitted:
-            if not email or not password:
+            clean_email = email.strip() if email else ""
+            clean_password = password.strip() if password else ""
+            if not clean_email or not clean_password:
                 st.error("Please fill in both email and password.")
             else:
-                with get_db_session() as session:
-                    auth = AuthService(session)
-                    payload, err = auth.login(UserLoginSchema(email=email, password=password))
-                if err:
-                    st.error(err)
-                elif payload["role"] != "CITIZEN":
-                    st.warning("This portal is for citizens only. Please use the correct role above.")
-                else:
-                    login_user(payload)
-                    st.success(f"Welcome back, {payload['full_name']}!")
-                    st.switch_page("pages/04_My_Complaints.py")
+                try:
+                    with get_db_session() as session:
+                        auth = AuthService(session)
+                        payload, err = auth.login(UserLoginSchema(email=clean_email, password=clean_password))
+                    if err:
+                        st.error(err)
+                    elif payload["role"] != "CITIZEN":
+                        st.warning("This portal is for citizens only. Please use the correct role above.")
+                    else:
+                        login_user(payload)
+                        st.success(f"Welcome back, {payload['full_name']}!")
+                        st.switch_page("pages/04_My_Complaints.py")
+                except ValidationError as ve:
+                    err_msgs = [f"• {e.get('loc', [''])[0].replace('_', ' ').title()}: {e.get('msg', 'Invalid field')}" for e in ve.errors()]
+                    st.error("⚠️ Invalid login details:\n\n" + "\n\n".join(err_msgs))
+                except Exception as e:
+                    st.error(f"Sign In error: {e}")
 
         render_forgot_password_expander("citizen")
 
@@ -144,26 +153,36 @@ if role_choice == "Citizen":
                 "Create My Account", type="primary", width="stretch"
             )
         if reg_submitted:
-            if not reg_name or not reg_email or not reg_pass:
-                st.error("Please fill in all required fields.")
+            clean_name = reg_name.strip() if reg_name else ""
+            clean_email = reg_email.strip() if reg_email else ""
+            clean_phone = reg_phone.strip() if reg_phone and reg_phone.strip() else None
+            clean_pass = reg_pass.strip() if reg_pass else ""
+
+            if not clean_name or not clean_email or not clean_pass:
+                st.error("Please fill in all required fields (Full Name, Email Address, and Password).")
             else:
-                with get_db_session() as session:
-                    auth = AuthService(session)
-                    user_obj, err = auth.register_citizen(
-                        UserRegisterSchema(
-                            full_name=reg_name,
-                            email=reg_email,
-                            phone=reg_phone or None,
-                            password=reg_pass,
+                try:
+                    schema_data = UserRegisterSchema(
+                        full_name=clean_name,
+                        email=clean_email,
+                        phone=clean_phone,
+                        password=clean_pass,
+                    )
+                    with get_db_session() as session:
+                        auth = AuthService(session)
+                        user_obj, err = auth.register_citizen(schema_data)
+                    if err:
+                        st.error(err)
+                    else:
+                        st.success(
+                            f"🎉 Account created successfully for **{clean_name}**! "
+                            "You can now sign in using the **Sign In** tab."
                         )
-                    )
-                if err:
-                    st.error(err)
-                else:
-                    st.success(
-                        f"Account created for **{reg_name}**! "
-                        "You can now sign in using the **Sign In** tab."
-                    )
+                except ValidationError as ve:
+                    err_msgs = [f"• {e.get('loc', [''])[0].replace('_', ' ').title()}: {e.get('msg', 'Invalid field')}" for e in ve.errors()]
+                    st.error("⚠️ Invalid registration details:\n\n" + "\n\n".join(err_msgs))
+                except Exception as e:
+                    st.error(f"Registration error: {e}")
 
 
 elif role_choice == "Field Officer":
@@ -182,20 +201,28 @@ elif role_choice == "Field Officer":
             off_pass = st.text_input("Password *", type="password")
             off_submitted = st.form_submit_button("Sign In", type="primary", width="stretch")
         if off_submitted:
-            if not off_email or not off_pass:
-                st.error("Please provide your email and password.")
+            clean_off_email = off_email.strip() if off_email else ""
+            clean_off_pass = off_pass.strip() if off_pass else ""
+            if not clean_off_email or not clean_off_pass:
+                st.error("Please provide your official email and password.")
             else:
-                with get_db_session() as session:
-                    auth = AuthService(session)
-                    payload, err = auth.login(UserLoginSchema(email=off_email, password=off_pass))
-                if err:
-                    st.error(err)
-                elif payload["role"] != "OFFICER":
-                    st.warning("This portal is for Field Officers only.")
-                else:
-                    login_user(payload)
-                    st.success(f"Welcome, Officer {payload['full_name']}!")
-                    st.switch_page("pages/05_Officer_Dashboard.py")
+                try:
+                    with get_db_session() as session:
+                        auth = AuthService(session)
+                        payload, err = auth.login(UserLoginSchema(email=clean_off_email, password=clean_off_pass))
+                    if err:
+                        st.error(err)
+                    elif payload["role"] != "OFFICER":
+                        st.warning("This portal is for Field Officers only.")
+                    else:
+                        login_user(payload)
+                        st.success(f"Welcome, Officer {payload['full_name']}!")
+                        st.switch_page("pages/05_Officer_Dashboard.py")
+                except ValidationError as ve:
+                    err_msgs = [f"• {e.get('loc', [''])[0].replace('_', ' ').title()}: {e.get('msg', 'Invalid field')}" for e in ve.errors()]
+                    st.error("⚠️ Invalid credentials format:\n\n" + "\n\n".join(err_msgs))
+                except Exception as e:
+                    st.error(f"Sign In error: {e}")
 
         render_forgot_password_expander("officer")
 
@@ -233,29 +260,42 @@ elif role_choice == "Field Officer":
             )
 
         if or_submitted:
-            if not all([or_name, or_email, or_emp_code, or_designation, or_pass, or_pass2]):
+            clean_or_name = or_name.strip() if or_name else ""
+            clean_or_email = or_email.strip() if or_email else ""
+            clean_or_emp = or_emp_code.strip() if or_emp_code else ""
+            clean_or_desig = or_designation.strip() if or_designation else ""
+            clean_or_pass = or_pass.strip() if or_pass else ""
+            clean_or_pass2 = or_pass2.strip() if or_pass2 else ""
+
+            if not all([clean_or_name, clean_or_email, clean_or_emp, clean_or_desig, clean_or_pass, clean_or_pass2]):
                 st.error("All fields are required.")
-            elif or_pass != or_pass2:
+            elif clean_or_pass != clean_or_pass2:
                 st.error("Passwords do not match.")
             else:
-                with get_db_session() as session:
-                    auth = AuthService(session)
-                    user_obj, err = auth.create_officer_account(
-                        email=or_email,
-                        full_name=or_name,
-                        password=or_pass,
-                        department_id=dept_map[or_dept],
-                        employee_code=or_emp_code,
-                        designation=or_designation,
-                    )
-                if err:
-                    st.error(err)
-                else:
-                    st.success(
-                        f"Officer account created for **{or_name}** "
-                        f"(Employee Code: `{or_emp_code}`). "
-                        "You may now sign in via the **Sign In** tab."
-                    )
+                try:
+                    with get_db_session() as session:
+                        auth = AuthService(session)
+                        user_obj, err = auth.create_officer_account(
+                            email=clean_or_email,
+                            full_name=clean_or_name,
+                            password=clean_or_pass,
+                            department_id=dept_map[or_dept],
+                            employee_code=clean_or_emp,
+                            designation=clean_or_desig,
+                        )
+                    if err:
+                        st.error(err)
+                    else:
+                        st.success(
+                            f"🎉 Officer account created for **{clean_or_name}** "
+                            f"(Employee Code: `{clean_or_emp}`). "
+                            "You may now sign in via the **Sign In** tab."
+                        )
+                except ValidationError as ve:
+                    err_msgs = [f"• {e.get('loc', [''])[0].replace('_', ' ').title()}: {e.get('msg', 'Invalid field')}" for e in ve.errors()]
+                    st.error("⚠️ Invalid registration details:\n\n" + "\n\n".join(err_msgs))
+                except Exception as e:
+                    st.error(f"Registration error: {e}")
 
 
 elif role_choice == "Department Admin":
@@ -295,22 +335,31 @@ elif role_choice == "Department Admin":
         )
 
     if da_submitted:
-        if not da_email or not da_pass or not da_code:
+        clean_da_email = da_email.strip() if da_email else ""
+        clean_da_pass = da_pass.strip() if da_pass else ""
+        clean_da_code = da_code.strip() if da_code else ""
+        if not clean_da_email or not clean_da_pass or not clean_da_code:
             st.error("All fields are required — email, password, and access code.")
-        elif da_code != _DEPT_ADMIN_ACCESS_CODE:
+        elif clean_da_code != _DEPT_ADMIN_ACCESS_CODE:
             st.error("Invalid Department Admin Access Code. Contact the Commissioner's office.")
         else:
-            with get_db_session() as session:
-                auth = AuthService(session)
-                payload, err = auth.login(UserLoginSchema(email=da_email, password=da_pass))
-            if err:
-                st.error(err)
-            elif payload["role"] not in ("DEPARTMENT_ADMIN", "SUPER_ADMIN"):
-                st.warning("Your account does not have Department Admin privileges.")
-            else:
-                login_user(payload)
-                st.success(f"Access granted. Welcome, {payload['full_name']}.")
-                st.switch_page("pages/06_Admin_Dashboard.py")
+            try:
+                with get_db_session() as session:
+                    auth = AuthService(session)
+                    payload, err = auth.login(UserLoginSchema(email=clean_da_email, password=clean_da_pass))
+                if err:
+                    st.error(err)
+                elif payload["role"] not in ("DEPARTMENT_ADMIN", "SUPER_ADMIN"):
+                    st.warning("Your account does not have Department Admin privileges.")
+                else:
+                    login_user(payload)
+                    st.success(f"Access granted. Welcome, {payload['full_name']}.")
+                    st.switch_page("pages/06_Admin_Dashboard.py")
+            except ValidationError as ve:
+                err_msgs = [f"• {e.get('loc', [''])[0].replace('_', ' ').title()}: {e.get('msg', 'Invalid field')}" for e in ve.errors()]
+                st.error("⚠️ Invalid credentials format:\n\n" + "\n\n".join(err_msgs))
+            except Exception as e:
+                st.error(f"Sign In error: {e}")
 
     render_forgot_password_expander("dept_admin")
 
@@ -371,29 +420,39 @@ elif role_choice == "Super Admin (Commissioner)":
         )
 
     if sa_submitted:
-        if not sa_email or not sa_pass or not sa_code:
+        clean_sa_email = sa_email.strip() if sa_email else ""
+        clean_sa_pass = sa_pass.strip() if sa_pass else ""
+        clean_sa_code = sa_code.strip() if sa_code else ""
+        if not clean_sa_email or not clean_sa_pass or not clean_sa_code:
             st.error("All three fields are mandatory.")
-        elif sa_code != _SUPER_ADMIN_ACCESS_CODE:
+        elif clean_sa_code != _SUPER_ADMIN_ACCESS_CODE:
             st.error(
                 "Invalid Commissioner's Authorisation Code. "
                 "This attempt has been logged."
             )
         else:
-            with get_db_session() as session:
-                auth = AuthService(session)
-                payload, err = auth.login(UserLoginSchema(email=sa_email, password=sa_pass))
-            if err:
-                st.error(err)
-            elif payload["role"] != "SUPER_ADMIN":
-                st.warning(
-                    "Your account does not have Super Admin (Commissioner) privileges."
-                )
-            else:
-                login_user(payload)
-                st.success(
-                    f"Commissioner-level access granted. Welcome, {payload['full_name']}."
-                )
-                st.switch_page("pages/06_Admin_Dashboard.py")
+            try:
+                with get_db_session() as session:
+                    auth = AuthService(session)
+                    payload, err = auth.login(UserLoginSchema(email=clean_sa_email, password=clean_sa_pass))
+                if err:
+                    st.error(err)
+                elif payload["role"] != "SUPER_ADMIN":
+                    st.warning(
+                        "Your account does not have Super Admin (Commissioner) privileges."
+                    )
+                else:
+                    login_user(payload)
+                    st.success(
+                        f"Commissioner-level access granted. Welcome, {payload['full_name']}."
+                    )
+                    st.switch_page("pages/06_Admin_Dashboard.py")
+            except ValidationError as ve:
+                err_msgs = [f"• {e.get('loc', [''])[0].replace('_', ' ').title()}: {e.get('msg', 'Invalid field')}" for e in ve.errors()]
+                st.error("⚠️ Invalid credentials format:\n\n" + "\n\n".join(err_msgs))
+            except Exception as e:
+                st.error(f"Sign In error: {e}")
+
 
     render_forgot_password_expander("super_admin")
 

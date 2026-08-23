@@ -36,6 +36,9 @@ class AuthService:
     def register_citizen(self, data: UserRegisterSchema, ip_address: Optional[str] = None) -> tuple[Optional[User], Optional[str]]:
         """Register a new citizen account."""
         clean_email = data.email.strip().lower()
+        if "@" not in clean_email or "." not in clean_email.split("@")[-1] or len(clean_email) < 5:
+            return None, "Please enter a valid email address (e.g. name@example.com)."
+
         # 1. Check if email already exists
         existing = self.user_repo.get_by_email(clean_email)
         if existing:

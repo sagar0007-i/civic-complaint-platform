@@ -8,16 +8,16 @@ from backend.models.user import UserRole
 class UserRegisterSchema(BaseModel):
     """Citizen / User self-registration schema."""
 
-    full_name: str = Field(..., min_length=2, max_length=150)
-    email: EmailStr
-    phone: Optional[str] = Field(None, pattern=r"^[0-9+\-\s()]{7,20}$")
-    password: str = Field(..., min_length=8)
+    full_name: str = Field(..., min_length=1, max_length=150)
+    email: str = Field(..., min_length=3)
+    phone: Optional[str] = None
+    password: str = Field(..., min_length=4)
 
 
 class UserLoginSchema(BaseModel):
     """User login request schema."""
 
-    email: EmailStr
+    email: str
     password: str
 
 
