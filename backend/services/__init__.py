@@ -22,6 +22,10 @@ from backend.services.yolo_service import (
     PotholeDetectionResult,
     PotholeDetectionBox,
 )
+from backend.services.whisper_service import (
+    WhisperAudioService,
+    WhisperTranscriptionResult,
+)
 
 __all__ = [
     "AuthService",
@@ -40,6 +44,8 @@ __all__ = [
     "YOLOPotholeDetector",
     "PotholeDetectionResult",
     "PotholeDetectionBox",
+    "WhisperAudioService",
+    "WhisperTranscriptionResult",
     "NotificationService",
     "AuditService",
     "AnalyticsService",

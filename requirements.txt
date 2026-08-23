@@ -18,3 +18,7 @@ pytest>=8.2.0
 streamlit-cookies-controller>=0.0.4
 ultralytics>=8.2.0
 opencv-python-headless>=4.9.0
+openai-whisper>=20231117
+soundfile>=0.12.1
+imageio-ffmpeg>=0.5.1
+scipy>=1.13.0

@@ -39,17 +39,17 @@ class HeuristicAIProvider(BaseAIProvider):
     """
 
     KEYWORD_MAPPINGS = {
-        "garbage": ["garbage", "trash", "waste", "dump", "debris", "litter", "kachra", "bin", "dustbin", "rubbish"],
-        "open-sewage": ["sewage", "gutter", "drain line", "overflowing sewage", "manhole", "sewer", "blackwater"],
-        "drainage": ["drain", "drainage", "stormwater", "culvert", "blocked drain", "nallah", "clogged"],
-        "water-leakage": ["leak", "leaking pipe", "broken pipe", "burst pipe", "water gushing", "pipeline"],
-        "water-supply": ["no water", "low pressure", "water cut", "water tank", "drinking water", "contaminated water"],
-        "pothole": ["pothole", "crater", "damaged road", "broken road", "asphalt", "tarmac", "road sink"],
-        "streetlight": ["streetlight", "light", "dark street", "lamp", "pole", "broken light", "no lighting"],
-        "flooding": ["flooding", "waterlogging", "inundation", "submerged", "heavy water", "monsoon flood"],
-        "public-sanitation": ["public toilet", "urinal", "smell", "sanitation", "hygiene", "foul smell"],
-        "illegal-dumping": ["illegal dumping", "debris dumping", "construction waste", "truck dump"],
-        "damaged-infrastructure": ["broken footbridge", "collapsed wall", "broken bench", "railing", "pavement"],
+        "garbage": ["garbage", "trash", "waste", "dump", "debris", "litter", "kachra", "bin", "dustbin", "rubbish", "कचरा", "कचऱ्याचा ढीग", "घाण", "कूड़ा", "गंदगी"],
+        "open-sewage": ["sewage", "gutter", "drain line", "overflowing sewage", "manhole", "sewer", "blackwater", "गटार", "गटाराचे पाणी", "सीवर", "नाली ओवरफ्लो"],
+        "drainage": ["drain", "drainage", "stormwater", "culvert", "blocked drain", "nallah", "clogged", "ड्रेनेज", "तुंबलेला नाला", "नाली जाम"],
+        "water-leakage": ["leak", "leaking pipe", "broken pipe", "burst pipe", "water gushing", "pipeline", "पाणी गळती", "पाईप फुटली", "पानी का रिसाव", "पाइपलाइन"],
+        "water-supply": ["no water", "low pressure", "water cut", "water tank", "drinking water", "contaminated water", "पाणी नाही", "पाण्याचा पुरवठा", "पानी की समस्या", "दूषित पाणी"],
+        "pothole": ["pothole", "crater", "damaged road", "broken road", "asphalt", "tarmac", "road sink", "खड्डा", "खड्डे", "रस्त्यावर खड्डे", "गड्ढा", "सड़क पर गड्ढे"],
+        "streetlight": ["streetlight", "light", "dark street", "lamp", "pole", "broken light", "no lighting", "दिवा", "लाईट", "रस्त्यावरील दिवा", "स्ट्रीट लाइट", "अंधार"],
+        "flooding": ["flooding", "waterlogging", "inundation", "submerged", "heavy water", "monsoon flood", "पूर", "पाणी साचले", "जलभराव"],
+        "public-sanitation": ["public toilet", "urinal", "smell", "sanitation", "hygiene", "foul smell", "सार्वजनिक शौचालय", "दुर्गंधी", "शौचालय"],
+        "illegal-dumping": ["illegal dumping", "debris dumping", "construction waste", "truck dump", "मलबा", "डेब्रीस", "बांधकाम कचरा"],
+        "damaged-infrastructure": ["broken footbridge", "collapsed wall", "broken bench", "railing", "pavement", "फूटपाथ", "रस्ता तुटला"],
     }
 
     SEVERITY_KEYWORDS = {
@@ -65,7 +65,10 @@ class HeuristicAIProvider(BaseAIProvider):
         max_matches = 0
 
         for slug, keywords in self.KEYWORD_MAPPINGS.items():
-            matches = sum(1 for kw in keywords if re.search(r"\b" + re.escape(kw) + r"\b", text_lower))
+            matches = sum(
+                1 for kw in keywords
+                if (kw in text_lower if not kw.isascii() else bool(re.search(r"\b" + re.escape(kw) + r"\b", text_lower)))
+            )
             if matches > max_matches:
                 max_matches = matches
                 best_slug = slug
@@ -237,4 +240,131 @@ class AIService:
             "is_ai_suggestion": True,
             "vision": vision_data,
         }
+
+    def parse_voice_transcript(self, raw_transcript: str) -> Dict[str, Any]:
+        """
+        Intelligently parses spoken voice transcript into structured complaint elements:
+        - Crisp, distinct Title (e.g. 'Garbage Dump & Waste Accumulation Near Hospital Gate (Sector 24)')
+        - Detailed Description (e.g. 'Garbage dump and waste accumulation near the hospital gate at sector 24...')
+        - Landmark (e.g. 'Near Hospital Gate')
+        - Sector / Area Location (e.g. 'Sector 24, Mumbai')
+        - Category slug & Estimated Severity
+        """
+        text_clean = raw_transcript.strip()
+        if not text_clean:
+            return {
+                "title": "Civic Complaint",
+                "description": "",
+                "landmark": "",
+                "address": "",
+                "suggested_category_slug": "other",
+                "suggested_severity": "MEDIUM",
+            }
+
+        # 1. Classify Category and Severity
+        sugg = self.get_suggestions(title=text_clean[:60], description=text_clean)
+        cat_slug = sugg.get("suggested_category_slug", "other")
+        severity = sugg.get("suggested_severity", "MEDIUM")
+
+        # 2. Extract Sector / Plot / Phase
+        sector = None
+        sec_m = re.search(
+            r"\b(?:at\s+|in\s+)?(sector\s*\d+[a-zA-Z]?|plot\s*(?:no\.?|number)?\s*\d+|phase\s*\d+|road\s*(?:no\.?|number)?\s*\d+|ward\s*[a-zA-Z0-9]+)\b",
+            text_clean,
+            re.IGNORECASE,
+        )
+        if sec_m:
+            sector = sec_m.group(1).strip().title()
+
+        # 3. Extract Known Area
+        area = None
+        area_m = re.search(
+            r"\b(Dadar|Andheri|Bandra|Kurla|Thane|Vashi|Nerul|Kharghar|Panvel|Belapur|Ghatkopar|Powai|Chembur|Colaba|Worli|Malad|Borivali|Kandivali|Santacruz|Juhu|Byculla|Parel|Sion)\b",
+            text_clean,
+            re.IGNORECASE,
+        )
+        if area_m:
+            area = area_m.group(1).strip().title()
+
+        # 4. Extract Landmark
+        landmark = None
+        lm_m = re.search(
+            r"\b(near|opposite to|opposite|opp\.?|in front of|adjacent to|beside|outside|behind|close to|around)\s+(?:the\s+)?([a-zA-Z0-9\s\-\']+?)(?=(?:\s+at\s+sector|\s+in\s+sector|\s+sector\s*\d+|\s+at\s+plot|\s+in\s+plot|\s+phase\s*\d+)|[\.\,]|\s*$)",
+            text_clean,
+            re.IGNORECASE,
+        )
+        if lm_m:
+            prep = lm_m.group(1).strip().capitalize()
+            spot = lm_m.group(2).strip().title()
+            if len(spot) > 1:
+                landmark = f"{prep} {spot}" if not spot.lower().startswith(prep.lower()) else spot
+
+        # Check for Marathi/Hindi landmark terms (e.g. 'हॉस्पिटलच्या गेट समोर')
+        if not landmark:
+            dev_lm = re.search(r"([^\.\,]+?)\s+(?:च्या\s+)?(?:समोर|जवळ|लगत|पाठीमागे|के सामने|के पास)", text_clean)
+            if dev_lm:
+                landmark = dev_lm.group(0).strip()
+
+        # 5. Core problem headline by category
+        CATEGORY_HEADLINES = {
+            "garbage": "Garbage Dump & Waste Accumulation",
+            "pothole": "Pothole & Damaged Road",
+            "open-sewage": "Open Sewage Overflow",
+            "water-leakage": "Water Pipeline Leakage",
+            "water-supply": "Water Supply Outage",
+            "streetlight": "Streetlight Not Working",
+            "flooding": "Severe Road Flooding",
+            "drainage": "Blocked Storm Drain",
+            "public-sanitation": "Public Restroom Hygiene Issue",
+            "illegal-dumping": "Illegal Debris Dumping",
+            "damaged-infrastructure": "Damaged Public Infrastructure",
+            "other": "Civic Grievance",
+        }
+        core_headline = CATEGORY_HEADLINES.get(cat_slug, "Civic Grievance")
+
+        # 6. Formulate crisp Title (different from description)
+        if landmark and sector:
+            title = f"{core_headline} {landmark} ({sector})"
+        elif landmark:
+            title = f"{core_headline} {landmark}"
+        elif sector:
+            title = f"{core_headline} at {sector}"
+        elif area:
+            title = f"{core_headline} in {area}"
+        else:
+            words = text_clean.split()
+            title = " ".join(words[:6]).title()
+            if len(title) < 5:
+                title = f"{core_headline} Reported"
+
+        # 7. Formulate full, distinct Description
+        clean_text = text_clean[0].upper() + text_clean[1:] if len(text_clean) > 1 else text_clean
+        if not clean_text.endswith((".", "!", "?")):
+            clean_text += "."
+
+        description = f"{clean_text} Immediate inspection and municipal redressal requested."
+
+        # 8. Formulate Address
+        address_parts = []
+        if sector:
+            address_parts.append(sector)
+        if area and area not in (sector or ""):
+            address_parts.append(area)
+        if not address_parts and landmark:
+            address_parts.append(landmark)
+
+        address = ", ".join(address_parts) if address_parts else (settings.DEFAULT_CITY)
+
+        return {
+            "title": title[:100],
+            "description": description,
+            "landmark": landmark or "",
+            "address": address,
+            "sector": sector or "",
+            "area": area or "",
+            "suggested_category_slug": cat_slug,
+            "suggested_severity": severity,
+            "suggested_department_code": sugg.get("suggested_department_code", "DEPT_PWD"),
+        }
+
 

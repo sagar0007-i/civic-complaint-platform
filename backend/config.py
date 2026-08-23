@@ -72,6 +72,11 @@ class Settings(BaseSettings):
     YOLO_CONFIDENCE_THRESHOLD: float = 0.35
     YOLO_IOU_THRESHOLD: float = 0.45
 
+    # Whisper Multilingual Voice Transcription Model (Marathi, Hindi, English)
+    WHISPER_ENABLED: bool = True
+    WHISPER_MODEL_NAME: str = "base"
+    WHISPER_DEVICE: str = "cpu"
+
     # Maps & Location
     MAP_PROVIDER: Literal["osm", "mapbox", "google_maps"] = "osm"
     MAP_API_KEY: Optional[str] = None

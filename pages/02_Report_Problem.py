@@ -30,6 +30,7 @@ from backend.services.storage_service import get_storage_provider
 from backend.services.location_service import LocationService
 from backend.services.ai_service import AIService
 from backend.services.yolo_service import YOLOPotholeDetector
+from backend.services.whisper_service import WhisperAudioService
 from backend.repositories.category_repo import CategoryRepository
 from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
@@ -134,6 +135,148 @@ if st.session_state.report_step == 1:
     st.markdown("### **STEP 1: SELECT PROBLEM CATEGORY**")
     st.caption("Choose the category that best describes your civic issue. Can't find it? Use **'Other / Not Listed'** at the bottom.")
 
+    with get_db_session() as session:
+        cat_repo = CategoryRepository(session)
+        categories = cat_repo.get_all(active_only=True)
+
+    # ── EXPRESS VOICE GRIEVANCE ASSISTANT (WHISPER) ───────────────────────────
+    if settings.WHISPER_ENABLED and categories:
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <span style="font-size:1.4rem;">🎙️</span>
+                    <div>
+                        <span style="font-family:'Rajdhani', sans-serif; font-weight:700; color:#0f2d6b; font-size:1.1rem; display:block;">
+                            EXPRESS VOICE GRIEVANCE REPORTING
+                        </span>
+                        <span style="font-size:0.83rem; color:#64748b;">
+                            बोलून तक्रार नोंदवा · बोलकर शिकायत दर्ज करें · Speak in Marathi, Hindi, or English
+                        </span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            audio_source = None
+            tab_mic, tab_upload_audio = st.tabs(["🎤 Record Live Voice", "📁 Upload Audio Clip"])
+
+            with tab_mic:
+                if hasattr(st, "audio_input"):
+                    audio_source = st.audio_input(
+                        "Click the microphone to record your complaint (e.g. 'रस्त्यावर मोठा खड्डा पडला आहे' or 'Garbage dump near hospital gate')",
+                        key="voice_audio_mic"
+                    )
+                else:
+                    st.caption("Microphone input active on supported browsers.")
+
+            with tab_upload_audio:
+                audio_file = st.file_uploader(
+                    "Upload Voice Note (WAV, MP3, M4A, OGG, WEBM)",
+                    type=["wav", "mp3", "m4a", "ogg", "webm"],
+                    key="voice_audio_upload",
+                )
+                if audio_file is not None and audio_source is None:
+                    audio_source = audio_file
+
+            if audio_source is not None:
+                audio_bytes = audio_source.read() if hasattr(audio_source, "read") else audio_source.getvalue()
+
+                if audio_bytes:
+                    with st.spinner("🤖 Whisper is transcribing and understanding your voice grievance..."):
+                        whisper_svc = WhisperAudioService()
+                        trans_res = whisper_svc.transcribe_audio(audio_bytes)
+
+                    if trans_res.success and trans_res.text:
+                        # Parse structured elements (distinct title, description, landmark, sector address)
+                        ai_svc = AIService()
+                        parsed = ai_svc.parse_voice_transcript(trans_res.text)
+
+                        matched_slug = parsed.get("suggested_category_slug", "other")
+                        matched_category = next((c for c in categories if c.slug == matched_slug), None)
+                        if not matched_category and categories:
+                            matched_category = categories[0]
+
+                        # 1-Click Review Card (Option 1 with Confirm & Next)
+                        st.markdown(
+                            f"""
+                            <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:14px; margin-top:10px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <span style="font-weight:700; color:#15803d; font-size:0.95rem;">
+                                        🗣️ Transcribed Voice Note ({trans_res.language_name}):
+                                    </span>
+                                    <span style="background:#dcfce7; color:#166534; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:600;">
+                                        AI Structured
+                                    </span>
+                                </div>
+                                <div style="font-style:italic; color:#166534; font-size:0.92rem; margin-bottom:10px; background:#ffffff; padding:10px 14px; border-radius:6px; border:1px solid #bbf7d0; line-height:1.5;">
+                                    "{trans_res.text}"
+                                </div>
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:0.88rem;">
+                                    <div style="color:#0f2d6b; margin-bottom:4px;">📌 <b>Auto-Generated Title:</b> {parsed['title']}</div>
+                                    <div style="color:#334155; margin-bottom:4px;">📝 <b>Auto-Formatted Description:</b> {parsed['description']}</div>
+                                    {f'<div style="color:#0369a1; margin-bottom:4px;">📍 <b>Extracted Landmark:</b> {parsed["landmark"]}</div>' if parsed["landmark"] else ''}
+                                    {f'<div style="color:#0369a1; margin-bottom:4px;">🏘️ <b>Extracted Sector/Address:</b> {parsed["address"]}</div>' if parsed["address"] and parsed["address"] != settings.DEFAULT_CITY else ''}
+                                    <div style="display:flex; flex-wrap:wrap; gap:16px; margin-top:6px; color:#1e3a8a;">
+                                        <span>🎯 <b>Category:</b> {matched_category.icon if matched_category else '📌'} {matched_category.name if matched_category else 'Other'}</span>
+                                        <span>⚡ <b>Severity:</b> <b>{parsed['suggested_severity']}</b></span>
+                                    </div>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                        st.write("")
+                        col_conf, col_edit = st.columns([2, 1])
+                        with col_conf:
+                            if st.button("✨ Confirm & Next: Upload Evidence ➡️", type="primary", width="stretch", key="confirm_voice_btn"):
+                                if matched_category:
+                                    st.session_state.report_category_id = matched_category.id
+                                    st.session_state.report_category_name = f"{matched_category.icon} {matched_category.name}"
+                                    st.session_state.report_category_slug = matched_category.slug
+                                    st.session_state.report_severity = parsed.get("suggested_severity", matched_category.default_severity)
+                                st.session_state.report_title = parsed["title"]
+                                st.session_state.report_description = parsed["description"]
+                                if parsed["landmark"]:
+                                    st.session_state.report_landmark = parsed["landmark"]
+                                if parsed["address"]:
+                                    st.session_state.report_address = parsed["address"]
+                                st.session_state.report_step = 3  # Advance directly to Step 3 (Media/Photos)
+                                st.rerun()
+                        with col_edit:
+                            if st.button("📝 Edit Details First", width="stretch", key="edit_voice_btn"):
+                                if matched_category:
+                                    st.session_state.report_category_id = matched_category.id
+                                    st.session_state.report_category_name = f"{matched_category.icon} {matched_category.name}"
+                                    st.session_state.report_category_slug = matched_category.slug
+                                    st.session_state.report_severity = parsed.get("suggested_severity", matched_category.default_severity)
+                                st.session_state.report_title = parsed["title"]
+                                st.session_state.report_description = parsed["description"]
+                                if parsed["landmark"]:
+                                    st.session_state.report_landmark = parsed["landmark"]
+                                if parsed["address"]:
+                                    st.session_state.report_address = parsed["address"]
+                                st.session_state.report_step = 2  # Advance to Step 2 (Edit Details)
+                                st.rerun()
+                    elif trans_res.message:
+                        st.warning(f"🎙️ {trans_res.message}")
+
+
+        st.markdown(
+            """
+            <div style="display:flex; align-items:center; margin: 1.2rem 0 0.8rem 0;">
+                <div style="flex:1; height:1px; background:#cbd5e1;"></div>
+                <span style="padding:0 12px; color:#64748b; font-size:0.85rem; font-weight:600; text-transform:uppercase;">
+                    OR SELECT MANUALLY BELOW
+                </span>
+                <div style="flex:1; height:1px; background:#cbd5e1;"></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     # Category group mapping
     CATEGORY_GROUPS = {
         "🚰 Water & Sanitation": ["open-sewage", "water-leakage", "water-supply", "public-sanitation"],
@@ -148,10 +291,6 @@ if st.session_state.report_step == 1:
         "🔍 Search Categories",
         placeholder="Type to filter... e.g. 'water', 'pothole', 'light'",
     )
-
-    with get_db_session() as session:
-        cat_repo = CategoryRepository(session)
-        categories = cat_repo.get_all(active_only=True)
 
     if not categories:
         st.warning("No complaint categories found. Please run the seed script.")
