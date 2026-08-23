@@ -17,6 +17,15 @@ from backend.database import get_db_session
 from backend.models.complaint import ComplaintSeverity
 from backend.schemas.complaint import ComplaintCreateSchema, LocationCreateSchema, MediaUploadMetaSchema
 from backend.services.complaint_service import ComplaintService
+import importlib
+import backend.services.location_service
+import backend.utils.india_boundary
+try:
+    importlib.reload(backend.services.location_service)
+    importlib.reload(backend.utils.india_boundary)
+except Exception:
+    pass
+
 from backend.services.storage_service import get_storage_provider
 from backend.services.location_service import LocationService
 from backend.services.ai_service import AIService
@@ -26,13 +35,18 @@ from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
 from backend.utils.icons import icon_svg
-try:
-    from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
-except ImportError:
-    import importlib
-    import backend.utils.india_boundary
-    importlib.reload(backend.utils.india_boundary)
-    from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
+from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
+
+
+def is_in_maharashtra(loc_svc: LocationService, lat: float, lng: float) -> bool:
+    """Safe boundary check for Maharashtra that never raises AttributeError."""
+    try:
+        if hasattr(loc_svc, "is_within_maharashtra_bounds"):
+            return loc_svc.is_within_maharashtra_bounds(lat, lng)
+    except Exception:
+        pass
+    return 15.50 <= lat <= 22.20 and 72.50 <= lng <= 81.00
+
 
 init_session_state()
 apply_custom_css()
@@ -77,7 +91,7 @@ if curr_step <= 5:
     current_label = step_names[curr_step - 1].upper()
     st.markdown(
         f"""
-        <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 18px; margin-bottom:1.4rem; box-shadow:0 2px 8px rgba(15,45,107,0.06);">
+        <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 18px; margin-bottom:0.8rem; box-shadow:0 2px 8px rgba(15,45,107,0.06);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="font-family:'Rajdhani', sans-serif; font-weight:700; font-size:1.05rem; color:#0f2d6b; letter-spacing:0.02em;">
                     STEP {curr_step} OF 5 — <span style="color:#ff9900;">{current_label}</span>
@@ -93,6 +107,23 @@ if curr_step <= 5:
         """,
         unsafe_allow_html=True,
     )
+
+    # Clickable Step Breadcrumbs Bar (Direct jump to any step)
+    step_short_names = ["1. Category", "2. Details", "3. Media", "4. Location", "5. Review"]
+    step_cols = st.columns(5)
+    for s_idx, s_col in enumerate(step_cols, 1):
+        with s_col:
+            if s_idx == curr_step:
+                st.button(f"📍 {step_short_names[s_idx-1]}", key=f"top_step_btn_{s_idx}", type="primary", use_container_width=True)
+            elif s_idx < curr_step:
+                if st.button(f"⬅️ {step_short_names[s_idx-1]}", key=f"top_step_btn_{s_idx}", type="secondary", use_container_width=True):
+                    st.session_state.report_step = s_idx
+                    st.rerun()
+            else:
+                st.button(f"{step_short_names[s_idx-1]}", key=f"top_step_btn_{s_idx}", disabled=True, use_container_width=True)
+
+    st.markdown("<div style='margin-bottom: 1.2rem;'></div>", unsafe_allow_html=True)
+
 
 # -----------------------------------------------------------------------------
 # STEP 1: SELECT CATEGORY
@@ -491,7 +522,7 @@ elif st.session_state.report_step == 4:
                 st.session_state.report_address = rev["address"]
                 st.rerun()
 
-    if not loc_service.is_within_maharashtra_bounds(c_lat, c_lng):
+    if not is_in_maharashtra(loc_service, c_lat, c_lng):
         st.warning("⚠️ The selected location is outside the State of Maharashtra municipal jurisdiction. Please select a location within Maharashtra.")
 
     # Address field
