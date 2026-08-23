@@ -17,6 +17,11 @@ from backend.services.audit_service import AuditService
 from backend.services.analytics_service import AnalyticsService
 from backend.services.gov_integration import MockGovernmentIntegrationService
 from backend.services.complaint_service import ComplaintService
+from backend.services.yolo_service import (
+    YOLOPotholeDetector,
+    PotholeDetectionResult,
+    PotholeDetectionBox,
+)
 
 __all__ = [
     "AuthService",
@@ -32,6 +37,9 @@ __all__ = [
     "HeuristicAIProvider",
     "GeminiAIProvider",
     "MockAIProvider",
+    "YOLOPotholeDetector",
+    "PotholeDetectionResult",
+    "PotholeDetectionBox",
     "NotificationService",
     "AuditService",
     "AnalyticsService",

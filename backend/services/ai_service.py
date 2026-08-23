@@ -166,7 +166,7 @@ class GeminiAIProvider(BaseAIProvider):
 
 
 class AIService:
-    """Civic AI Service orchestrating AI suggestions across providers."""
+    """Civic AI Service orchestrating text NLP suggestions and YOLO Vision AI detection."""
 
     def __init__(self, provider: Optional[BaseAIProvider] = None):
         if provider:
@@ -186,7 +186,8 @@ class AIService:
         image_bytes: Optional[bytes] = None,
     ) -> Dict[str, Any]:
         """
-        Produce a non-binding AI recommendation bundle for a new complaint.
+        Produce a non-binding AI recommendation bundle for a new complaint,
+        combining NLP text analysis with YOLO vision detection if an image is provided.
         """
         combined = f"{title}. {description}"
         classification = self.provider.classify_complaint(combined, image_bytes)
@@ -194,12 +195,46 @@ class AIService:
         severity = self.provider.estimate_severity(combined, cat_slug)
         dept_code = self.provider.suggest_department(cat_slug, combined)
         summary = self.provider.summarize_complaint(title, description, landmark)
+        confidence = classification.get("confidence_score", 0.75)
+
+        vision_data: Dict[str, Any] = {
+            "potholes_detected": False,
+            "pothole_count": 0,
+            "annotated_image_bytes": None,
+            "vision_message": "",
+        }
+
+        # Run YOLO Vision Detection if an image is attached and YOLO is enabled
+        if image_bytes and settings.YOLO_ENABLED:
+            try:
+                from backend.services.yolo_service import YOLOPotholeDetector
+                detector = YOLOPotholeDetector()
+                vision_result = detector.detect_potholes(image_bytes)
+
+                if vision_result.potholes_detected:
+                    cat_slug = "pothole"
+                    dept_code = "DEPT_ROADS"
+                    severity = vision_result.suggested_severity
+                    confidence = max(confidence, vision_result.max_confidence)
+
+                vision_data = {
+                    "potholes_detected": vision_result.potholes_detected,
+                    "pothole_count": vision_result.pothole_count,
+                    "max_confidence": vision_result.max_confidence,
+                    "annotated_image_bytes": vision_result.annotated_image_bytes,
+                    "vision_message": vision_result.message,
+                    "model_used": vision_result.model_used,
+                }
+            except Exception as e:
+                logger.warning(f"Vision AI analysis skipped due to: {e}")
 
         return {
             "suggested_category_slug": cat_slug,
             "suggested_severity": severity,
             "suggested_department_code": dept_code,
-            "confidence_score": classification.get("confidence_score", 0.75),
+            "confidence_score": round(confidence, 2),
             "summary_text": summary,
             "is_ai_suggestion": True,
+            "vision": vision_data,
         }
+

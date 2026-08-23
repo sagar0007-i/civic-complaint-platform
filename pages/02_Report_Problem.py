@@ -20,6 +20,7 @@ from backend.services.complaint_service import ComplaintService
 from backend.services.storage_service import get_storage_provider
 from backend.services.location_service import LocationService
 from backend.services.ai_service import AIService
+from backend.services.yolo_service import YOLOPotholeDetector
 from backend.repositories.category_repo import CategoryRepository
 from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
@@ -350,10 +351,45 @@ elif st.session_state.report_step == 3:
             except Exception as e:
                 st.error(f"Capture upload error: {e}")
 
-    # Show count of currently attached media
+    # Show count of currently attached media & YOLO Vision Verification
     count = len(st.session_state.uploaded_media_meta)
     if count > 0:
         st.info(f"📎 **{count}** media file(s) attached.")
+
+        # YOLO Vision AI Inspection Block
+        if settings.YOLO_ENABLED:
+            with st.expander("🤖 **AI Vision Inspection (YOLO Pothole Detector)**", expanded=True):
+                detector = YOLOPotholeDetector()
+                has_image = any(m.get("media_type") == "image" for m in st.session_state.uploaded_media_meta)
+
+                if has_image:
+                    for idx, meta in enumerate(st.session_state.uploaded_media_meta):
+                        if meta.get("media_type") == "image":
+                            file_path = storage.get_file_path(meta["storage_path"])
+                            if file_path and os.path.exists(file_path):
+                                with open(file_path, "rb") as f:
+                                    img_data = f.read()
+
+                                vision_res = detector.detect_potholes(img_data)
+                                if vision_res.potholes_detected:
+                                    st.success(
+                                        f"🎯 **YOLO Model Verified**: Detected **{vision_res.pothole_count} Pothole(s)** "
+                                        f"(Confidence: `{int(vision_res.max_confidence * 100)}%`) in `{meta.get('original_filename', 'photo')}`"
+                                    )
+                                    if vision_res.annotated_image_bytes:
+                                        st.image(
+                                            vision_res.annotated_image_bytes,
+                                            caption=f"🎯 AI Bounding Box Detection - {vision_res.pothole_count} Pothole(s) Identified",
+                                            use_container_width=True,
+                                        )
+                                    # Auto-suggest severity if higher
+                                    if vision_res.suggested_severity in ["HIGH", "CRITICAL"] and st.session_state.report_severity != "CRITICAL":
+                                        st.session_state.report_severity = vision_res.suggested_severity
+                                        st.info(f"⚡ Severity automatically upgraded to **{vision_res.suggested_severity}** based on road hazard density.")
+                                elif vision_res.is_loaded:
+                                    st.caption(f"ℹ️ `{meta.get('original_filename', 'photo')}`: No road potholes detected by Vision model.")
+                                else:
+                                    st.caption(f"💡 Vision Model Status: {vision_res.message}")
 
     col_back, col_next = st.columns([1, 1])
     with col_back:

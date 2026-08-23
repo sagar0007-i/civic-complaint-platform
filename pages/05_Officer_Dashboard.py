@@ -19,6 +19,7 @@ from backend.models.complaint import ComplaintStatus, ComplaintSeverity
 from backend.services.complaint_service import ComplaintService
 from backend.services.sla_service import SLAService
 from backend.services.storage_service import get_storage_provider
+from backend.services.yolo_service import YOLOPotholeDetector
 from backend.repositories.user_repo import UserRepository
 from backend.repositories.category_repo import CategoryRepository
 from backend.repositories.ward_repo import WardRepository
@@ -126,15 +127,40 @@ with get_db_session() as session:
                     ).add_to(m_officer)
                     st_folium(m_officer, height=220, width=None, key="officer_map")
 
-                # Attached Photos
+                # Attached Photos & YOLO Vision Analysis
                 if complaint.media:
                     st.markdown("#### 📸 **Attached Media Proof**")
+                    yolo_det = YOLOPotholeDetector()
                     for med in complaint.media:
                         file_path = storage.get_file_path(med.storage_path)
                         if file_path and os.path.exists(file_path) and med.media_type == "image":
                             try:
+                                with open(file_path, "rb") as f:
+                                    img_bytes = f.read()
+
                                 img = Image.open(file_path)
-                                st.image(img, caption=med.original_filename, use_container_width=True)
+                                st.image(img, caption=f"Original: {med.original_filename}", use_container_width=True)
+
+                                # Check YOLO detection
+                                v_res = yolo_det.detect_potholes(img_bytes)
+                                if v_res.potholes_detected and v_res.annotated_image_bytes:
+                                    st.markdown(
+                                        f"""
+                                        <div style="background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:10px; margin:8px 0;">
+                                            <span style="font-weight:bold; color:#B91C1C;">🎯 AI Vision Verified:</span>
+                                            <span style="color:#7F1D1D; font-size:0.9rem;">
+                                                {v_res.pothole_count} Pothole(s) detected (Confidence: {int(v_res.max_confidence * 100)}%).
+                                                Suggested Severity: <b>{v_res.suggested_severity}</b>
+                                            </span>
+                                        </div>
+                                        """,
+                                        unsafe_allow_html=True,
+                                    )
+                                    st.image(
+                                        v_res.annotated_image_bytes,
+                                        caption=f"🎯 AI Bounding Box Inspection ({v_res.pothole_count} potholes)",
+                                        use_container_width=True,
+                                    )
                             except Exception:
                                 st.caption(f"📁 {med.original_filename}")
                         else:

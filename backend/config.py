@@ -66,6 +66,12 @@ class Settings(BaseSettings):
     AI_API_KEY: Optional[str] = None
     GEMINI_MODEL: str = "gemini-2.5-flash"
 
+    # YOLO Pothole Vision AI Model
+    YOLO_ENABLED: bool = True
+    YOLO_POTHOLE_MODEL_PATH: str = str(BASE_DIR / "ai_models" / "pothole_yolo.pt")
+    YOLO_CONFIDENCE_THRESHOLD: float = 0.35
+    YOLO_IOU_THRESHOLD: float = 0.45
+
     # Maps & Location
     MAP_PROVIDER: Literal["osm", "mapbox", "google_maps"] = "osm"
     MAP_API_KEY: Optional[str] = None
