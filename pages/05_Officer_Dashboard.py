@@ -308,23 +308,26 @@ with get_db_session() as session:
                     # ── Mandatory Public Delay Justification Section ───────────────────────
                     st.markdown("#### 🏛️ **Public Delay Justification & Transparency (RTS Act)**")
                     sla_res = sla_service.check_sla_status(complaint)
+                    curr_delay_reason = getattr(complaint, "delay_reason", None)
+                    curr_delay_by = getattr(complaint, "delay_justified_by", None)
+                    curr_delay_target = getattr(complaint, "revised_resolution_target", None)
 
-                    if complaint.delay_reason:
+                    if curr_delay_reason:
                         st.markdown(
                             f"""
                             <div style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:8px; padding:12px 14px; margin-bottom:12px;">
                                 <div style="font-weight:700; color:#b45309; font-size:0.9rem;">📢 Public Delay Statement Currently Active:</div>
-                                <div style="color:#1e293b; font-size:0.88rem; margin:6px 0;">"{complaint.delay_reason}"</div>
+                                <div style="color:#1e293b; font-size:0.88rem; margin:6px 0;">"{curr_delay_reason}"</div>
                                 <div style="color:#78350f; font-size:0.78rem;">
-                                    <b>Published By:</b> {complaint.delay_justified_by or 'Officer'} |
-                                    <b>Target Date:</b> {format_datetime(complaint.revised_resolution_target)}
+                                    <b>Published By:</b> {curr_delay_by or 'Officer'} |
+                                    <b>Target Date:</b> {format_datetime(curr_delay_target)}
                                 </div>
                             </div>
                             """,
                             unsafe_allow_html=True,
                         )
 
-                    with st.expander("📝 " + ("Update Official Public Delay Reason" if complaint.delay_reason else "Submit Official Public Delay Reason (Publicly Disclosed)"), expanded=bool(sla_res.get("is_breached") and not complaint.delay_reason)):
+                    with st.expander("📝 " + ("Update Official Public Delay Reason" if curr_delay_reason else "Submit Official Public Delay Reason (Publicly Disclosed)"), expanded=bool(sla_res.get("is_breached") and not curr_delay_reason)):
                         if sla_res.get("is_breached"):
                             st.warning("⚠️ **SLA Deadline Breached**: A transparent explanation is required by civic regulations so the public and citizen know why work is delayed.")
                         else:
@@ -332,7 +335,7 @@ with get_db_session() as session:
 
                         delay_input = st.text_area(
                             "Reason for Delay (Publicly Visible to Citizen & Portal) *",
-                            value=complaint.delay_reason or "",
+                            value=curr_delay_reason or "",
                             placeholder="e.g. Underground utility line conflict detected. Awaiting safety clearance from BEST Electrical before heavy excavation can resume.",
                             height=80,
                             key=f"delay_txt_{complaint.id}",

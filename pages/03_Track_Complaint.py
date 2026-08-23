@@ -130,10 +130,15 @@ with get_db_session() as session:
 
         # Public SLA Delay Justification & Accountability Statement
         sla_info = sla_service.check_sla_status(c)
-        if c.delay_reason:
-            revised_date_str = format_datetime(c.revised_resolution_target) if c.revised_resolution_target else "Under Accelerated Review"
-            justified_date_str = format_datetime(c.delay_justified_at) if c.delay_justified_at else "Recently"
-            officer_str = c.delay_justified_by or (f"{c.assigned_officer.designation} ({c.assigned_officer.user.full_name})" if (c.assigned_officer and c.assigned_officer.user) else "Competent Municipal Officer")
+        c_delay_reason = getattr(c, "delay_reason", None)
+        c_delay_by = getattr(c, "delay_justified_by", None)
+        c_delay_at = getattr(c, "delay_justified_at", None)
+        c_revised_target = getattr(c, "revised_resolution_target", None)
+
+        if c_delay_reason:
+            revised_date_str = format_datetime(c_revised_target) if c_revised_target else "Under Accelerated Review"
+            justified_date_str = format_datetime(c_delay_at) if c_delay_at else "Recently"
+            officer_str = c_delay_by or (f"{c.assigned_officer.designation} ({c.assigned_officer.user.full_name})" if (c.assigned_officer and c.assigned_officer.user) else "Competent Municipal Officer")
             st.markdown(
                 f"""
                 <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 18px 20px; margin-bottom: 1.5rem; box-shadow: 0 4px 14px rgba(245,158,11,0.15);">
@@ -146,7 +151,7 @@ with get_db_session() as session:
                     </div>
                     <div style="background:#ffffff; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:6px; font-size:0.95rem; color:#1e293b; line-height:1.5; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <b>Official Reason for Delay:</b><br>
-                        "{c.delay_reason}"
+                        "{c_delay_reason}"
                     </div>
                     <div style="margin-top:12px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; font-size:0.82rem; color:#78350f; border-top:1px dashed rgba(245,158,11,0.4); padding-top:8px;">
                         <span>👤 <b>Accountable Official:</b> {officer_str}</span>

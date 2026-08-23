@@ -138,20 +138,23 @@ with get_db_session() as session:
 
     delayed_complaints = [
         c for c in all_complaints
-        if c.delay_reason or (c.sla_deadline and c.status not in ["RESOLVED", "REJECTED"])
+        if getattr(c, "delay_reason", None) or (c.sla_deadline and c.status not in ["RESOLVED", "REJECTED"])
     ]
 
     if delayed_complaints:
         delay_table_data = []
         for c in delayed_complaints:
+            d_reason = getattr(c, "delay_reason", None)
+            d_by = getattr(c, "delay_justified_by", None)
+            d_target = getattr(c, "revised_resolution_target", None)
             delay_table_data.append({
                 "Complaint ID": c.complaint_number,
                 "Title": c.title,
                 "Department": c.department.name if c.department else "N/A",
                 "Status": c.status,
-                "Official Delay Explanation": c.delay_reason if c.delay_reason else "⚠️ Pending Officer Statement",
-                "Accountable Official": c.delay_justified_by or (c.assigned_officer.user.full_name if (c.assigned_officer and c.assigned_officer.user) else "Assigned Department"),
-                "Revised Target Date": c.revised_resolution_target.strftime("%d %b %Y") if c.revised_resolution_target else "Accelerated Resolution",
+                "Official Delay Explanation": d_reason if d_reason else "⚠️ Pending Officer Statement",
+                "Accountable Official": d_by or (c.assigned_officer.user.full_name if (c.assigned_officer and c.assigned_officer.user) else "Assigned Department"),
+                "Revised Target Date": d_target.strftime("%d %b %Y") if d_target else "Accelerated Resolution",
             })
         df_delay = pd.DataFrame(delay_table_data)
         st.dataframe(df_delay, width="stretch", hide_index=True)
@@ -174,9 +177,9 @@ with get_db_session() as session:
                 "Status": c.status,
                 "Created At": c.created_at.strftime("%Y-%m-%d %H:%M:%S") if c.created_at else "",
                 "Escalated": "Yes" if c.is_escalated else "No",
-                "Delay Reason (Public)": c.delay_reason or "None / Within SLA",
-                "Accountable Officer": c.delay_justified_by or "",
-                "Revised Target Date": c.revised_resolution_target.strftime("%Y-%m-%d") if c.revised_resolution_target else "",
+                "Delay Reason (Public)": getattr(c, "delay_reason", None) or "None / Within SLA",
+                "Accountable Officer": getattr(c, "delay_justified_by", None) or "",
+                "Revised Target Date": getattr(c, "revised_resolution_target", None).strftime("%Y-%m-%d") if getattr(c, "revised_resolution_target", None) else "",
             }
             for c in all_complaints
         ]
