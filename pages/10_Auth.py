@@ -76,6 +76,23 @@ def render_forgot_password_expander(key_prefix: str) -> None:
                     st.error(msg)
 
 
+# ─── Top Quick Navigation Bar ────────────────────────────────────────────────
+top_nav_col1, top_nav_col2, top_nav_col3, top_nav_col4 = st.columns(4)
+with top_nav_col1:
+    if st.button("🏠 Home", use_container_width=True):
+        st.switch_page("pages/01_Home.py")
+with top_nav_col2:
+    if st.button("📝 Report Problem", use_container_width=True):
+        st.switch_page("pages/02_Report_Problem.py")
+with top_nav_col3:
+    if st.button("🔍 Track Status", use_container_width=True):
+        st.switch_page("pages/03_Track_Complaint.py")
+with top_nav_col4:
+    if st.button("⚡ Live Interaction", use_container_width=True):
+        st.switch_page("pages/11_Evaluation_Dossier.py")
+
+st.markdown("<div style='margin-bottom: 0.8rem;'></div>", unsafe_allow_html=True)
+
 # ─── Header ──────────────────────────────────────────────────────────────────
 st.markdown(f'<h1 class="main-header">{icon_svg("lock", size=28, color="#1E3A8A")} CivicPulse — Secure Authentication</h1>', unsafe_allow_html=True)
 
@@ -282,6 +299,7 @@ elif role_choice == "Field Officer":
                             department_id=dept_map[or_dept],
                             employee_code=clean_or_emp,
                             designation=clean_or_desig,
+                            auto_disambiguate_code=False,
                         )
                     if err:
                         st.error(err)

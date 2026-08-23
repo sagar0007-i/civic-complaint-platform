@@ -75,10 +75,29 @@ with get_db_session() as session:
 
     st.divider()
 
-    # Queue Tabs
-    tab_assigned, tab_dept, tab_inspect = st.tabs(["🎯 Assigned to Me", "🏢 Department Queue", "🔍 Inspect & Resolve Grievance"])
+    # Queue Navigation Switcher
+    if "officer_tab" not in st.session_state:
+        st.session_state.officer_tab = "🏢 Department Queue"
 
-    with tab_assigned:
+    tab_c1, tab_c2, tab_c3 = st.columns(3)
+    with tab_c1:
+        if st.button("🎯 Assigned to Me", type="primary" if st.session_state.officer_tab == "🎯 Assigned to Me" else "secondary", use_container_width=True):
+            st.session_state.officer_tab = "🎯 Assigned to Me"
+            st.rerun()
+
+    with tab_c2:
+        if st.button("🏢 Department Queue", type="primary" if st.session_state.officer_tab == "🏢 Department Queue" else "secondary", use_container_width=True):
+            st.session_state.officer_tab = "🏢 Department Queue"
+            st.rerun()
+
+    with tab_c3:
+        if st.button("🔍 Inspect & Resolve Grievance", type="primary" if st.session_state.officer_tab == "🔍 Inspect & Resolve Grievance" else "secondary", use_container_width=True):
+            st.session_state.officer_tab = "🔍 Inspect & Resolve Grievance"
+            st.rerun()
+
+    st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
+
+    if st.session_state.officer_tab == "🎯 Assigned to Me":
         st.markdown("### 🎯 **My Assigned Grievances**")
         if not my_assigned:
             st.info("You currently have no complaints assigned directly to you.")
@@ -93,11 +112,12 @@ with get_db_session() as session:
                         st.write(f"⚡ **Severity:** {format_severity_badge(comp.severity)}")
                     with c2:
                         st.write(f"📅 **Date:** {format_datetime(comp.created_at)}")
-                        if st.button("Inspect & Take Action", key=f"act_my_{comp.id}", type="primary"):
+                        if st.button("🔍 Inspect & Take Action", key=f"act_my_{comp.id}", type="primary", use_container_width=True):
                             st.session_state.officer_inspect_id = comp.id
+                            st.session_state.officer_tab = "🔍 Inspect & Resolve Grievance"
                             st.rerun()
 
-    with tab_dept:
+    elif st.session_state.officer_tab == "🏢 Department Queue":
         st.markdown("### 🏢 **Department Queue & Filters**")
 
         f1, f2, f3 = st.columns(3)
@@ -129,12 +149,20 @@ with get_db_session() as session:
                     st.write(f"👤 **Assigned To:** {comp.assigned_officer.user.full_name if comp.assigned_officer and comp.assigned_officer.user else 'Unassigned'}")
                     st.write(f"⚡ **Priority:** {format_severity_badge(comp.severity)}")
                 with c3:
-                    if st.button("🔍 Open Grievance File", key=f"open_{comp.id}", type="primary"):
+                    if st.button("🔍 Open Grievance File", key=f"open_{comp.id}", type="primary", use_container_width=True):
                         st.session_state.officer_inspect_id = comp.id
+                        st.session_state.officer_tab = "🔍 Inspect & Resolve Grievance"
                         st.rerun()
 
-    with tab_inspect:
+    elif st.session_state.officer_tab == "🔍 Inspect & Resolve Grievance":
         st.markdown("### 🔍 **Grievance Inspection & Action Workbench**")
+
+        back_col, _ = st.columns([1, 3])
+        with back_col:
+            if st.button("⬅️ Back to Queue", use_container_width=True):
+                st.session_state.officer_tab = "🏢 Department Queue"
+                st.rerun()
+
         inspect_id = st.session_state.get("officer_inspect_id")
 
         if not inspect_id and dept_complaints:
@@ -274,6 +302,59 @@ with get_db_session() as session:
                         except Exception as e:
                             session.rollback()
                             st.error(f"Error updating status: {e}")
+
+                    st.divider()
+
+                    # ── Mandatory Public Delay Justification Section ───────────────────────
+                    st.markdown("#### 🏛️ **Public Delay Justification & Transparency (RTS Act)**")
+                    sla_res = sla_service.check_sla_status(complaint)
+
+                    if complaint.delay_reason:
+                        st.markdown(
+                            f"""
+                            <div style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:8px; padding:12px 14px; margin-bottom:12px;">
+                                <div style="font-weight:700; color:#b45309; font-size:0.9rem;">📢 Public Delay Statement Currently Active:</div>
+                                <div style="color:#1e293b; font-size:0.88rem; margin:6px 0;">"{complaint.delay_reason}"</div>
+                                <div style="color:#78350f; font-size:0.78rem;">
+                                    <b>Published By:</b> {complaint.delay_justified_by or 'Officer'} |
+                                    <b>Target Date:</b> {format_datetime(complaint.revised_resolution_target)}
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                    with st.expander("📝 " + ("Update Official Public Delay Reason" if complaint.delay_reason else "Submit Official Public Delay Reason (Publicly Disclosed)"), expanded=bool(sla_res.get("is_breached") and not complaint.delay_reason)):
+                        if sla_res.get("is_breached"):
+                            st.warning("⚠️ **SLA Deadline Breached**: A transparent explanation is required by civic regulations so the public and citizen know why work is delayed.")
+                        else:
+                            st.caption("ℹ️ If unexpected site constraints or departmental dependencies delay resolution, publish an official reason here.")
+
+                        delay_input = st.text_area(
+                            "Reason for Delay (Publicly Visible to Citizen & Portal) *",
+                            value=complaint.delay_reason or "",
+                            placeholder="e.g. Underground utility line conflict detected. Awaiting safety clearance from BEST Electrical before heavy excavation can resume.",
+                            height=80,
+                            key=f"delay_txt_{complaint.id}",
+                        )
+                        delay_days = st.number_input("Committed Additional Days to Complete *", min_value=1, max_value=30, value=3, key=f"delay_days_{complaint.id}")
+
+                        if st.button("📢 Publish Public Delay Statement", key=f"pub_delay_{complaint.id}", type="secondary"):
+                            if not delay_input.strip() or len(delay_input.strip()) < 10:
+                                st.error("Please provide a comprehensive explanation (minimum 10 characters).")
+                            else:
+                                _, delay_err = comp_service.submit_public_delay_justification(
+                                    complaint_id=complaint.id,
+                                    officer_user_id=current_user["user_id"],
+                                    delay_reason=delay_input.strip(),
+                                    revised_target_days=delay_days,
+                                )
+                                if delay_err:
+                                    st.error(delay_err)
+                                else:
+                                    session.commit()
+                                    st.success("✅ Public delay statement published to citizen tracking timeline and public dashboard!")
+                                    st.rerun()
 
                     st.divider()
 

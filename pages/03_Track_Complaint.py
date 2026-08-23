@@ -128,6 +128,51 @@ with get_db_session() as session:
             unsafe_allow_html=True,
         )
 
+        # Public SLA Delay Justification & Accountability Statement
+        sla_info = sla_service.check_sla_status(c)
+        if c.delay_reason:
+            revised_date_str = format_datetime(c.revised_resolution_target) if c.revised_resolution_target else "Under Accelerated Review"
+            justified_date_str = format_datetime(c.delay_justified_at) if c.delay_justified_at else "Recently"
+            officer_str = c.delay_justified_by or (f"{c.assigned_officer.designation} ({c.assigned_officer.user.full_name})" if (c.assigned_officer and c.assigned_officer.user) else "Competent Municipal Officer")
+            st.markdown(
+                f"""
+                <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 18px 20px; margin-bottom: 1.5rem; box-shadow: 0 4px 14px rgba(245,158,11,0.15);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                        <span style="font-size:1.3rem;">🏛️</span>
+                        <h4 style="color:#92400e; margin:0; font-family:'Rajdhani', sans-serif; font-size:1.15rem; letter-spacing:0.02em;">OFFICIAL BMC PUBLIC DELAY JUSTIFICATION & ACCOUNTABILITY STATEMENT</h4>
+                    </div>
+                    <div style="font-size:0.85rem; color:#b45309; font-weight:600; margin-bottom:10px;">
+                        Mandatory Public Disclosure under Maharashtra Right to Public Services Act (RTS Act):
+                    </div>
+                    <div style="background:#ffffff; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:6px; font-size:0.95rem; color:#1e293b; line-height:1.5; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <b>Official Reason for Delay:</b><br>
+                        "{c.delay_reason}"
+                    </div>
+                    <div style="margin-top:12px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; font-size:0.82rem; color:#78350f; border-top:1px dashed rgba(245,158,11,0.4); padding-top:8px;">
+                        <span>👤 <b>Accountable Official:</b> {officer_str}</span>
+                        <span>📅 <b>Disclosed On:</b> {justified_date_str}</span>
+                        <span>🎯 <b>Revised Committed Target Date:</b> <span style="background:#fde68a; padding:2px 8px; border-radius:4px; font-weight:700; color:#92400e;">{revised_date_str}</span></span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        elif sla_info.get("is_breached"):
+            st.markdown(
+                """
+                <div style="background:#fef2f2; border:2px solid #ef4444; border-radius:12px; padding:14px 18px; margin-bottom:1.5rem;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1.2rem;">🚨</span>
+                        <h4 style="color:#b91c1c; margin:0; font-size:1.05rem;">SLA RESOLUTION DEADLINE EXCEEDED — ACTION PENDING</h4>
+                    </div>
+                    <p style="color:#7f1d1d; font-size:0.88rem; margin:6px 0 0 0;">
+                        This complaint has exceeded its committed SLA resolution window. The responsible department officer is mandated to inspect on-site and publish an official delay justification statement for public record.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
         # Two Column Layout: Details & Map vs Timeline
         col_left, col_right = st.columns([1, 1])
 

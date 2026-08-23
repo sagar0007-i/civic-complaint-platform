@@ -122,12 +122,46 @@ with get_db_session() as session:
                 names="department",
                 labels={"department": "Department", "count": "Grievances"},
             )
+            fig_dept.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=320)
+            st.plotly_chart(fig_dept, width="stretch")
+        else:
+            st.info("No department data available.")
+
+    st.divider()
+
+    # ── Public SLA Delay & Accountability Register ─────────────────────────
+    st.markdown("### 🏛️ **Official Delay Justification & Accountability Register (RTS Act)**")
+    st.caption("Public disclosures published by BMC field departments explaining why specific grievances required timeline extensions.")
+
+    comp_repo = ComplaintRepository(session)
+    all_complaints = comp_repo.list_complaints(limit=200)
+
+    delayed_complaints = [
+        c for c in all_complaints
+        if c.delay_reason or (c.sla_deadline and c.status not in ["RESOLVED", "REJECTED"])
+    ]
+
+    if delayed_complaints:
+        delay_table_data = []
+        for c in delayed_complaints:
+            delay_table_data.append({
+                "Complaint ID": c.complaint_number,
+                "Title": c.title,
+                "Department": c.department.name if c.department else "N/A",
+                "Status": c.status,
+                "Official Delay Explanation": c.delay_reason if c.delay_reason else "⚠️ Pending Officer Statement",
+                "Accountable Official": c.delay_justified_by or (c.assigned_officer.user.full_name if (c.assigned_officer and c.assigned_officer.user) else "Assigned Department"),
+                "Revised Target Date": c.revised_resolution_target.strftime("%d %b %Y") if c.revised_resolution_target else "Accelerated Resolution",
+            })
+        df_delay = pd.DataFrame(delay_table_data)
+        st.dataframe(df_delay, width="stretch", hide_index=True)
+    else:
+        st.success("✅ All active grievances are currently within committed SLA resolution limits!")
+
     st.divider()
 
     # Public Export & SLA Accountability
     st.markdown("### 📥 **Export Public Transparency Report**")
-    comp_repo = ComplaintRepository(session)
-    all_complaints = comp_repo.list_complaints(limit=100)
     if all_complaints:
         report_rows = [
             {
@@ -140,6 +174,9 @@ with get_db_session() as session:
                 "Status": c.status,
                 "Created At": c.created_at.strftime("%Y-%m-%d %H:%M:%S") if c.created_at else "",
                 "Escalated": "Yes" if c.is_escalated else "No",
+                "Delay Reason (Public)": c.delay_reason or "None / Within SLA",
+                "Accountable Officer": c.delay_justified_by or "",
+                "Revised Target Date": c.revised_resolution_target.strftime("%Y-%m-%d") if c.revised_resolution_target else "",
             }
             for c in all_complaints
         ]
@@ -147,7 +184,7 @@ with get_db_session() as session:
         csv_data = df_export.to_csv(index=False).encode("utf-8")
 
         st.download_button(
-            label="📊 Download Public Grievance Dataset (CSV)",
+            label="📊 Download Complete Public Grievance Dataset (CSV)",
             data=csv_data,
             file_name="civicpulse_transparency_data_2026.csv",
             mime="text/csv",
@@ -155,3 +192,4 @@ with get_db_session() as session:
         )
     else:
         st.info("No complaint data available for export.")
+

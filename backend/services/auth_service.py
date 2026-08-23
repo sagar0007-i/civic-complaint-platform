@@ -130,19 +130,28 @@ class AuthService:
         ward_id: Optional[str] = None,
         role: str = UserRole.OFFICER.value,
         admin_user_id: Optional[str] = None,
+        auto_disambiguate_code: bool = True,
     ) -> tuple[Optional[User], Optional[str]]:
-        """Admin helper to create an officer user account with profile."""
-        existing_email = self.user_repo.get_by_email(email)
-        if existing_email:
-            return None, "A user with this email already exists."
+        """Admin/Self-registration helper to create an officer user account with profile."""
+        clean_email = email.strip().lower()
+        if "@" not in clean_email or "." not in clean_email.split("@")[-1] or len(clean_email) < 5:
+            return None, "Please enter a valid official email address (e.g. name@civicpulse.gov.in)."
 
-        clean_code = (employee_code or "").strip()
+        existing_email = self.user_repo.get_by_email(clean_email)
+        if existing_email:
+            return None, f"An account with email '{clean_email}' already exists. Please sign in using the Sign In tab."
+
+        clean_code = (employee_code or "").strip().upper()
         if not clean_code:
             clean_code = f"EMP-{uuid.uuid4().hex[:6].upper()}"
 
         existing_code = self.user_repo.get_officer_by_employee_code(clean_code)
         if existing_code:
-            clean_code = f"{clean_code}-{uuid.uuid4().hex[:4].upper()}"
+            if auto_disambiguate_code:
+                clean_code = f"{clean_code}-{uuid.uuid4().hex[:4].upper()}"
+            else:
+                assigned_name = existing_code.user.full_name if (existing_code.user and existing_code.user.full_name) else "an existing officer"
+                return None, f"Employee Code '{clean_code}' is already registered in BMC records (Assigned to {assigned_name}). If this is your account, please sign in via the Sign In tab."
 
         is_valid, msg = validate_password_strength(password)
         if not is_valid:
@@ -151,8 +160,8 @@ class AuthService:
         try:
             hashed = hash_password(password)
             user = self.user_repo.create_user(
-                email=email,
-                full_name=full_name,
+                email=clean_email,
+                full_name=full_name.strip(),
                 hashed_password=hashed,
                 role=role,
             )
@@ -161,7 +170,7 @@ class AuthService:
                 user_id=user.id,
                 department_id=department_id,
                 employee_code=clean_code,
-                designation=designation,
+                designation=designation.strip(),
                 ward_id=ward_id,
             )
 
@@ -169,13 +178,18 @@ class AuthService:
                 action="CREATE_OFFICER",
                 entity_type="Officer",
                 entity_id=user.id,
-                user_id=admin_user_id,
-                details_json=json.dumps({"email": email, "role": role, "dept": department_id, "emp_code": clean_code}),
+                user_id=admin_user_id or user.id,
+                details_json=json.dumps({"email": clean_email, "role": role, "dept": department_id, "emp_code": clean_code}),
             )
             return user, None
         except Exception as e:
             logger.error(f"Failed to create officer account: {e}")
-            return None, "Could not create officer account due to a database constraint conflict. Please check officer details."
+            try:
+                self.session.rollback()
+            except Exception:
+                pass
+            return None, "Could not register officer: An account with this Email or Employee Code already exists. Please Sign In using your existing credentials."
+
 
     def request_password_reset(self, email: str) -> tuple[bool, str]:
         """Generate a 6-digit OTP code and send password reset email."""

@@ -50,10 +50,14 @@ class Complaint(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     status = Column(String(50), default=ComplaintStatus.SUBMITTED.value, nullable=False, index=True)
     landmark = Column(String(255), nullable=True)
 
-    # SLA tracking
+    # SLA tracking & Public Delay Accountability
     sla_deadline = Column(DateTime, nullable=True, index=True)
     is_escalated = Column(Boolean, default=False, nullable=False, index=True)
     resolved_at = Column(DateTime, nullable=True)
+    delay_reason = Column(Text, nullable=True)
+    delay_justified_at = Column(DateTime, nullable=True)
+    delay_justified_by = Column(String(255), nullable=True)
+    revised_resolution_target = Column(DateTime, nullable=True)
 
     # Relationships
     citizen = relationship("User", back_populates="complaints", foreign_keys=[citizen_id])

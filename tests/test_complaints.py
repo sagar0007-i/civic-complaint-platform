@@ -3,6 +3,7 @@
 import pytest
 from backend.services.complaint_service import ComplaintService
 from backend.services.notification_service import NotificationService
+from backend.services.sla_service import SLAService
 from backend.schemas.complaint import ComplaintCreateSchema, LocationCreateSchema
 from backend.models.complaint import ComplaintSeverity, ComplaintStatus
 
@@ -161,3 +162,52 @@ def test_user_notifications_read_status(db_session, seed_test_data):
 
     unread = [n for n in notif_service.get_user_notifications(data["citizen"].id) if not n.is_read]
     assert len(unread) == 0
+
+
+def test_public_delay_justification_submission(db_session, seed_test_data):
+    """Test public delay justification submission and SLA metadata reporting."""
+    comp_service = ComplaintService(db_session)
+    sla_service = SLAService(db_session)
+    data = seed_test_data
+
+    payload = ComplaintCreateSchema(
+        category_id=data["cat_pothole"].id,
+        title="Delayed Pothole Resurfacing",
+        description="Massive crater obstructing arterial junction.",
+        severity=ComplaintSeverity.HIGH,
+        ward_id=data["ward"].id,
+        location=LocationCreateSchema(
+            latitude=19.0760,
+            longitude=72.8777,
+            address="SV Road Junction",
+            city="Mumbai",
+        ),
+    )
+
+    complaint = comp_service.submit_complaint(
+        citizen_id=data["citizen"].id,
+        data=payload,
+    )
+    db_session.commit()
+
+    # Submit official delay justification
+    reason = "Utility cable trenching underway by electricity provider. Asphalt hot-mix laying scheduled post clearance."
+    updated, err = comp_service.submit_public_delay_justification(
+        complaint_id=complaint.id,
+        officer_user_id=data["officer"].user_id,
+        delay_reason=reason,
+        revised_target_days=4,
+    )
+    db_session.commit()
+
+    assert err is None
+    assert updated is not None
+    assert updated.delay_reason == reason
+    assert updated.delay_justified_by is not None
+    assert updated.revised_resolution_target is not None
+
+    # Check SLA service reporting
+    sla_report = sla_service.check_sla_status(updated)
+    assert sla_report["has_justification"] is True
+    assert sla_report["delay_reason"] == reason
+

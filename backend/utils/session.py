@@ -483,33 +483,48 @@ def apply_custom_css() -> None:
     header[data-testid="stHeader"] {
         background: transparent !important;
         z-index: 9999 !important;
+        display: block !important;
+        visibility: visible !important;
     }
 
     /* ── High-Contrast Civic Styling for Streamlit Native Sidebar Toggle ── */
-    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapseButton"],
     header[data-testid="stHeader"] button[aria-label*="sidebar" i],
-    header[data-testid="stHeader"] button[title*="sidebar" i] {
+    header[data-testid="stHeader"] button[title*="sidebar" i],
+    header[data-testid="stHeader"] button {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
         background: linear-gradient(135deg, #0f2d6b 0%, #1a4a9e 100%) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
+        border: 2px solid #ff9900 !important;
         border-radius: 8px !important;
-        box-shadow: 0 3px 12px rgba(15,45,107,0.35) !important;
-        padding: 4px 8px !important;
+        box-shadow: 0 4px 14px rgba(15,45,107,0.4) !important;
+        padding: 6px 12px !important;
+        z-index: 100000 !important;
+        cursor: pointer !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button:hover,
-    header[data-testid="stHeader"] button[aria-label*="sidebar" i]:hover {
+    [data-testid="collapsedControl"]:hover,
+    [data-testid="stSidebarCollapsedControl"]:hover,
+    header[data-testid="stHeader"] button[aria-label*="sidebar" i]:hover,
+    header[data-testid="stHeader"] button:hover {
         background: linear-gradient(135deg, #1a4a9e 0%, #ff9900 100%) !important;
-        box-shadow: 0 4px 16px rgba(255,153,0,0.4) !important;
+        box-shadow: 0 6px 20px rgba(255,153,0,0.55) !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button svg,
-    header[data-testid="stHeader"] button[aria-label*="sidebar" i] svg {
+    [data-testid="collapsedControl"] svg,
+    [data-testid="stSidebarCollapsedControl"] svg,
+    [data-testid="stSidebarCollapseButton"] svg,
+    header[data-testid="stHeader"] button svg {
         fill: #ffffff !important;
         color: #ffffff !important;
         width: 22px !important;
         height: 22px !important;
     }
+
 
     /* ── Responsive Adjustments ── */
     @media screen and (max-width: 768px) {
