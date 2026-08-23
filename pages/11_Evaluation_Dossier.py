@@ -37,26 +37,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Download Complete Documentation Option
-doc_path = BASE_DIR / "Evaluation_Dossier_Complete_Documentation.md"
-if doc_path.exists():
-    with open(doc_path, "r", encoding="utf-8") as f:
-        doc_content = f.read()
-
-    col_info, col_btn = st.columns([3, 1])
-    with col_info:
-        st.info("📄 Complete 9-Criteria Architectural Dossier is saved and available for download.")
-    with col_btn:
-        st.download_button(
-            label="📥 Download Full Dossier (.md)",
-            data=doc_content,
-            file_name="CivicPulse_Evaluation_Dossier.md",
-            mime="text/markdown",
-            use_container_width=True,
-        )
-
-st.divider()
-
 # Simulation Selector
 demo_choice = st.radio(
     "Select Interactive Simulation Engine:",
