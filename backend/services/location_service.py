@@ -92,3 +92,8 @@ class LocationService:
                     closest_ward = ward
 
         return closest_ward
+
+    @staticmethod
+    def is_within_mumbai_bounds(lat: float, lon: float) -> bool:
+        """Verify if coordinates fall within Greater Mumbai (BMC) municipal boundaries."""
+        return 18.85 <= lat <= 19.35 and 72.70 <= lon <= 73.10

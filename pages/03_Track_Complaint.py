@@ -140,8 +140,19 @@ with get_db_session() as session:
                 if c.location.landmark:
                     st.write(f"**Landmark:** {c.location.landmark}")
 
-                # Leaflet Map
-                m_track = folium.Map(location=[c.location.latitude, c.location.longitude], zoom_start=15)
+                # Leaflet Map with Mumbai Municipal Boundary constraints & clean Positron tiles
+                m_track = folium.Map(
+                    location=[c.location.latitude, c.location.longitude],
+                    zoom_start=15,
+                    min_zoom=11,
+                    max_zoom=18,
+                    tiles="CartoDB positron",
+                    max_bounds=True,
+                    min_lat=18.85,
+                    max_lat=19.35,
+                    min_lon=72.70,
+                    max_lon=73.10,
+                )
                 folium.Marker(
                     [c.location.latitude, c.location.longitude],
                     popup=c.complaint_number,

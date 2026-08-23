@@ -432,8 +432,19 @@ elif st.session_state.report_step == 4:
             st.session_state.report_lng = c_lng
             st.session_state.report_ward_id = w_obj.id
 
-    # Interactive Folium Map
-    m = folium.Map(location=[c_lat, c_lng], zoom_start=14)
+    # Interactive Folium Map with Mumbai Municipal Boundary constraints & clean Positron tiles
+    m = folium.Map(
+        location=[c_lat, c_lng],
+        zoom_start=14,
+        min_zoom=11,
+        max_zoom=18,
+        tiles="CartoDB positron",
+        max_bounds=True,
+        min_lat=18.85,
+        max_lat=19.35,
+        min_lon=72.70,
+        max_lon=73.10,
+    )
     folium.Marker(
         [c_lat, c_lng],
         popup="Pinned Location",
@@ -461,6 +472,9 @@ elif st.session_state.report_step == 4:
             st.session_state.report_ward_id = nearest_w.id
 
     st.write(f"📌 **Selected Coordinates:** `{c_lat:.5f}, {c_lng:.5f}`")
+
+    if not loc_service.is_within_mumbai_bounds(c_lat, c_lng):
+        st.warning("⚠️ The selected location is outside the Greater Mumbai Municipal (BMC) jurisdiction. Please click within Mumbai limits.")
 
     # Address field
     addr_val = st.text_input(

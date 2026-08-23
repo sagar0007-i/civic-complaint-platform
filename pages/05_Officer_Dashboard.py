@@ -166,8 +166,26 @@ with get_db_session() as session:
                         if complaint.location.landmark:
                             st.write(f"**Landmark:** {complaint.location.landmark}")
 
-                        # Interactive Map
-                        m_officer = folium.Map(location=[complaint.location.latitude, complaint.location.longitude], zoom_start=15)
+                        # Interactive Map with Mumbai Municipal Boundary constraints & clean Positron tiles
+                        m_officer = folium.Map(
+                            location=[complaint.location.latitude, complaint.location.longitude],
+                            zoom_start=15,
+                            min_zoom=11,
+                            max_zoom=18,
+                            tiles="CartoDB positron",
+                            max_bounds=True,
+                            min_lat=18.85,
+                            max_lat=19.35,
+                            min_lon=72.70,
+                            max_lon=73.10,
+                        )
+                        folium.Marker(
+                            [complaint.location.latitude, complaint.location.longitude],
+                            popup=complaint.complaint_number,
+                            tooltip=complaint.title,
+                            icon=folium.Icon(color="red", icon="wrench"),
+                        ).add_to(m_officer)
+                        st_folium(m_officer, height=220, width=None, key="officer_map")
                         folium.Marker(
                             [complaint.location.latitude, complaint.location.longitude],
                             popup=complaint.complaint_number,
