@@ -441,102 +441,41 @@ def apply_custom_css() -> None:
         border: 1px solid #e2e8f0;
     }
     .dot-indicator { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-    .dot-low, .dot-res  { background: #10b981; }
-    .dot-med, .dot-prog { background: #f59e0b; }
-    .dot-high, .dot-crit, .dot-sub { background: #ef4444; }
+     /* ── Hide Streamlit Developer Menu & Footer (Preserve Native Header & Sidebar Toggle) ── */
+    #MainMenu { visibility: hidden !important; display: none !important; }
+    footer { visibility: hidden !important; display: none !important; }
+    [data-testid="stDecoration"] { visibility: hidden !important; display: none !important; }
+    .viewerBadge_container__1QSob { visibility: hidden !important; display: none !important; }
+    .styles_viewerBadge__1yB5_ { visibility: hidden !important; display: none !important; }
+    button[title="View app in Streamlit Community Cloud"] { visibility: hidden !important; display: none !important; }
+    #manage-app-button { display: none !important; }
 
-    /* ── Timeline Stepper ───────────────────────────────────────────────────── */
-    .timeline-node {
-        border-left: 3px solid #ff9900;
-        padding-left: 1.2rem;
-        margin-bottom: 1.2rem;
-        position: relative;
-    }
-    .timeline-node::before {
-        content: '';
-        position: absolute; left: -7px; top: 4px;
-        width: 11px; height: 11px;
-        border-radius: 50%;
-        background: #ff9900;
-        box-shadow: 0 0 0 3px rgba(255,153,0,0.2);
-    }
-
-    /* ── Info / Warning / Success boxes ─────────────────────────────────────── */
-    [data-testid="stAlert"] {
-        border-radius: 10px !important;
-        border-left-width: 4px !important;
-        font-weight: 500 !important;
-    }
-
-    /* ── Tabs ───────────────────────────────────────────────────────────────── */
-    [data-testid="stTabs"] button[aria-selected="true"] {
-        color: #0f2d6b !important;
-        border-bottom: 3px solid #ff9900 !important;
-        font-weight: 700 !important;
-    }
-
-    /* ── Hide Streamlit Developer Menu, Footer & Decorations (NOT the sidebar toggle) ── */
-    /* ── Hide Streamlit Developer Menu, Footer & Toolbar (Preserve Sidebar Control) ── */
-    #MainMenu {visibility: hidden !important; display: none !important;}
-    footer {visibility: hidden !important; display: none !important;}
-    [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    [data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
-    [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
-    .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
-    .styles_viewerBadge__1yB5_ {visibility: hidden !important; display: none !important;}
-    button[title="View app in Streamlit Community Cloud"] {visibility: hidden !important; display: none !important;}
-    #manage-app-button {display: none !important;}
-
-    /* ── Header Container ── */
-    [data-testid="stHeader"] {
+    /* ── Header Bar ── */
+    header[data-testid="stHeader"] {
         background: transparent !important;
-        height: 3.5rem !important;
-        z-index: 99999 !important;
+        z-index: 9999 !important;
     }
 
-    /* ── Native Streamlit Sidebar Toggle Control (High-Contrast Civic Styling) ── */
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stHeaderNav"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: fixed !important;
-        top: 0.6rem !important;
-        left: 0.6rem !important;
-        z-index: 999999 !important;
-    }
-
+    /* ── High-Contrast Civic Styling for Streamlit Native Sidebar Toggle ── */
     [data-testid="stSidebarCollapsedControl"] button,
-    [data-testid="stSidebarCollapseButton"] button,
-    [data-testid="stHeaderNav"] button,
-    button[aria-label="Open sidebar"],
-    button[aria-label="Close sidebar"],
-    button[aria-label="Toggle sidebar"] {
+    header[data-testid="stHeader"] button[aria-label*="sidebar" i],
+    header[data-testid="stHeader"] button[title*="sidebar" i] {
         background: linear-gradient(135deg, #0f2d6b 0%, #1a4a9e 100%) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255,255,255,0.25) !important;
-        border-radius: 10px !important;
-        width: 42px !important;
-        height: 42px !important;
-        box-shadow: 0 4px 16px rgba(15,45,107,0.45) !important;
-        transition: all 0.2s ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 3px 12px rgba(15,45,107,0.35) !important;
+        padding: 4px 8px !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] button:hover,
-    [data-testid="stSidebarCollapseButton"] button:hover,
-    [data-testid="stHeaderNav"] button:hover {
+    header[data-testid="stHeader"] button[aria-label*="sidebar" i]:hover {
         background: linear-gradient(135deg, #1a4a9e 0%, #ff9900 100%) !important;
-        box-shadow: 0 6px 20px rgba(255,153,0,0.4) !important;
-        transform: scale(1.05) !important;
+        box-shadow: 0 4px 16px rgba(255,153,0,0.4) !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] button svg,
-    [data-testid="stSidebarCollapseButton"] button svg,
-    [data-testid="stHeaderNav"] button svg {
+    header[data-testid="stHeader"] button[aria-label*="sidebar" i] svg {
         fill: #ffffff !important;
         color: #ffffff !important;
         width: 22px !important;
