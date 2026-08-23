@@ -1,4 +1,4 @@
-"""Authentication Portal — Citizen / Officer Registration + Secure Admin Access."""
+
 
 import sys
 from pathlib import Path
@@ -29,6 +29,52 @@ apply_custom_css()
 _DEPT_ADMIN_ACCESS_CODE = "CIVICBMC2026"
 _SUPER_ADMIN_ACCESS_CODE = "COMMISH2026"
 
+
+def render_forgot_password_expander(key_prefix: str) -> None:
+    """Render a reusable 'Forgot Password?' expander with Email OTP verification."""
+    with st.expander("🔑 Forgot Password?"):
+        st.markdown("##### Reset Your Password via Email OTP")
+        st.caption("Enter your registered email address to receive a 6-digit verification code.")
+
+        with st.form(f"forgot_pass_form_{key_prefix}"):
+            fp_email = st.text_input("Registered Email Address *", placeholder="e.g. user@example.com", key=f"fp_email_{key_prefix}")
+            fp_otp = st.text_input("6-Digit OTP Code (Sent to Email)", placeholder="e.g. 849201", key=f"fp_otp_{key_prefix}")
+            fp_new_pass = st.text_input("New Password * (min 8 chars, 1 letter & 1 number)", type="password", key=f"fp_new_pass_{key_prefix}")
+            fp_confirm_pass = st.text_input("Confirm New Password *", type="password", key=f"fp_confirm_{key_prefix}")
+
+            col_btn1, col_btn2 = st.columns([1, 1])
+            with col_btn1:
+                req_submitted = st.form_submit_button("Send OTP to Email", use_container_width=True)
+            with col_btn2:
+                reset_submitted = st.form_submit_button("Update Password", type="primary", use_container_width=True)
+
+        if req_submitted:
+            if not fp_email:
+                st.error("Please enter your registered email address.")
+            else:
+                with get_db_session() as session:
+                    auth = AuthService(session)
+                    ok, msg = auth.request_password_reset(fp_email)
+                if ok:
+                    st.success(msg)
+                else:
+                    st.error(msg)
+
+        if reset_submitted:
+            if not fp_email or not fp_otp or not fp_new_pass or not fp_confirm_pass:
+                st.error("All fields (Email, OTP Code, New Password, Confirm Password) are required.")
+            elif fp_new_pass != fp_confirm_pass:
+                st.error("New passwords do not match.")
+            else:
+                with get_db_session() as session:
+                    auth = AuthService(session)
+                    ok, msg = auth.reset_password(fp_email, fp_otp, fp_new_pass)
+                if ok:
+                    st.success(msg)
+                else:
+                    st.error(msg)
+
+
 # ─── Header ──────────────────────────────────────────────────────────────────
 st.markdown(f'<h1 class="main-header">{icon_svg("lock", size=28, color="#1E3A8A")} CivicPulse — Secure Authentication</h1>', unsafe_allow_html=True)
 
@@ -54,9 +100,6 @@ role_choice = st.radio(
 
 st.divider()
 
-# =============================================================================
-# CITIZEN — Register + Sign In
-# =============================================================================
 if role_choice == "Citizen":
     st.markdown(f"## {icon_svg('user', color='#2563EB')} Citizen Portal", unsafe_allow_html=True)
     tab_login, tab_register = st.tabs(["Sign In", "Create Account"])
@@ -82,6 +125,9 @@ if role_choice == "Citizen":
                     login_user(payload)
                     st.success(f"Welcome back, {payload['full_name']}!")
                     st.switch_page("pages/04_My_Complaints.py")
+
+        render_forgot_password_expander("citizen")
+
 
     with tab_register:
         st.markdown("### Create a New Citizen Account")
@@ -119,9 +165,7 @@ if role_choice == "Citizen":
                         "You can now sign in using the **Sign In** tab."
                     )
 
-# =============================================================================
-# FIELD OFFICER — Register with Employee Code + Sign In
-# =============================================================================
+
 elif role_choice == "Field Officer":
     st.markdown(f"## {icon_svg('hard-hat', color='#16A34A')} Field Officer Portal", unsafe_allow_html=True)
     st.info(
@@ -152,6 +196,9 @@ elif role_choice == "Field Officer":
                     login_user(payload)
                     st.success(f"Welcome, Officer {payload['full_name']}!")
                     st.switch_page("pages/05_Officer_Dashboard.py")
+
+        render_forgot_password_expander("officer")
+
 
     with tab_off_register:
         st.markdown("### Register as a Field Officer")
@@ -210,28 +257,26 @@ elif role_choice == "Field Officer":
                         "You may now sign in via the **Sign In** tab."
                     )
 
-# =============================================================================
-# DEPARTMENT ADMIN — Secure Access Code Required
-# =============================================================================
+
 elif role_choice == "Department Admin":
     st.markdown(f"## {icon_svg('building', color='#EA580C')} Department Administrator Access", unsafe_allow_html=True)
 
     st.markdown(
         f"""
-        <div style="
+        <div class="auth-banner" style="
             background: linear-gradient(135deg, #1E3A5F 0%, #1e40af 100%);
             border-radius: 12px;
             padding: 1.4rem 1.8rem;
-            color: white;
+            color: #ffffff !important;
             margin-bottom: 1.2rem;
         ">
-            <h4 style="margin:0 0 0.4rem 0;">{icon_svg('lock', color='#FFFFFF')} Restricted Area — Authorised Personnel Only</h4>
-            <p style="margin:0; opacity:0.85; font-size:0.9rem;">
-                Department Administrator access is <strong>not available for self-registration</strong>.
+            <h4 style="margin:0 0 0.4rem 0; color: #ffffff !important;">{icon_svg('lock', color='#FFFFFF')} Restricted Area — Authorised Personnel Only</h4>
+            <div style="margin:0; opacity:1; font-size:0.9rem; color: #ffffff !important; line-height: 1.5;">
+                Department Administrator access is <span style="color: #ffffff !important; font-weight: 700;">not available for self-registration</span>.
                 Accounts are issued exclusively by the Municipal Commissioner's office.<br/><br/>
                 To proceed, enter your official credentials and the
-                <strong>Department Admin Access Code</strong> issued to your department head.
-            </p>
+                <span style="color: #ffffff !important; font-weight: 700;">Department Admin Access Code</span> issued to your department head.
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -267,6 +312,9 @@ elif role_choice == "Department Admin":
                 st.success(f"Access granted. Welcome, {payload['full_name']}.")
                 st.switch_page("pages/06_Admin_Dashboard.py")
 
+    render_forgot_password_expander("dept_admin")
+
+
     with st.expander("Need Access?"):
         st.markdown(
             "Contact the **BMC IT Helpdesk** at `it.helpdesk@civicpulse.gov.in` or call "
@@ -274,30 +322,27 @@ elif role_choice == "Department Admin":
             "You must provide your Employee Code and department order letter."
         )
 
-# =============================================================================
-# SUPER ADMIN — Highest Security Level — Dual Factor
-# =============================================================================
 elif role_choice == "Super Admin (Commissioner)":
     st.markdown(f"## {icon_svg('shield-check', color='#DC2626')} Municipal Commissioner — Super Admin Access", unsafe_allow_html=True)
 
     st.markdown(
         f"""
-        <div style="
+        <div class="auth-banner" style="
             background: linear-gradient(135deg, #7c2d12 0%, #991b1b 100%);
             border-radius: 12px;
             padding: 1.4rem 1.8rem;
-            color: white;
+            color: #ffffff !important;
             margin-bottom: 1.2rem;
         ">
-            <h4 style="margin:0 0 0.4rem 0;">{icon_svg('shield-check', color='#FFFFFF')} Highest Privilege — Municipal Commissioner Level</h4>
-            <p style="margin:0; opacity:0.85; font-size:0.9rem;">
-                Super Admin access grants <strong>full unrestricted control</strong> over all 
+            <h4 style="margin:0 0 0.4rem 0; color: #ffffff !important;">{icon_svg('shield-check', color='#FFFFFF')} Highest Privilege — Municipal Commissioner Level</h4>
+            <div style="margin:0; opacity:0.95; font-size:0.9rem; color: #ffffff !important; line-height: 1.5;">
+                Super Admin access grants <span style="color: #ffffff !important; font-weight: 700;">full unrestricted control</span> over all 
                 wards, departments, routing rules, SLA policies, and audit logs of the 
                 Brihanmumbai Municipal Corporation (BMC / MCGM).<br/><br/>
-                This login requires your official credentials <strong>plus</strong> the 
-                <strong>Commissioner's Office Authorisation Code</strong>.
+                This login requires your official credentials <span style="color: #ffffff !important; font-weight: 700;">plus</span> the 
+                <span style="color: #ffffff !important; font-weight: 700;">Commissioner's Office Authorisation Code</span>.
                 Unauthorised access attempts are logged and reported.
-            </p>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -349,6 +394,8 @@ elif role_choice == "Super Admin (Commissioner)":
                     f"Commissioner-level access granted. Welcome, {payload['full_name']}."
                 )
                 st.switch_page("pages/06_Admin_Dashboard.py")
+
+    render_forgot_password_expander("super_admin")
 
     with st.expander("Access Information"):
         st.markdown(

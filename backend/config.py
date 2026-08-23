@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     # Default to sqlite:///civic_pulse.db (absolute path) for instant zero-dependency local dev/tests,
     # or postgresql+psycopg://civic_user:civic_pass@localhost:5432/civic_db for Postgres/Docker
     DATABASE_URL: str = Field(
-        default=f"sqlite:///{str((BASE_DIR / 'civic_pulse.db').resolve()).replace(chr(92), '/')}",
+        default=f"sqlite:///{str((BASE_DIR / 'civic_db.sqlite').resolve()).replace(chr(92), '/')}",
         description="Database connection string (PostgreSQL or SQLite)",
     )
     DB_POOL_SIZE: int = 10

@@ -91,15 +91,15 @@ def apply_custom_css() -> None:
     }
 
     /* Ensure all markdown, paragraphs, and labels in main body are dark and clear */
-    .stMain p, .stMain span, .stMain label, .stMain div:not([class*="badge"]):not([class*="hero"]) {
+    .stMain p, .stMain span, .stMain label, .stMain div:not([class*="badge"]):not([class*="hero"]):not([class*="auth-banner"]) {
         color: #1e293b;
     }
 
-    .stMarkdown p, .stMarkdown strong {
+    .stMarkdown p:not(.auth-banner *), .stMarkdown strong:not(.auth-banner *) {
         color: #0f2d6b !important;
     }
 
-    /* ── Hero Banner ────────────────────────────────────────────────────────── */
+    /* ── Hero & Auth Banners ────────────────────────────────────────────────── */
     .hero-banner {
         background: linear-gradient(135deg, #0f2d6b 0%, #1a4a9e 40%, #c0392b 100%);
         border-radius: 16px;
@@ -111,7 +111,17 @@ def apply_custom_css() -> None:
         box-shadow: 0 8px 32px rgba(15, 45, 107, 0.35);
         border: none;
     }
-    .hero-banner * {
+    .hero-banner *,
+    .auth-banner,
+    .auth-banner *,
+    .auth-banner p,
+    .auth-banner strong,
+    .auth-banner h1, .auth-banner h2, .auth-banner h3, .auth-banner h4, .auth-banner h5, .auth-banner h6,
+    .auth-banner span, .auth-banner div,
+    .stMarkdown .auth-banner *,
+    .stMarkdown .auth-banner p,
+    .stMarkdown .auth-banner strong,
+    .stMarkdown .auth-banner h4 {
         color: #ffffff !important;
     }
     .hero-banner::before {

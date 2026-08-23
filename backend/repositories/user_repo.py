@@ -65,6 +65,15 @@ class UserRepository:
             self.session.flush()
         return user
 
+    def update_password(self, user_id: str, new_hashed_password: str) -> Optional[User]:
+        """Update hashed password for a user."""
+        user = self.get_by_id(user_id)
+        if user:
+            user.hashed_password = new_hashed_password
+            self.session.flush()
+        return user
+
+
     def create_officer_profile(
         self,
         user_id: str,

@@ -88,3 +88,33 @@ def test_user_login_invalid_password(db_session, seed_test_data):
     payload, err = auth_service.login(login_data)
     assert payload is None
     assert err == "Invalid email or password."
+
+
+def test_password_reset_flow(db_session, seed_test_data):
+    """Test full password reset via email OTP code."""
+    from backend.utils.email import get_latest_outbox_email
+
+    auth_service = AuthService(db_session)
+    email = "citizen.test@example.com"
+
+    # 1. Request OTP reset
+    ok, msg = auth_service.request_password_reset(email)
+    assert ok is True
+
+    outbox_item = get_latest_outbox_email(email)
+    assert outbox_item is not None
+    otp_code = outbox_item["otp_code"]
+    assert len(otp_code) == 6
+
+    # 2. Reset password
+    new_pass = "NewSecurePassword@999"
+    ok, msg = auth_service.reset_password(email, otp_code, new_pass)
+    assert ok is True
+    assert "updated successfully" in msg
+
+    # 3. Login with new password
+    payload, err = auth_service.login(UserLoginSchema(email=email, password=new_pass))
+    assert err is None
+    assert payload is not None
+    assert payload["email"] == email
+

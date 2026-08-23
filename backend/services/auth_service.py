@@ -1,6 +1,8 @@
 """Authentication and RBAC Authorization Service."""
 
 import json
+import secrets
+import time
 from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 from backend.repositories.user_repo import UserRepository
@@ -14,7 +16,12 @@ from backend.utils.security import (
     generate_secure_token,
     sanitize_text,
 )
+from backend.utils.email import send_password_reset_email
 from backend.utils.logging import logger
+
+# In-memory store for reset OTP codes (email -> {"code": str, "expires_at": float})
+_RESET_OTP_STORE: Dict[str, dict] = {}
+
 
 
 class AuthService:
@@ -27,10 +34,11 @@ class AuthService:
 
     def register_citizen(self, data: UserRegisterSchema, ip_address: Optional[str] = None) -> tuple[Optional[User], Optional[str]]:
         """Register a new citizen account."""
+        clean_email = data.email.strip().lower()
         # 1. Check if email already exists
-        existing = self.user_repo.get_by_email(data.email)
+        existing = self.user_repo.get_by_email(clean_email)
         if existing:
-            return None, "An account with this email address already exists."
+            return None, "An account with this email address already exists. Please sign in using the Sign In tab or reset your password."
 
         # 2. Validate password strength
         is_valid, msg = validate_password_strength(data.password)
@@ -40,7 +48,7 @@ class AuthService:
         # 3. Hash password and save
         hashed = hash_password(data.password)
         user = self.user_repo.create_user(
-            email=data.email,
+            email=clean_email,
             full_name=sanitize_text(data.full_name),
             hashed_password=hashed,
             phone=data.phone,
@@ -152,3 +160,61 @@ class AuthService:
         )
 
         return user, None
+
+    def request_password_reset(self, email: str) -> tuple[bool, str]:
+        """Generate a 6-digit OTP code and send password reset email."""
+        clean_email = email.strip().lower()
+        user = self.user_repo.get_by_email(clean_email)
+        if not user or not user.is_active:
+            return False, "No active account found for this email address."
+
+        otp_code = str(secrets.randbelow(900000) + 100000)
+        _RESET_OTP_STORE[clean_email] = {
+            "code": otp_code,
+            "expires_at": time.time() + 900,  # 15 minutes
+        }
+
+        success, msg = send_password_reset_email(
+            to_email=user.email,
+            recipient_name=user.full_name,
+            otp_code=otp_code,
+        )
+        return success, msg
+
+    def reset_password(self, email: str, reset_code: str, new_password: str) -> tuple[bool, str]:
+        """Verify OTP reset code and update user password."""
+        clean_email = email.strip().lower()
+        otp_info = _RESET_OTP_STORE.get(clean_email)
+
+        if not otp_info or time.time() > otp_info["expires_at"]:
+            return False, "Invalid or expired verification code. Please request a new code."
+
+        if otp_info["code"] != reset_code.strip():
+            return False, "Incorrect verification code. Please check your email and try again."
+
+        user = self.user_repo.get_by_email(clean_email)
+        if not user or not user.is_active:
+            return False, "User account not found."
+
+        is_valid, msg = validate_password_strength(new_password)
+        if not is_valid:
+            return False, msg
+
+        hashed = hash_password(new_password)
+        self.user_repo.update_password(user.id, hashed)
+
+        # Audit log password reset
+        self.audit_repo.log(
+            action="AUTH_PASSWORD_RESET",
+            entity_type="User",
+            entity_id=user.id,
+            user_id=user.id,
+            details_json=json.dumps({"email": user.email}),
+        )
+
+        # Invalidate used OTP
+        _RESET_OTP_STORE.pop(clean_email, None)
+
+        logger.info(f"Password reset successfully for user: {user.email}")
+        return True, "Password updated successfully! You may now sign in using your new password."
+

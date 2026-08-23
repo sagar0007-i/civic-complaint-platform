@@ -1,7 +1,7 @@
 """Civic Analytics and Reporting Service."""
 
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from backend.models.complaint import Complaint, ComplaintStatus, ComplaintSeverity

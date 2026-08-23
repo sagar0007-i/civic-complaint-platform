@@ -20,7 +20,7 @@ A complete, production-ready, full-stack civic grievance reporting, intelligent 
    - **Data Layer**: SQLAlchemy 2.0 ORM with PostgreSQL and SQLite fallback support, repository patterns, Alembic migrations.
 
 3. **Role-Based Access Control (RBAC)**:
-   - `CITIZEN`: Self-registration, file complaints, track grievance timeline, add clarification messages.
+   - `CITIZEN`: Self-registration, file complaints, track grievance timeline, add clarification messages, password reset via email OTP.
    - `OFFICER`: Department grievance queue, field triage workbench, photo evidence inspect, status transitions (`ACKNOWLEDGED` -> `IN_PROGRESS` -> `RESOLVED`), internal notes.
    - `DEPARTMENT_ADMIN`: Department oversight, officer assignment, SLA monitoring, escalation handling.
    - `SUPER_ADMIN`: System-wide governance, municipal wards & zones, departments, categories, routing rules, SLA configuration, audit trails.
@@ -55,7 +55,7 @@ civic_complaint_platform/
 │   ├── 07_Analytics.py         # Transparency portal, category charts, ward heatmaps, SLA metrics
 │   ├── 08_Notifications.py    # User notification center
 │   ├── 09_Profile.py          # User profile & credentials
-│   └── 10_Auth.py             # Login, registration, 1-click fast demo switcher
+│   └── 10_Auth.py             # Login, registration, forgot password via email OTP
 ├── backend/
 │   ├── config.py               # Pydantic Settings & environment variables
 │   ├── database.py             # SQLAlchemy 2.0 engine, SessionLocal, lifecycle
@@ -63,7 +63,7 @@ civic_complaint_platform/
 │   ├── schemas/                # Pydantic validation schemas for all inputs/outputs
 │   ├── repositories/           # Decoupled data access repositories
 │   ├── services/               # Core business logic services
-│   └── utils/                  # Security (Argon2), Logging, Formatting, Session
+│   └── utils/                  # Security (Argon2), Logging, Formatting, Session, Email
 ├── migrations/                 # Alembic migrations (env.py, versions/)
 ├── scripts/
 │   └── seed_database.py        # Realistic Indian civic dataset (Wards, Depts, Officers, Complaints)
@@ -112,8 +112,6 @@ Open your browser at: **`http://localhost:8501`**
 
 ## 🔑 Demo Accounts (Pre-Seeded)
 
-Use the **1-Click Demo Switcher** on the `Login / Register` page or sign in manually:
-
 | Role | Email | Password | Description |
 | :--- | :--- | :--- | :--- |
 | **Super Admin** | `admin@civicpulse.gov.in` | `Admin@123` | Municipal Commissioner, BMC (Full Access) |
@@ -123,6 +121,12 @@ Use the **1-Click Demo Switcher** on the `Login / Register` page or sign in manu
 | **Field Officer** | `officer.water@civicpulse.gov.in` | `Officer@123` | Sub-Engineer Water Works (Colaba Ward A) |
 | **Citizen** | `citizen.rahul@example.com` | `Citizen@123` | Amit Deshmukh (Resident, Bandra West, Mumbai) |
 | **Citizen** | `citizen.priya@example.com` | `Citizen@123` | Neha Kulkarni (Resident, Andheri West, Mumbai) |
+
+---
+
+## 🔑 Forgot Password Feature Guide
+
+For dedicated instructions on setting up and testing the **Forgot Password via Email OTP** feature, see [FORGOT_PASSWORD_README.md](file:///b:/SIH2026/civic-complaint-platform/FORGOT_PASSWORD_README.md).
 
 ---
 

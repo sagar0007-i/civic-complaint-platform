@@ -21,6 +21,21 @@ class UserLoginSchema(BaseModel):
     password: str
 
 
+class PasswordResetRequestSchema(BaseModel):
+    """Request password reset code via email."""
+
+    email: EmailStr
+
+
+class PasswordResetConfirmSchema(BaseModel):
+    """Confirm password reset with OTP code and new password."""
+
+    email: EmailStr
+    reset_code: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=8)
+
+
+
 class UserResponseSchema(BaseModel):
     """User profile response."""
 
