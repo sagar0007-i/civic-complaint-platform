@@ -100,10 +100,26 @@ with get_db_session() as session:
         # Progress Stepper
         status_order = ["SUBMITTED", "ACKNOWLEDGED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"]
         current_idx = status_order.index(c.status) if c.status in status_order else 2
+        pct = int(((current_idx + 1) / len(status_order)) * 100)
 
-        prog_val = (current_idx + 1) / len(status_order)
-        st.progress(prog_val, text=f"Current Stage: {format_status_badge(c.status)}")
-        st.write("")
+        st.markdown(
+            f"""
+            <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 18px; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(15,45,107,0.06);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="font-family:'Rajdhani', sans-serif; font-weight:700; font-size:1.05rem; color:#0f2d6b; letter-spacing:0.02em;">
+                        LIFECYCLE STAGE: <span style="color:#ff9900;">{format_status_badge(c.status)}</span>
+                    </div>
+                    <div style="background:rgba(255,153,0,0.12); color:#e67e00; border:1px solid rgba(255,153,0,0.3); border-radius:9999px; padding:2px 10px; font-weight:700; font-size:0.8rem;">
+                        STAGE {current_idx + 1} OF 5 ({pct}%)
+                    </div>
+                </div>
+                <div style="width:100%; height:8px; background-color:#e2e8f0; border-radius:9999px; overflow:hidden;">
+                    <div style="width:{pct}%; height:100%; background:linear-gradient(90deg, #0f2d6b 0%, #ff9900 100%); border-radius:9999px;"></div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         # Two Column Layout: Details & Map vs Timeline
         col_left, col_right = st.columns([1, 1])

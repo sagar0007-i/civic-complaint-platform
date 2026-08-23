@@ -61,42 +61,182 @@ if "submitted_complaint_number" not in st.session_state:
     st.session_state.submitted_complaint_number = None
 
 # Step indicator progress bar
-step_names = ["1. Category", "2. Details", "3. Photos / Video", "4. Location", "5. Review & Submit"]
+step_names = ["Select Category", "Describe Problem", "Photo & Video Proof", "Pin Location", "Review & Submit"]
 curr_step = st.session_state.report_step
 
 if curr_step <= 5:
-    st.progress(curr_step / 5, text=f"Step {curr_step} of 5: {step_names[curr_step - 1]}")
-    st.write("")
+    pct = int((curr_step / 5) * 100)
+    current_label = step_names[curr_step - 1].upper()
+    st.markdown(
+        f"""
+        <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 18px; margin-bottom:1.4rem; box-shadow:0 2px 8px rgba(15,45,107,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="font-family:'Rajdhani', sans-serif; font-weight:700; font-size:1.05rem; color:#0f2d6b; letter-spacing:0.02em;">
+                    STEP {curr_step} OF 5 — <span style="color:#ff9900;">{current_label}</span>
+                </div>
+                <div style="background:rgba(255,153,0,0.12); color:#e67e00; border:1px solid rgba(255,153,0,0.3); border-radius:9999px; padding:2px 10px; font-weight:700; font-size:0.8rem;">
+                    {pct}% COMPLETED
+                </div>
+            </div>
+            <div style="width:100%; height:8px; background-color:#e2e8f0; border-radius:9999px; overflow:hidden;">
+                <div style="width:{pct}%; height:100%; background:linear-gradient(90deg, #0f2d6b 0%, #ff9900 100%); border-radius:9999px;"></div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # -----------------------------------------------------------------------------
 # STEP 1: SELECT CATEGORY
 # -----------------------------------------------------------------------------
 if st.session_state.report_step == 1:
-    st.markdown("### 🗂️ **Step 1: Select Problem Category**")
+    st.markdown("### **STEP 1: SELECT PROBLEM CATEGORY**")
+    st.caption("Choose the category that best describes your civic issue. Can't find it? Use **'Other / Not Listed'** at the bottom.")
+
+    # Category group mapping
+    CATEGORY_GROUPS = {
+        "🚰 Water & Sanitation": ["open-sewage", "water-leakage", "water-supply", "public-sanitation"],
+        "🛣️ Roads & Infrastructure": ["pothole", "damaged-infrastructure"],
+        "🗑️ Waste & Environment": ["garbage", "illegal-dumping", "flooding"],
+        "💡 Utilities": ["streetlight", "drainage"],
+        "📌 Other": ["other"],
+    }
+
+    # Search bar
+    search_query = st.text_input(
+        "🔍 Search Categories",
+        placeholder="Type to filter... e.g. 'water', 'pothole', 'light'",
+    )
 
     with get_db_session() as session:
         cat_repo = CategoryRepository(session)
         categories = cat_repo.get_all(active_only=True)
 
-        if not categories:
-            st.warning("No complaint categories found. Please run the seed script.")
-        else:
-            # Render clean grid of selectable category cards
+    if not categories:
+        st.warning("No complaint categories found. Please run the seed script.")
+    else:
+        # Filter by search query
+        if search_query.strip():
+            categories = [c for c in categories if search_query.lower() in c.name.lower() or search_query.lower() in (c.description or "").lower()]
+            if not categories:
+                st.info("No categories match your search. Try a different keyword or use **Other / Not Listed** below.")
+
+        # Render categories grouped
+        rendered_slugs = set()
+        for group_name, slugs in CATEGORY_GROUPS.items():
+            group_cats = [c for c in categories if c.slug in slugs and c.slug != "other"]
+            if not group_cats:
+                continue
+            st.markdown(
+                f"""
+                <div style="margin: 1.1rem 0 0.5rem 0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-family:'Rajdhani', sans-serif; font-weight:700; font-size:1.15rem; color:#0f2d6b; letter-spacing:0.02em;">
+                        {group_name}
+                    </span>
+                    <div style="flex:1; height:1px; background:#cbd5e1; margin-left:8px;"></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
             cols = st.columns(3)
-            for idx, cat in enumerate(categories):
+            for idx, cat in enumerate(group_cats):
                 col = cols[idx % 3]
+                rendered_slugs.add(cat.slug)
                 with col:
                     is_selected = st.session_state.report_category_id == cat.id
-                    btn_label = f"{cat.icon} {cat.name}"
+                    btn_label = f"{cat.icon}  {cat.name}"
                     if is_selected:
-                        btn_label = f"👉 {cat.icon} **{cat.name}**"
-
-                    if st.button(btn_label, key=f"cat_btn_{cat.id}", use_container_width=True):
+                        btn_label = f"✅  {cat.icon}  {cat.name}"
+                    if st.button(btn_label, key=f"cat_btn_{cat.id}", use_container_width=True,
+                                 type="primary" if is_selected else "secondary"):
                         st.session_state.report_category_id = cat.id
                         st.session_state.report_category_name = f"{cat.icon} {cat.name}"
                         st.session_state.report_severity = cat.default_severity
+                        st.session_state.report_other_description = ""
                         st.session_state.report_step = 2
                         st.rerun()
+
+        # Remaining ungrouped categories (not in any group)
+        ungrouped = [c for c in categories if c.slug not in rendered_slugs and c.slug != "other"]
+        if ungrouped:
+            st.markdown(
+                """
+                <div style="margin: 1.1rem 0 0.5rem 0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-family:'Rajdhani', sans-serif; font-weight:700; font-size:1.15rem; color:#0f2d6b; letter-spacing:0.02em;">
+                        📋 Other Civic Issues
+                    </span>
+                    <div style="flex:1; height:1px; background:#cbd5e1; margin-left:8px;"></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            cols = st.columns(3)
+            for idx, cat in enumerate(ungrouped):
+                col = cols[idx % 3]
+                with col:
+                    is_selected = st.session_state.report_category_id == cat.id
+                    btn_label = f"{cat.icon}  {cat.name}"
+                    if is_selected:
+                        btn_label = f"✅  {cat.icon}  {cat.name}"
+                    if st.button(btn_label, key=f"cat_btn_{cat.id}", use_container_width=True,
+                                 type="primary" if is_selected else "secondary"):
+                        st.session_state.report_category_id = cat.id
+                        st.session_state.report_category_name = f"{cat.icon} {cat.name}"
+                        st.session_state.report_severity = cat.default_severity
+                        st.session_state.report_other_description = ""
+                        st.session_state.report_step = 2
+                        st.rerun()
+
+        st.divider()
+
+        # ── OTHER / NOT LISTED ────────────────────────────────────────────────
+        st.markdown("#### **PROBLEM NOT IN THE LIST ABOVE?**")
+        st.caption("Use this section to describe any civic issue that doesn't fit the categories above.")
+
+        with st.container(border=True):
+            st.markdown("##### ✍️ Describe Your Problem Directly")
+
+
+            other_problem_type = st.text_input(
+                "Problem Type / Category Name *",
+                placeholder="e.g. Broken park bench, Illegal parking, Damaged bus stop shelter",
+                key="other_problem_type_input",
+            )
+            other_problem_desc = st.text_area(
+                "Describe the Problem in Detail *",
+                placeholder="Please describe what is wrong, where it is, how long it has been like this, and any safety risk it poses...",
+                height=110,
+                key="other_problem_desc_input",
+            )
+            other_severity = st.select_slider(
+                "How urgent is this issue?",
+                options=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+                value="MEDIUM",
+                key="other_severity_slider",
+            )
+
+            # Find the "other" category from the DB
+            other_cat = next((c for c in categories if c.slug == "other"), None)
+            if not other_cat:
+                # fallback: pick any available category
+                other_cat = categories[-1] if categories else None
+
+            if st.button("➡️ Continue with Custom Problem", type="primary", use_container_width=False):
+                if not other_problem_type.strip():
+                    st.error("Please enter a short name for the problem type.")
+                elif len(other_problem_desc.strip()) < 10:
+                    st.error("Please describe the problem in at least 10 characters.")
+                elif other_cat:
+                    st.session_state.report_category_id = other_cat.id
+                    st.session_state.report_category_name = f"📌 Other — {other_problem_type.strip()}"
+                    st.session_state.report_severity = other_severity
+                    st.session_state.report_title = other_problem_type.strip()
+                    st.session_state.report_description = other_problem_desc.strip()
+                    st.session_state.report_step = 3  # Skip to media since title+desc are filled
+                    st.rerun()
+                else:
+                    st.error("No categories available. Please contact support.")
+
 
 # -----------------------------------------------------------------------------
 # STEP 2: DESCRIBE THE PROBLEM

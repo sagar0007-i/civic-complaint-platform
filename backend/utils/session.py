@@ -74,215 +74,340 @@ def require_auth(allowed_roles: Optional[list[str]] = None) -> bool:
 
 
 def apply_custom_css() -> None:
-    """Inject modern, clean, dark-mode civic styling and high-contrast button styling into Streamlit."""
+    """Inject bold, human-crafted Indian civic design system into Streamlit with guaranteed high contrast."""
     custom_css = """
     <style>
-    /* Google Fonts Import */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+    /* ── Fonts ─────────────────────────────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap');
 
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    /* Hero Banner */
-    .hero-banner {
-        background: #1e3a5f;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 2rem 2rem;
-        color: #ffffff;
-        margin-bottom: 1.6rem;
-    }
-    .hero-title {
-        font-size: 1.9rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin-bottom: 0.35rem;
-        color: #ffffff;
-    }
-    .hero-subtitle {
-        font-size: 0.95rem;
-        color: #e2e8f0;
-        font-weight: 400;
-        max-width: 800px;
-        line-height: 1.55;
-    }
-
-    /* Civic & Evaluation Cards */
-    .civic-card, .eval-card, .role-card {
-        background: #ffffff;
-        border: 1px solid #e8edf5;
-        border-radius: 10px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .civic-card:hover, .eval-card:hover, .role-card:hover {
-        border-color: #2563eb;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
-    .eval-title {
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 0.4rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .eval-subhead {
-        font-size: 0.92rem;
-        font-weight: 600;
-        color: #64748b;
-        margin-top: 0.7rem;
-        margin-bottom: 0.25rem;
-    }
-    .eval-body {
-        font-size: 0.88rem;
-        color: #64748b;
-        line-height: 1.55;
-    }
-
-    /* Metric Cards */
-    .glass-metric {
-        background: #ffffff;
-        border: 1px solid #e8edf5;
-        border-radius: 10px;
-        padding: 1rem;
-        text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    [data-testid="stMetricValue"] {
-        font-weight: 700 !important;
+    /* ── Page Background & Base Text Colors ─────────────────────────────────── */
+    .stApp {
+        background: #f0f4f8 !important;
         color: #1e293b !important;
     }
-    [data-testid="stMetricLabel"] {
-        color: #64748b !important;
-    }
 
-    /* Minimal Badge Pills with Dot Indicators */
-    .pill-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 3px 10px;
-        border-radius: 9999px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        background: #f8fafc;
+    /* Ensure all markdown, paragraphs, and labels in main body are dark and clear */
+    .stMain p, .stMain span, .stMain label, .stMain div:not([class*="badge"]):not([class*="hero"]) {
         color: #1e293b;
-        border: 1px solid #e8edf5;
     }
-    .dot-indicator {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        display: inline-block;
+
+    .stMarkdown p, .stMarkdown strong {
+        color: #0f2d6b !important;
     }
-    .dot-low, .dot-res { background-color: #10b981; }
-    .dot-med, .dot-prog, .dot-sub { background-color: #f59e0b; }
-    .dot-high, .dot-crit { background-color: #ef4444; }
 
-    /* =========================================================================
-       HIGH-CONTRAST VISIBLE BUTTON STYLES
-       ========================================================================= */
-
-    /* Primary Buttons (Government Blue) */
-    div.stButton > button[kind="primary"],
-    div.stButton > button[data-testid="baseButton-primary"],
-    button[data-testid="baseButton-primary"],
-    button[kind="primary"],
-    div[data-testid="stFormSubmitButton"] > button[kind="primary"],
-    div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"] {
-        background-color: #2563eb !important;
+    /* ── Hero Banner ────────────────────────────────────────────────────────── */
+    .hero-banner {
+        background: linear-gradient(135deg, #0f2d6b 0%, #1a4a9e 40%, #c0392b 100%);
+        border-radius: 16px;
+        padding: 2.5rem 2.5rem 2.2rem;
         color: #ffffff !important;
-        border: 1px solid #2563eb !important;
+        margin-bottom: 1.8rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(15, 45, 107, 0.35);
+        border: none;
+    }
+    .hero-banner * {
+        color: #ffffff !important;
+    }
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 220px; height: 220px;
+        background: rgba(255,153,0,0.15);
+        border-radius: 50%;
+    }
+    .hero-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -50px; left: 30%;
+        width: 160px; height: 160px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 50%;
+    }
+    .hero-title {
+        font-family: 'Rajdhani', 'Inter', sans-serif;
+        font-size: 2.1rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.45rem;
+        color: #ffffff !important;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        position: relative; z-index: 1;
+    }
+    .hero-subtitle {
+        font-size: 0.97rem;
+        color: rgba(255,255,255,0.9) !important;
+        font-weight: 400;
+        max-width: 780px;
+        line-height: 1.65;
+        position: relative; z-index: 1;
+    }
+
+    /* ── Section Headings ───────────────────────────────────────────────────── */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Rajdhani', 'Inter', sans-serif !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        color: #0f2d6b !important;
+    }
+
+    /* ── Cards (Civic / Role / Eval) ────────────────────────────────────────── */
+    .civic-card, .eval-card, .role-card {
+        background: #ffffff !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 1.4rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 12px rgba(15, 45, 107, 0.07);
+        transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    }
+    .civic-card:hover, .eval-card:hover, .role-card:hover {
+        border-color: #ff9900 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 45, 107, 0.12);
+    }
+    .eval-title {
+        font-size: 1.12rem;
+        font-weight: 700;
+        color: #0f2d6b !important;
+        margin-bottom: 0.4rem;
+    }
+    .eval-subhead {
+        font-size: 0.91rem;
+        font-weight: 600;
+        color: #475569 !important;
+        margin: 0.6rem 0 0.2rem;
+    }
+    .eval-body {
+        font-size: 0.87rem;
+        color: #64748b !important;
+        line-height: 1.6;
+    }
+
+    /* ── Metric Cards ───────────────────────────────────────────────────────── */
+    [data-testid="stMetric"] {
+        background: #ffffff !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.2rem;
+        box-shadow: 0 2px 8px rgba(15,45,107,0.06);
+        border-top: 4px solid #0f2d6b !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-family: 'Rajdhani', sans-serif !important;
+        font-size: 1.9rem !important;
+        font-weight: 700 !important;
+        color: #0f2d6b !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-weight: 600 !important;
+        color: #475569 !important;
+        font-size: 0.82rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+    }
+
+    /* ── Sidebar ────────────────────────────────────────────────────────────── */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0f2d6b 0%, #1a3f8f 70%, #0f2d6b 100%) !important;
+        border-right: none !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #e2e8f0 !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown span,
+    [data-testid="stSidebar"] label {
+        color: #c7d4f0 !important;
+    }
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+    }
+    /* Sidebar nav links */
+    [data-testid="stSidebarNav"] a {
+        color: #c7d4f0 !important;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 6px 10px;
+        transition: background 0.15s;
+    }
+    [data-testid="stSidebarNav"] a:hover {
+        background: rgba(255,153,0,0.15) !important;
+        color: #ff9900 !important;
+    }
+    [data-testid="stSidebarNav"] a[aria-current="page"] {
+        background: rgba(255,153,0,0.22) !important;
+        color: #ffb733 !important;
+        font-weight: 700 !important;
+        border-left: 3px solid #ff9900 !important;
+    }
+    /* Sidebar section group labels */
+    [data-testid="stSidebarNav"] span {
+        color: rgba(255,153,0,0.9) !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+    }
+    /* Sidebar divider */
+    [data-testid="stSidebar"] hr {
+        border-color: rgba(255,255,255,0.12) !important;
+    }
+    /* Sidebar logout button */
+    [data-testid="stSidebar"] div.stButton > button {
+        background: rgba(255,255,255,0.08) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
+    }
+    [data-testid="stSidebar"] div.stButton > button:hover {
+        background: rgba(255, 80, 60, 0.35) !important;
+        border-color: #ff5050 !important;
+        color: #ffffff !important;
+    }
+
+    /* ── Primary Buttons ────────────────────────────────────────────────────── */
+    div.stButton > button[kind="primary"],
+    button[data-testid="baseButton-primary"],
+    div[data-testid="stFormSubmitButton"] > button[kind="primary"] {
+        background: linear-gradient(135deg, #ff9900 0%, #e67e00 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
         font-size: 0.95rem !important;
-        padding: 0.55rem 1.25rem !important;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
-        transition: all 0.15s ease-in-out !important;
+        padding: 0.6rem 1.4rem !important;
+        box-shadow: 0 4px 14px rgba(255,153,0,0.4) !important;
+        letter-spacing: 0.02em !important;
+        transition: all 0.18s ease !important;
     }
-
-    /* Force all child text/spans in primary buttons to be white */
     div.stButton > button[kind="primary"] *,
-    div.stButton > button[data-testid="baseButton-primary"] *,
-    button[data-testid="baseButton-primary"] *,
-    button[kind="primary"] *,
-    div[data-testid="stFormSubmitButton"] > button[kind="primary"] *,
-    div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"] * {
+    button[data-testid="baseButton-primary"] * {
         color: #ffffff !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
     }
-
-    /* Hover state for primary buttons */
     div.stButton > button[kind="primary"]:hover,
-    div.stButton > button[data-testid="baseButton-primary"]:hover,
-    button[data-testid="baseButton-primary"]:hover,
-    button[kind="primary"]:hover,
-    div[data-testid="stFormSubmitButton"] > button[kind="primary"]:hover,
-    div[data-testid="stFormSubmitButton"] > button[data-testid="baseButton-primary"]:hover {
-        background-color: #1d4ed8 !important;
-        color: #ffffff !important;
-        border-color: #1d4ed8 !important;
+    button[data-testid="baseButton-primary"]:hover {
+        background: linear-gradient(135deg, #ffaa1a 0%, #ff9900 100%) !important;
+        box-shadow: 0 6px 20px rgba(255,153,0,0.55) !important;
         transform: translateY(-1px) !important;
     }
 
-    div.stButton > button[kind="primary"]:hover *,
-    div.stButton > button[data-testid="baseButton-primary"]:hover *,
-    button[data-testid="baseButton-primary"]:hover *,
-    button[kind="primary"]:hover * {
-        color: #ffffff !important;
-    }
-
-    /* Secondary Buttons (White with Slate Text) */
+    /* ── Secondary Buttons ──────────────────────────────────────────────────── */
     div.stButton > button[kind="secondary"],
-    div.stButton > button[data-testid="baseButton-secondary"],
     button[data-testid="baseButton-secondary"],
-    button[kind="secondary"],
     div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
-        border: 1px solid #e8edf5 !important;
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        font-size: 0.95rem !important;
-        transition: all 0.15s ease-in-out !important;
+        background: #ffffff !important;
+        color: #0f2d6b !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        font-size: 0.93rem !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+        transition: all 0.15s ease !important;
     }
-
     div.stButton > button[kind="secondary"] *,
-    div.stButton > button[data-testid="baseButton-secondary"] *,
+    button[data-testid="baseButton-secondary"] *,
     div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) * {
-        color: #1e293b !important;
+        color: #0f2d6b !important;
     }
-
     div.stButton > button[kind="secondary"]:hover,
-    div.stButton > button[data-testid="baseButton-secondary"]:hover,
     div.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]):hover {
-        background-color: #f8fafc !important;
-        border-color: #cbd5e1 !important;
-        color: #0f172a !important;
+        background: #f0f4ff !important;
+        border-color: #ff9900 !important;
+        color: #0f2d6b !important;
+        box-shadow: 0 2px 8px rgba(255,153,0,0.15) !important;
     }
 
-    /* Timeline Stepper */
+    /* ── Inputs & Text areas ────────────────────────────────────────────────── */
+    [data-testid="stTextInput"] input,
+    [data-testid="stTextArea"] textarea,
+    [data-testid="stSelectbox"] > div {
+        background-color: #ffffff !important;
+        color: #0f2d6b !important;
+        border-radius: 10px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        font-weight: 500 !important;
+    }
+    [data-testid="stTextInput"] input::placeholder,
+    [data-testid="stTextArea"] textarea::placeholder {
+        color: #94a3b8 !important;
+    }
+    [data-testid="stTextInput"] input:focus,
+    [data-testid="stTextArea"] textarea:focus {
+        border-color: #ff9900 !important;
+        box-shadow: 0 0 0 3px rgba(255,153,0,0.15) !important;
+    }
+
+    /* ── Status Badges ──────────────────────────────────────────────────────── */
+    .badge-critical {
+        background: #fef2f2 !important;
+        color: #dc2626 !important;
+        border: 1px solid #fecaca !important;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .pill-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 3px 10px; border-radius: 9999px;
+        font-size: 0.78rem; font-weight: 600;
+        background: #f8fafc; color: #1e293b !important;
+        border: 1px solid #e2e8f0;
+    }
+    .dot-indicator { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .dot-low, .dot-res  { background: #10b981; }
+    .dot-med, .dot-prog { background: #f59e0b; }
+    .dot-high, .dot-crit, .dot-sub { background: #ef4444; }
+
+    /* ── Timeline Stepper ───────────────────────────────────────────────────── */
     .timeline-node {
-        border-left: 2px solid #e2e8f0;
+        border-left: 3px solid #ff9900;
         padding-left: 1.2rem;
         margin-bottom: 1.2rem;
         position: relative;
     }
     .timeline-node::before {
         content: '';
-        position: absolute;
-        left: -6px;
-        top: 4px;
-        width: 10px;
-        height: 10px;
+        position: absolute; left: -7px; top: 4px;
+        width: 11px; height: 11px;
         border-radius: 50%;
-        background-color: #2563eb;
+        background: #ff9900;
+        box-shadow: 0 0 0 3px rgba(255,153,0,0.2);
+    }
+
+    /* ── Info / Warning / Success boxes ─────────────────────────────────────── */
+    [data-testid="stAlert"] {
+        border-radius: 10px !important;
+        border-left-width: 4px !important;
+        font-weight: 500 !important;
+    }
+
+    /* ── Tabs ───────────────────────────────────────────────────────────────── */
+    [data-testid="stTabs"] button[aria-selected="true"] {
+        color: #0f2d6b !important;
+        border-bottom: 3px solid #ff9900 !important;
+        font-weight: 700 !important;
+    }
+
+    /* ── Main Header ────────────────────────────────────────────────────────── */
+    .main-header {
+        font-family: 'Rajdhani', sans-serif !important;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0f2d6b !important;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.3rem;
     }
     </style>
     """
