@@ -26,7 +26,13 @@ from backend.repositories.ward_repo import WardRepository
 from backend.repositories.user_repo import UserRepository
 from backend.utils.session import init_session_state, get_current_user, is_logged_in, apply_custom_css
 from backend.utils.icons import icon_svg
-from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
+try:
+    from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
+except ImportError:
+    import importlib
+    import backend.utils.india_boundary
+    importlib.reload(backend.utils.india_boundary)
+    from backend.utils.india_boundary import add_india_boundary_layer, add_maharashtra_boundary_layer
 
 init_session_state()
 apply_custom_css()
