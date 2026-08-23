@@ -77,6 +77,7 @@ st.write("")
 # LIVE MUNICIPAL METRICS
 # -----------------------------------------------------------------------------
 st.markdown("### LIVE MUNICIPAL METRICS")
+showcase = []
 try:
     with get_db_session() as session:
         analytics = AnalyticsService(session)

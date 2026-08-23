@@ -51,8 +51,41 @@ def get_db_session() -> Generator[Session, None, None]:
         SessionLocal.remove()
 
 
+def _auto_migrate_sqlite() -> None:
+    """Ensure newly added model columns are added to existing SQLite database tables."""
+    if not settings.DATABASE_URL.startswith("sqlite"):
+        return
+
+    try:
+        with engine.connect() as conn:
+            for table_name, table in Base.metadata.tables.items():
+                result = conn.execute(text(f"PRAGMA table_info({table_name})")).fetchall()
+                existing_cols = {row[1] for row in result}
+                if not existing_cols:
+                    continue
+                for col in table.columns:
+                    if col.name not in existing_cols:
+                        col_type = "TEXT"
+                        type_str = str(col.type).upper()
+                        if "INT" in type_str or "BOOL" in type_str:
+                            col_type = "INTEGER"
+                        elif "FLOAT" in type_str or "REAL" in type_str:
+                            col_type = "REAL"
+                        elif "DATE" in type_str or "TIME" in type_str:
+                            col_type = "TIMESTAMP"
+
+                        logger.info(f"Auto-migrating SQLite: adding column {table_name}.{col.name} ({col_type})")
+                        try:
+                            conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type}"))
+                            conn.commit()
+                        except Exception as e:
+                            logger.warning(f"Could not auto-add column {table_name}.{col.name}: {e}")
+    except Exception as err:
+        logger.warning(f"SQLite auto-migration check skipped: {err}")
+
+
 def init_db() -> None:
-    """Initialize database tables from all declared SQLAlchemy models."""
+    """Initialize database tables from all declared SQLAlchemy models and migrate missing columns."""
     from backend.models import (
         user,
         department,
@@ -74,6 +107,7 @@ def init_db() -> None:
 
     logger.info(f"Initializing database schemas with dialect: {engine.dialect.name}...")
     Base.metadata.create_all(bind=engine)
+    _auto_migrate_sqlite()
     logger.info("Database schema initialized successfully.")
 
 
