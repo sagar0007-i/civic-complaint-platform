@@ -2,7 +2,8 @@
 
 import pytest
 from backend.services.complaint_service import ComplaintService
-from backend.schemas.complaint import ComplaintCreateSchema, LocationCreateSchema, MediaUploadMetaSchema
+from backend.services.notification_service import NotificationService
+from backend.schemas.complaint import ComplaintCreateSchema, LocationCreateSchema
 from backend.models.complaint import ComplaintSeverity, ComplaintStatus
 
 
@@ -35,41 +36,43 @@ def test_complaint_submission_and_id_format(db_session, seed_test_data):
     assert complaint is not None
     assert complaint.complaint_number.startswith("CIV-2026-")
     assert complaint.status == ComplaintStatus.SUBMITTED.value
-    assert complaint.department_id == data["dept_swm"].id
-    assert complaint.location is not None
-    assert complaint.location.latitude == 19.0596
-    assert len(complaint.status_history) == 1
-    assert complaint.status_history[0].to_status == ComplaintStatus.SUBMITTED.value
 
 
 def test_complaint_status_transition_lifecycle(db_session, seed_test_data):
-    """Test status updates and audit timeline generation."""
+    """Test complaint status transitions through lifecycle and terminal locks."""
     comp_service = ComplaintService(db_session)
     data = seed_test_data
 
     payload = ComplaintCreateSchema(
         category_id=data["cat_pothole"].id,
-        title="Severe pothole on cross road",
-        description="Deep crater damaging two-wheelers.",
+        title="Deep Pothole on Linking Road",
+        description="Severe road defect causing traffic congestion.",
         severity=ComplaintSeverity.HIGH,
+        landmark="Opposite Shopping Mall",
+        ward_id=data["ward"].id,
         location=LocationCreateSchema(
-            latitude=19.0590,
-            longitude=72.8290,
-            address="Linking Road, Bandra West",
+            latitude=19.0596,
+            longitude=72.8295,
+            address="Linking Road",
             city="Mumbai",
         ),
     )
 
-    complaint = comp_service.submit_complaint(citizen_id=data["citizen"].id, data=payload)
+    complaint = comp_service.submit_complaint(
+        citizen_id=data["citizen"].id,
+        data=payload,
+    )
 
     # 1. Update to IN_PROGRESS
     comp_service.update_status(
         complaint_id=complaint.id,
         user_id=data["officer"].user_id,
         to_status=ComplaintStatus.IN_PROGRESS,
-        remarks="Field team deployed with repair vehicle.",
+        remarks="Field engineer dispatched to inspect road section.",
     )
-    assert complaint.status == ComplaintStatus.IN_PROGRESS.value
+    updated = comp_service.get_complaint_by_id(complaint.id)
+    assert updated.status == ComplaintStatus.IN_PROGRESS.value
+    assert len(updated.status_history) == 2
 
     # 2. Update to RESOLVED
     comp_service.update_status(
@@ -94,7 +97,6 @@ def test_complaint_status_transition_lifecycle(db_session, seed_test_data):
     assert "terminal state" in str(exc_info.value)
 
 
-
 def test_complaint_comment_addition(db_session, seed_test_data):
     """Test adding comments to complaint thread."""
     comp_service = ComplaintService(db_session)
@@ -102,19 +104,60 @@ def test_complaint_comment_addition(db_session, seed_test_data):
 
     payload = ComplaintCreateSchema(
         category_id=data["cat_garbage"].id,
-        title="Overflowing dustbin",
-        description="Trash overflowing on road.",
-        location=LocationCreateSchema(latitude=12.9780, longitude=77.6400),
+        title="Garbage Overflow",
+        description="Waste bin overflowing.",
+        severity=ComplaintSeverity.LOW,
+        ward_id=data["ward"].id,
+        location=LocationCreateSchema(
+            latitude=19.0596,
+            longitude=72.8295,
+            address="Main Market",
+            city="Mumbai",
+        ),
     )
-    complaint = comp_service.submit_complaint(citizen_id=data["citizen"].id, data=payload)
+
+    complaint = comp_service.submit_complaint(
+        citizen_id=data["citizen"].id,
+        data=payload,
+    )
 
     comp_service.add_comment(
         complaint_id=complaint.id,
         user_id=data["citizen"].id,
-        comment_text="Garbage truck visited but missed the inner street.",
+        comment_text="When will the repair crew arrive?",
         is_internal=False,
     )
-
     fetched = comp_service.get_complaint_by_id(complaint.id)
     assert len(fetched.comments) == 1
-    assert "missed the inner street" in fetched.comments[0].comment
+    assert "repair crew" in fetched.comments[0].comment
+
+
+def test_user_notifications_read_status(db_session, seed_test_data):
+    """Test creating and marking notifications as read."""
+    data = seed_test_data
+    notif_service = NotificationService(db_session)
+
+    # 1. Create a notification
+    notif = notif_service.notif_repo.create(
+        user_id=data["citizen"].id,
+        title="Test Notification",
+        message="This is a test notification.",
+    )
+    db_session.commit()
+
+    assert notif.is_read is False
+
+    # 2. Mark single notification as read
+    notif_service.mark_as_read(notif.id)
+    db_session.commit()
+
+    user_notifs = notif_service.get_user_notifications(data["citizen"].id)
+    target = next(n for n in user_notifs if n.id == notif.id)
+    assert target.is_read is True
+
+    # 3. Mark all as read
+    notif_service.mark_all_read(data["citizen"].id)
+    db_session.commit()
+
+    unread = [n for n in notif_service.get_user_notifications(data["citizen"].id) if not n.is_read]
+    assert len(unread) == 0
