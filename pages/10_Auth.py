@@ -282,6 +282,7 @@ elif role_choice == "Field Officer":
                             department_id=dept_map[or_dept],
                             employee_code=clean_or_emp,
                             designation=clean_or_desig,
+                            auto_disambiguate_code=False,
                         )
                     if err:
                         st.error(err)
