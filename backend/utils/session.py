@@ -34,7 +34,7 @@ def _save_sessions_cache(data: Dict[str, Any]) -> None:
 
 
 def init_session_state() -> None:
-    """Initialize default session state keys and synchronously restore session from query_params / disk."""
+    """Initialize default session state keys and synchronously restore session from query_params or active disk session cache."""
     if "is_authenticated" not in st.session_state:
         st.session_state.is_authenticated = False
     if "user" not in st.session_state:
@@ -44,18 +44,40 @@ def init_session_state() -> None:
     if "token" not in st.session_state:
         st.session_state.token = None
 
-    # Restore session synchronously from query_params on refresh
-    if not st.session_state.is_authenticated:
-        session_id = st.query_params.get("session")
-        if session_id:
-            cache = _load_sessions_cache()
-            session_payload = cache.get(session_id)
-            if session_payload and session_payload.get("user_id") and session_payload.get("role"):
-                st.session_state.is_authenticated = True
-                st.session_state.user = session_payload
-                st.session_state.role = session_payload.get("role")
-                st.session_state.token = session_payload.get("token")
-                st.session_state.session_id = session_id
+    # 1. If already authenticated in memory, sync session_id into query_params
+    if st.session_state.is_authenticated and st.session_state.user:
+        sid = st.session_state.get("session_id")
+        if sid:
+            try:
+                if st.query_params.get("session") != sid:
+                    st.query_params["session"] = sid
+            except Exception:
+                pass
+        return
+
+    # 2. Restore session from query_params or active disk cache on refresh / cold-start
+    cache = _load_sessions_cache()
+    session_id = st.query_params.get("session")
+
+    session_payload = None
+    if session_id and session_id in cache:
+        session_payload = cache[session_id]
+    elif cache:
+        # Fallback: use the active session from disk cache if user did not log out
+        latest_key = list(cache.keys())[-1]
+        session_id = latest_key
+        session_payload = cache[latest_key]
+
+    if session_payload and session_payload.get("user_id") and session_payload.get("role"):
+        st.session_state.is_authenticated = True
+        st.session_state.user = session_payload
+        st.session_state.role = session_payload.get("role")
+        st.session_state.token = session_payload.get("token")
+        st.session_state.session_id = session_id
+        try:
+            st.query_params["session"] = session_id
+        except Exception:
+            pass
 
 
 def get_current_user() -> Optional[Dict[str, Any]]:
@@ -85,29 +107,22 @@ def login_user(session_payload: Dict[str, Any]) -> None:
     st.session_state.token = session_payload.get("token")
     st.session_state.session_id = session_id
 
-    # Persist session to query_params & disk cache
+    # Save to disk cache and update query_params
     try:
-        st.query_params["session"] = session_id
         cache = _load_sessions_cache()
         cache[session_id] = session_payload
         _save_sessions_cache(cache)
+        st.query_params["session"] = session_id
     except Exception:
         pass
 
 
 def logout_user() -> None:
     """Clear session state, remove query_param, and purge disk cache."""
-    session_id = st.session_state.get("session_id") or st.query_params.get("session")
-    if session_id:
-        try:
-            cache = _load_sessions_cache()
-            cache.pop(session_id, None)
-            _save_sessions_cache(cache)
-        except Exception:
-            pass
+    _save_sessions_cache({})
 
     try:
-        st.query_params.pop("session", None)
+        st.query_params.clear()
     except Exception:
         pass
 
