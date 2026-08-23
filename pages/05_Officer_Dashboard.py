@@ -305,6 +305,59 @@ with get_db_session() as session:
 
                     st.divider()
 
+                    # ── Mandatory Public Delay Justification Section ───────────────────────
+                    st.markdown("#### 🏛️ **Public Delay Justification & Transparency (RTS Act)**")
+                    sla_res = sla_service.check_sla_status(complaint)
+
+                    if complaint.delay_reason:
+                        st.markdown(
+                            f"""
+                            <div style="background:#fffbeb; border:1.5px solid #f59e0b; border-radius:8px; padding:12px 14px; margin-bottom:12px;">
+                                <div style="font-weight:700; color:#b45309; font-size:0.9rem;">📢 Public Delay Statement Currently Active:</div>
+                                <div style="color:#1e293b; font-size:0.88rem; margin:6px 0;">"{complaint.delay_reason}"</div>
+                                <div style="color:#78350f; font-size:0.78rem;">
+                                    <b>Published By:</b> {complaint.delay_justified_by or 'Officer'} |
+                                    <b>Target Date:</b> {format_datetime(complaint.revised_resolution_target)}
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                    with st.expander("📝 " + ("Update Official Public Delay Reason" if complaint.delay_reason else "Submit Official Public Delay Reason (Publicly Disclosed)"), expanded=bool(sla_res.get("is_breached") and not complaint.delay_reason)):
+                        if sla_res.get("is_breached"):
+                            st.warning("⚠️ **SLA Deadline Breached**: A transparent explanation is required by civic regulations so the public and citizen know why work is delayed.")
+                        else:
+                            st.caption("ℹ️ If unexpected site constraints or departmental dependencies delay resolution, publish an official reason here.")
+
+                        delay_input = st.text_area(
+                            "Reason for Delay (Publicly Visible to Citizen & Portal) *",
+                            value=complaint.delay_reason or "",
+                            placeholder="e.g. Underground utility line conflict detected. Awaiting safety clearance from BEST Electrical before heavy excavation can resume.",
+                            height=80,
+                            key=f"delay_txt_{complaint.id}",
+                        )
+                        delay_days = st.number_input("Committed Additional Days to Complete *", min_value=1, max_value=30, value=3, key=f"delay_days_{complaint.id}")
+
+                        if st.button("📢 Publish Public Delay Statement", key=f"pub_delay_{complaint.id}", type="secondary"):
+                            if not delay_input.strip() or len(delay_input.strip()) < 10:
+                                st.error("Please provide a comprehensive explanation (minimum 10 characters).")
+                            else:
+                                _, delay_err = comp_service.submit_public_delay_justification(
+                                    complaint_id=complaint.id,
+                                    officer_user_id=current_user["user_id"],
+                                    delay_reason=delay_input.strip(),
+                                    revised_target_days=delay_days,
+                                )
+                                if delay_err:
+                                    st.error(delay_err)
+                                else:
+                                    session.commit()
+                                    st.success("✅ Public delay statement published to citizen tracking timeline and public dashboard!")
+                                    st.rerun()
+
+                    st.divider()
+
                     # Reassign Officer Option
                     st.markdown("#### 👤 **Officer Assignment**")
                     dept_officers = user_repo.list_officers_by_department(complaint.department_id)

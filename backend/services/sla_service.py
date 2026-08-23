@@ -56,13 +56,27 @@ class SLAService:
         time_left = deadline - now
         total_seconds = time_left.total_seconds()
 
+        has_justification = bool(getattr(complaint, "delay_reason", None))
+        justification_text = getattr(complaint, "delay_reason", None)
+        justified_by = getattr(complaint, "delay_justified_by", None)
+        justified_at = getattr(complaint, "delay_justified_at", None)
+        revised_target = getattr(complaint, "revised_resolution_target", None)
+
         if total_seconds < 0:
             overdue_hours = abs(total_seconds) / 3600
+            badge = f"🚨 Overdue by {overdue_hours:.1f}h"
+            if has_justification:
+                badge = f"🚨 Overdue ({overdue_hours:.1f}h) [📝 Reason Published]"
             return {
                 "status": "BREACHED",
-                "badge": f"🚨 Overdue by {overdue_hours:.1f}h",
+                "badge": badge,
                 "is_breached": True,
                 "overdue_hours": overdue_hours,
+                "has_justification": has_justification,
+                "delay_reason": justification_text,
+                "delay_justified_by": justified_by,
+                "delay_justified_at": justified_at,
+                "revised_resolution_target": revised_target,
             }
         elif total_seconds < 3600 * 8:  # Less than 8 hours
             hours_left = total_seconds / 3600
@@ -71,6 +85,11 @@ class SLAService:
                 "badge": f"⚠️ At Risk ({hours_left:.1f}h left)",
                 "is_breached": False,
                 "hours_left": hours_left,
+                "has_justification": has_justification,
+                "delay_reason": justification_text,
+                "delay_justified_by": justified_by,
+                "delay_justified_at": justified_at,
+                "revised_resolution_target": revised_target,
             }
         else:
             hours_left = total_seconds / 3600
@@ -79,6 +98,11 @@ class SLAService:
                 "badge": f"🟢 On Track ({hours_left:.1f}h left)",
                 "is_breached": False,
                 "hours_left": hours_left,
+                "has_justification": has_justification,
+                "delay_reason": justification_text,
+                "delay_justified_by": justified_by,
+                "delay_justified_at": justified_at,
+                "revised_resolution_target": revised_target,
             }
 
     def check_and_escalate_overdue_complaints(self) -> List[Escalation]:

@@ -87,6 +87,19 @@ with get_db_session() as session:
                 with c3:
                     st.write(f"📅 **Date Filed:** {format_datetime(c.created_at)}")
                     st.write(f"⏱️ **SLA Status:** {sla_info['badge']}")
-                    if st.button("🔍 View Full Timeline & Map", key=f"btn_my_{c.id}"):
+                    if st.button("🔍 View Full Timeline & Map", key=f"btn_my_{c.id}", use_container_width=True):
                         st.session_state.search_complaint_num = c.complaint_number
                         st.switch_page("pages/03_Track_Complaint.py")
+
+                if c.delay_reason:
+                    revised_str = format_datetime(c.revised_resolution_target) if c.revised_resolution_target else "Accelerated"
+                    st.markdown(
+                        f"""
+                        <div style="background:#fffbeb; border:1px solid #f59e0b; border-radius:8px; padding:10px 14px; margin-top:8px; font-size:0.85rem;">
+                            <b style="color:#b45309;">🏛️ Official Department Delay Justification:</b> "{c.delay_reason}"<br>
+                            <span style="color:#78350f; font-size:0.78rem;">Accountable Officer: {c.delay_justified_by or 'BMC Official'} | Revised Target: <b>{revised_str}</b></span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+

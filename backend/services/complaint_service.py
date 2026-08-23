@@ -1,7 +1,7 @@
 """Complaint Orchestration and Lifecycle Business Logic Service."""
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 from backend.repositories.complaint_repo import ComplaintRepository
@@ -349,6 +349,71 @@ class ComplaintService:
             description=description,
         )
 
+    def submit_public_delay_justification(
+        self,
+        complaint_id: str,
+        officer_user_id: str,
+        delay_reason: str,
+        revised_target_days: int = 3,
+        ip_address: Optional[str] = None,
+    ) -> tuple[Optional[Complaint], Optional[str]]:
+        """Submit a mandatory public transparency statement explaining why an overdue complaint was not resolved within SLA."""
+        complaint = self.complaint_repo.get_by_id(complaint_id)
+        if not complaint:
+            return None, "Complaint not found."
+
+        clean_reason = sanitize_text(delay_reason)
+        if len(clean_reason) < 10:
+            return None, "Please provide a comprehensive explanation for the delay (at least 10 characters)."
+
+        from backend.models.user import User
+        officer_user = self.session.query(User).filter(User.id == officer_user_id).first()
+        officer_name = officer_user.full_name if officer_user else "Assigned Department Official"
+
+        now = datetime.now(timezone.utc)
+        revised_target = now + timedelta(days=max(1, int(revised_target_days)))
+
+        complaint.delay_reason = clean_reason
+        complaint.delay_justified_at = now
+        complaint.delay_justified_by = officer_name
+        complaint.revised_resolution_target = revised_target
+
+        # Record into public status timeline
+        self.complaint_repo.add_status_history(
+            complaint_id=complaint.id,
+            from_status=complaint.status,
+            to_status=complaint.status,
+            changed_by_id=officer_user_id,
+            remarks=f"🏛️ OFFICIAL PUBLIC DELAY JUSTIFICATION SUBMITTED: {clean_reason} (Revised Resolution Target: {revised_target.strftime('%d %b %Y')})",
+        )
+
+        # Record public comment
+        self.complaint_repo.add_comment(
+            complaint_id=complaint.id,
+            user_id=officer_user_id,
+            comment=f"🏛️ Official Public Delay Accountability Statement (By {officer_name}):\n\n\"{clean_reason}\"\n\n📅 Revised Committed Resolution Date: {revised_target.strftime('%d %b %Y')}",
+            is_internal=False,
+        )
+
+        self.audit_service.log_event(
+            action="PUBLIC_DELAY_JUSTIFICATION",
+            entity_type="Complaint",
+            entity_id=complaint.id,
+            user_id=officer_user_id,
+            ip_address=ip_address,
+            details={
+                "complaint_number": complaint.complaint_number,
+                "delay_reason": clean_reason,
+                "justified_by": officer_name,
+                "revised_target": str(revised_target),
+            },
+        )
+
+        self.session.flush()
+        logger.info(f"Public delay justification submitted for {complaint.complaint_number} by {officer_name}")
+        return complaint, None
+
     def list_complaints(self, **kwargs) -> List[Complaint]:
         """Search and filter complaints."""
         return self.complaint_repo.list_complaints(**kwargs)
+
