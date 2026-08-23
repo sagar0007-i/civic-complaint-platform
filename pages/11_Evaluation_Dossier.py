@@ -28,9 +28,9 @@ apply_custom_css()
 st.markdown(
     f"""
     <div class="hero-banner">
-        <div class="hero-title">{icon_svg('cpu', size=32, color='#FFFFFF')} Live Interactive Technology Demonstration Hub</div>
+        <div class="hero-title">{icon_svg('cpu', size=32, color='#FFFFFF')} Live Interaction Hub</div>
         <div class="hero-subtitle">
-            Live sandbox to test and evaluate the core underlying algorithms of <b>CivicPulse Mumbai</b> in real-time.
+            Live interactive sandbox to test and simulate the core underlying algorithms of <b>CivicPulse Mumbai</b> in real-time.
         </div>
     </div>
     """,

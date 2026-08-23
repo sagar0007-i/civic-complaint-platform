@@ -50,7 +50,7 @@ pages = st.navigation(
         ],
         "PUBLIC": [
             st.Page("pages/07_Analytics.py",         title="ANALYTICS"),
-            st.Page("pages/11_Evaluation_Dossier.py",title="EVALUATION DOSSIER"),
+            st.Page("pages/11_Evaluation_Dossier.py",title="LIVE INTERACTION"),
         ],
         "ACCOUNT": [
             st.Page("pages/08_Notifications.py",     title="NOTIFICATIONS"),
