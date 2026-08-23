@@ -61,6 +61,8 @@ if "report_category_id" not in st.session_state:
     st.session_state.report_category_id = None
 if "report_category_name" not in st.session_state:
     st.session_state.report_category_name = None
+if "report_category_slug" not in st.session_state:
+    st.session_state.report_category_slug = None
 if "report_title" not in st.session_state:
     st.session_state.report_title = ""
 if "report_description" not in st.session_state:
@@ -190,6 +192,7 @@ if st.session_state.report_step == 1:
                                  type="primary" if is_selected else "secondary"):
                         st.session_state.report_category_id = cat.id
                         st.session_state.report_category_name = f"{cat.icon} {cat.name}"
+                        st.session_state.report_category_slug = cat.slug
                         st.session_state.report_severity = cat.default_severity
                         st.session_state.report_other_description = ""
                         st.session_state.report_step = 2
@@ -221,6 +224,7 @@ if st.session_state.report_step == 1:
                                  type="primary" if is_selected else "secondary"):
                         st.session_state.report_category_id = cat.id
                         st.session_state.report_category_name = f"{cat.icon} {cat.name}"
+                        st.session_state.report_category_slug = cat.slug
                         st.session_state.report_severity = cat.default_severity
                         st.session_state.report_other_description = ""
                         st.session_state.report_step = 2
@@ -268,6 +272,7 @@ if st.session_state.report_step == 1:
                 elif other_cat:
                     st.session_state.report_category_id = other_cat.id
                     st.session_state.report_category_name = f"📌 Other — {other_problem_type.strip()}"
+                    st.session_state.report_category_slug = "other"
                     st.session_state.report_severity = other_severity
                     st.session_state.report_title = other_problem_type.strip()
                     st.session_state.report_description = other_problem_desc.strip()
@@ -394,8 +399,13 @@ elif st.session_state.report_step == 3:
     if count > 0:
         st.info(f"📎 **{count}** media file(s) attached.")
 
-        # YOLO Vision AI Inspection Block
-        if settings.YOLO_ENABLED:
+        # YOLO Vision AI Inspection Block (Only for Pothole & Road Surface category)
+        is_pothole_cat = (
+            st.session_state.get("report_category_slug") == "pothole"
+            or "pothole" in (st.session_state.get("report_category_name") or "").lower()
+        )
+
+        if settings.YOLO_ENABLED and is_pothole_cat:
             with st.expander("🤖 **AI Vision Inspection (YOLO Pothole Detector)**", expanded=True):
                 detector = YOLOPotholeDetector()
                 has_image = any(m.get("media_type") == "image" for m in st.session_state.uploaded_media_meta)
@@ -418,7 +428,7 @@ elif st.session_state.report_step == 3:
                                         st.image(
                                             vision_res.annotated_image_bytes,
                                             caption=f"🎯 AI Bounding Box Detection - {vision_res.pothole_count} Pothole(s) Identified",
-                                            use_container_width=True,
+                                            width="stretch",
                                         )
                                     # Auto-suggest severity if higher
                                     if vision_res.suggested_severity in ["HIGH", "CRITICAL"] and st.session_state.report_severity != "CRITICAL":
