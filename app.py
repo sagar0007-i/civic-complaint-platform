@@ -109,7 +109,7 @@ with st.sidebar:
             dept = user["officer_profile"].get("department_name", "")
             desig = user["officer_profile"].get("designation", "")
             st.caption(f"🏢 {dept} · {desig}")
-        if st.button("🚪 Log Out", use_container_width=True):
+        if st.button("🚪 Log Out", width="stretch"):
             logout_user()
             st.rerun()
     else:

@@ -83,6 +83,17 @@ def test_complaint_status_transition_lifecycle(db_session, seed_test_data):
     assert updated.resolved_at is not None
     assert len(updated.status_history) == 3
 
+    # 3. Attempting to revert RESOLVED complaint back to IN_PROGRESS must fail
+    with pytest.raises(ValueError) as exc_info:
+        comp_service.update_status(
+            complaint_id=complaint.id,
+            user_id=data["officer"].user_id,
+            to_status=ComplaintStatus.IN_PROGRESS,
+            remarks="Attempting invalid status revert.",
+        )
+    assert "terminal state" in str(exc_info.value)
+
+
 
 def test_complaint_comment_addition(db_session, seed_test_data):
     """Test adding comments to complaint thread."""

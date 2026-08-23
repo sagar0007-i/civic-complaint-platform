@@ -148,7 +148,7 @@ if st.session_state.report_step == 1:
                     btn_label = f"{cat.icon}  {cat.name}"
                     if is_selected:
                         btn_label = f"✅  {cat.icon}  {cat.name}"
-                    if st.button(btn_label, key=f"cat_btn_{cat.id}", use_container_width=True,
+                    if st.button(btn_label, key=f"cat_btn_{cat.id}", width="stretch",
                                  type="primary" if is_selected else "secondary"):
                         st.session_state.report_category_id = cat.id
                         st.session_state.report_category_name = f"{cat.icon} {cat.name}"
@@ -179,7 +179,7 @@ if st.session_state.report_step == 1:
                     btn_label = f"{cat.icon}  {cat.name}"
                     if is_selected:
                         btn_label = f"✅  {cat.icon}  {cat.name}"
-                    if st.button(btn_label, key=f"cat_btn_{cat.id}", use_container_width=True,
+                    if st.button(btn_label, key=f"cat_btn_{cat.id}", width="stretch",
                                  type="primary" if is_selected else "secondary"):
                         st.session_state.report_category_id = cat.id
                         st.session_state.report_category_name = f"{cat.icon} {cat.name}"
@@ -222,7 +222,7 @@ if st.session_state.report_step == 1:
                 # fallback: pick any available category
                 other_cat = categories[-1] if categories else None
 
-            if st.button("➡️ Continue with Custom Problem", type="primary", use_container_width=False):
+            if st.button("➡️ Continue with Custom Problem", type="primary", width="content"):
                 if not other_problem_type.strip():
                     st.error("Please enter a short name for the problem type.")
                 elif len(other_problem_desc.strip()) < 10:
@@ -283,11 +283,11 @@ elif st.session_state.report_step == 2:
 
     col_back, col_next = st.columns([1, 1])
     with col_back:
-        if st.button("⬅️ Back to Category", use_container_width=True):
+        if st.button("⬅️ Back to Category", width="stretch"):
             st.session_state.report_step = 1
             st.rerun()
     with col_next:
-        if st.button("Next: Upload Photos / Videos ➡️", type="primary", use_container_width=True):
+        if st.button("Next: Upload Photos / Videos ➡️", type="primary", width="stretch"):
             if len(title_val.strip()) < 5:
                 st.error("Please enter a clear title (at least 5 characters).")
             elif len(desc_val.strip()) < 10:
@@ -393,11 +393,11 @@ elif st.session_state.report_step == 3:
 
     col_back, col_next = st.columns([1, 1])
     with col_back:
-        if st.button("⬅️ Back to Details", use_container_width=True):
+        if st.button("⬅️ Back to Details", width="stretch"):
             st.session_state.report_step = 2
             st.rerun()
     with col_next:
-        if st.button("Next: Set Location ➡️", type="primary", use_container_width=True):
+        if st.button("Next: Set Location ➡️", type="primary", width="stretch"):
             st.session_state.report_step = 4
             st.rerun()
 
@@ -471,11 +471,11 @@ elif st.session_state.report_step == 4:
 
     col_back, col_next = st.columns([1, 1])
     with col_back:
-        if st.button("⬅️ Back to Media", use_container_width=True):
+        if st.button("⬅️ Back to Media", width="stretch"):
             st.session_state.report_step = 3
             st.rerun()
     with col_next:
-        if st.button("Next: Review & Submit ➡️", type="primary", use_container_width=True):
+        if st.button("Next: Review & Submit ➡️", type="primary", width="stretch"):
             st.session_state.report_step = 5
             st.rerun()
 
@@ -543,12 +543,12 @@ elif st.session_state.report_step == 5:
 
     col_edit, col_submit = st.columns([1, 2])
     with col_edit:
-        if st.button("✏️ Edit Complaint", use_container_width=True):
+        if st.button("✏️ Edit Complaint", width="stretch"):
             st.session_state.report_step = 2
             st.rerun()
 
     with col_submit:
-        if st.button("🚀 Submit Grievance", type="primary", use_container_width=True):
+        if st.button("🚀 Submit Grievance", type="primary", width="stretch"):
             # If guest, create or find citizen user
             with get_db_session() as session:
                 user_repo = UserRepository(session)
@@ -638,11 +638,11 @@ elif st.session_state.report_step == 6:
 
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("🔍 Track This Complaint Now", type="primary", use_container_width=True):
+        if st.button("🔍 Track This Complaint Now", type="primary", width="stretch"):
             st.session_state.search_complaint_num = comp_num
             st.switch_page("pages/03_Track_Complaint.py")
     with c2:
-        if st.button("📢 File Another Complaint", use_container_width=True):
+        if st.button("📢 File Another Complaint", width="stretch"):
             # Reset wizard
             st.session_state.report_step = 1
             st.session_state.report_title = ""

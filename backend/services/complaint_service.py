@@ -229,6 +229,13 @@ class ComplaintService:
         from_status = complaint.status
         clean_remarks = sanitize_text(remarks)
 
+        # Enforce terminal state protection (RESOLVED / REJECTED cannot be reverted back)
+        if from_status in (ComplaintStatus.RESOLVED.value, ComplaintStatus.REJECTED.value) and to_status.value != from_status:
+            raise ValueError(
+                f"Complaint {complaint.complaint_number} is already '{from_status}' (terminal state) "
+                f"and cannot be reverted back to '{to_status.value}'."
+            )
+
         # Update status
         complaint.status = to_status.value
         if to_status == ComplaintStatus.RESOLVED:

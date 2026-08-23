@@ -40,7 +40,7 @@ with search_col1:
         label_visibility="collapsed",
     )
 with search_col2:
-    search_btn = st.button("Search Status", type="primary", use_container_width=True)
+    search_btn = st.button("Search Status", type="primary", width="stretch")
 
 complaint_to_display = None
 
@@ -160,7 +160,7 @@ with get_db_session() as session:
                         if file_path and os.path.exists(file_path) and med.media_type == "image":
                             try:
                                 img = Image.open(file_path)
-                                st.image(img, caption=med.original_filename, use_container_width=True)
+                                st.image(img, caption=med.original_filename, width="stretch")
                             except Exception:
                                 st.caption(f"📁 {med.original_filename}")
                         else:

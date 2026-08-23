@@ -65,7 +65,7 @@ with get_db_session() as session:
                 labels={"count": "Number of Complaints", "category": "Category"},
             )
             fig_cat.update_layout(yaxis={"autorange": "reversed"}, margin=dict(l=20, r=20, t=20, b=20), height=320)
-            st.plotly_chart(fig_cat, use_container_width=True)
+            st.plotly_chart(fig_cat, width="stretch")
         else:
             st.info("No category data available.")
 
@@ -84,7 +84,7 @@ with get_db_session() as session:
                 color_discrete_map=color_map,
             )
             fig_sev.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=320)
-            st.plotly_chart(fig_sev, use_container_width=True)
+            st.plotly_chart(fig_sev, width="stretch")
         else:
             st.info("No severity data available.")
 
@@ -107,7 +107,7 @@ with get_db_session() as session:
                 labels={"ward": "Ward Name", "count": "Complaints"},
             )
             fig_ward.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=320)
-            st.plotly_chart(fig_ward, use_container_width=True)
+            st.plotly_chart(fig_ward, width="stretch")
         else:
             st.info("No ward data available.")
 

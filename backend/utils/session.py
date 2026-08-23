@@ -1,14 +1,41 @@
-"""Streamlit Session State, RBAC Guards, and Catchy Modern Civic Theme."""
-
+import json
+import os
+import uuid
+from pathlib import Path
 from typing import Optional, Dict, Any
 import streamlit as st
+import streamlit.components.v1 as components
 from backend.database import get_db_session
 from backend.services.auth_service import AuthService
 from backend.models.user import UserRole
 
+# File path for persistent session cache
+SESSIONS_FILE = Path(__file__).resolve().parent.parent.parent / "uploads" / ".sessions_cache.json"
+
+
+def _load_sessions_cache() -> Dict[str, Any]:
+    """Load active session cache from disk."""
+    if not SESSIONS_FILE.exists():
+        return {}
+    try:
+        with open(SESSIONS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_sessions_cache(data: Dict[str, Any]) -> None:
+    """Save active session cache to disk."""
+    try:
+        SESSIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(SESSIONS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
+
 
 def init_session_state() -> None:
-    """Initialize default session state keys."""
+    """Initialize default session state keys and synchronously restore session from query_params / disk."""
     if "is_authenticated" not in st.session_state:
         st.session_state.is_authenticated = False
     if "user" not in st.session_state:
@@ -17,6 +44,19 @@ def init_session_state() -> None:
         st.session_state.role = None
     if "token" not in st.session_state:
         st.session_state.token = None
+
+    # Restore session synchronously from query_params on refresh
+    if not st.session_state.is_authenticated:
+        session_id = st.query_params.get("session")
+        if session_id:
+            cache = _load_sessions_cache()
+            session_payload = cache.get(session_id)
+            if session_payload and session_payload.get("user_id") and session_payload.get("role"):
+                st.session_state.is_authenticated = True
+                st.session_state.user = session_payload
+                st.session_state.role = session_payload.get("role")
+                st.session_state.token = session_payload.get("token")
+                st.session_state.session_id = session_id
 
 
 def get_current_user() -> Optional[Dict[str, Any]]:
@@ -38,19 +78,45 @@ def get_current_role() -> Optional[str]:
 
 
 def login_user(session_payload: Dict[str, Any]) -> None:
-    """Store authenticated session in Streamlit state."""
+    """Store authenticated session in Streamlit state and persist synchronously to query_params & disk."""
+    session_id = uuid.uuid4().hex[:16]
     st.session_state.is_authenticated = True
     st.session_state.user = session_payload
     st.session_state.role = session_payload.get("role")
     st.session_state.token = session_payload.get("token")
+    st.session_state.session_id = session_id
+
+    # Persist session to query_params & disk cache
+    try:
+        st.query_params["session"] = session_id
+        cache = _load_sessions_cache()
+        cache[session_id] = session_payload
+        _save_sessions_cache(cache)
+    except Exception:
+        pass
 
 
 def logout_user() -> None:
-    """Clear session state and log out."""
+    """Clear session state, remove query_param, and purge disk cache."""
+    session_id = st.session_state.get("session_id") or st.query_params.get("session")
+    if session_id:
+        try:
+            cache = _load_sessions_cache()
+            cache.pop(session_id, None)
+            _save_sessions_cache(cache)
+        except Exception:
+            pass
+
+    try:
+        st.query_params.pop("session", None)
+    except Exception:
+        pass
+
     st.session_state.is_authenticated = False
     st.session_state.user = None
     st.session_state.role = None
     st.session_state.token = None
+    st.session_state.session_id = None
 
 
 def require_auth(allowed_roles: Optional[list[str]] = None) -> bool:
@@ -410,18 +476,208 @@ def apply_custom_css() -> None:
         font-weight: 700 !important;
     }
 
-    /* ── Hide Streamlit Developer Menu, Header & Footer ───────────────────── */
+    /* ── Hide Streamlit Developer Menu, Footer & Decorations (NOT the sidebar toggle) ── */
     #MainMenu {visibility: hidden !important; display: none !important;}
-    header {visibility: hidden !important; display: none !important;}
     footer {visibility: hidden !important; display: none !important;}
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
     [data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
     [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
-    [data-testid="stHeader"] {visibility: hidden !important; display: none !important; height: 0px !important;}
     .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
     .styles_viewerBadge__1yB5_ {visibility: hidden !important; display: none !important;}
     button[title="View app in Streamlit Community Cloud"] {visibility: hidden !important; display: none !important;}
     #manage-app-button {display: none !important;}
+
+    /* ── Keep header minimal but preserve the sidebar hamburger toggle ────── */
+    [data-testid="stHeader"] {
+        background: transparent !important;
+        height: 3rem !important;
+        min-height: 3rem !important;
+    }
+    [data-testid="stHeader"] [data-testid="stToolbar"],
+    [data-testid="stHeader"] [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    /* Force Streamlit's native collapsed control always visible */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] button {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+    }
+
+    /* ── Custom Hamburger Button (always visible fallback) ───────────────── */
+    #civic-hamburger {
+        position: fixed;
+        top: 0.55rem;
+        left: 0.55rem;
+        z-index: 999999;
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #0f2d6b 0%, #1a4a9e 100%);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        box-shadow: 0 4px 16px rgba(15,45,107,0.45);
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+    #civic-hamburger:hover {
+        background: linear-gradient(135deg, #1a4a9e 0%, #ff9900 100%);
+        box-shadow: 0 6px 20px rgba(255,153,0,0.4);
+        transform: scale(1.05);
+    }
+    #civic-hamburger span {
+        display: block;
+        width: 20px;
+        height: 2.5px;
+        background: #ffffff;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+    }
+
+    /* ── Responsive: Mobile (≤ 768px) ──────────────────────────────────────── */
+    @media screen and (max-width: 768px) {
+        [data-testid="stSidebar"] {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            height: 100vh !important;
+            z-index: 9998 !important;
+            box-shadow: 6px 0 24px rgba(0,0,0,0.35) !important;
+            overflow-y: auto !important;
+        }
+        .stMainBlockContainer {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            padding-top: 3.5rem !important;
+        }
+        .hero-banner { padding: 1.5rem 1.2rem !important; }
+        .hero-title  { font-size: 1.5rem !important; }
+        .hero-subtitle { font-size: 0.88rem !important; }
+    }
+
+    /* ── Responsive: Tablet (769px – 1024px) ───────────────────────────────── */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        .stMainBlockContainer {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+            padding-top: 3rem !important;
+        }
+        .hero-title { font-size: 1.75rem !important; }
+    }
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
+
+    # ── Inject hamburger button via st.components (JS executes here) ───────────
+    # st.markdown() strips <script> tags — must use components.html() instead
+    components.html("""
+    <script>
+    (function() {
+        var parentDoc = window.parent.document;
+
+        // CSS injected into parent for the hamburger button
+        function injectCSS() {
+            if (parentDoc.getElementById('civic-ham-style')) return;
+            var style = parentDoc.createElement('style');
+            style.id = 'civic-ham-style';
+            style.textContent = `
+                #civic-hamburger {
+                    position: fixed;
+                    top: 0.6rem;
+                    left: 0.6rem;
+                    z-index: 999999;
+                    width: 42px;
+                    height: 42px;
+                    background: linear-gradient(135deg, #0f2d6b 0%, #1a4a9e 100%);
+                    border: none;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 5px;
+                    box-shadow: 0 4px 16px rgba(15,45,107,0.5);
+                    transition: all 0.2s ease;
+                    padding: 0;
+                }
+                #civic-hamburger:hover {
+                    background: linear-gradient(135deg, #1a4a9e 0%, #ff9900 100%);
+                    box-shadow: 0 6px 20px rgba(255,153,0,0.45);
+                    transform: scale(1.07);
+                }
+                #civic-hamburger span {
+                    display: block;
+                    width: 20px;
+                    height: 2.5px;
+                    background: #ffffff;
+                    border-radius: 3px;
+                }
+            `;
+            parentDoc.head.appendChild(style);
+        }
+
+        function injectButton() {
+            if (parentDoc.getElementById('civic-hamburger')) return;
+
+            var btn = parentDoc.createElement('button');
+            btn.id = 'civic-hamburger';
+            btn.title = 'Toggle Menu';
+            btn.setAttribute('aria-label', 'Toggle sidebar navigation');
+            for (var i = 0; i < 3; i++) {
+                var s = parentDoc.createElement('span');
+                btn.appendChild(s);
+            }
+
+            btn.addEventListener('click', function() {
+                var selectors = [
+                    '[data-testid="stSidebarCollapsedControl"] button',
+                    '[data-testid="collapsedControl"] button',
+                    'button[aria-label="Open sidebar"]',
+                    'button[aria-label="Close sidebar"]',
+                    'button[aria-label="open sidebar"]',
+                    'button[aria-label="close sidebar"]'
+                ];
+                var clicked = false;
+                for (var i = 0; i < selectors.length; i++) {
+                    var el = parentDoc.querySelector(selectors[i]);
+                    if (el) { el.click(); clicked = true; break; }
+                }
+                if (!clicked) {
+                    var sb = parentDoc.querySelector('[data-testid="stSidebar"]');
+                    if (sb) {
+                        var hidden = window.parent.getComputedStyle(sb).display === 'none'
+                                     || sb.style.display === 'none';
+                        sb.style.cssText += hidden
+                            ? 'display:flex!important;visibility:visible!important;'
+                            : 'display:none!important;';
+                    }
+                }
+            });
+
+            parentDoc.body.appendChild(btn);
+        }
+
+        injectCSS();
+        injectButton();
+
+        // Re-inject on every Streamlit re-render
+        var observer = new MutationObserver(function() {
+            injectCSS();
+            injectButton();
+        });
+        observer.observe(parentDoc.body, { childList: true, subtree: false });
+    })();
+    </script>
+    """, height=0)

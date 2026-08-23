@@ -50,6 +50,7 @@ class YOLOPotholeDetector:
     _instance: Optional["YOLOPotholeDetector"] = None
     _model: Any = None
     _model_loaded: bool = False
+    _last_error_message: str = ""
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -71,10 +72,8 @@ class YOLOPotholeDetector:
             return self._model
 
         if not self.is_model_available():
-            logger.info(
-                f"YOLO weights not found at '{self.model_path}'. "
-                f"Running in fallback/mock mode until weights are placed in ai_models/."
-            )
+            self._last_error_message = f"YOLO model weights file (pothole_yolo.pt) not found at '{self.model_path}'."
+            logger.info(self._last_error_message)
             return None
 
         try:
@@ -83,15 +82,16 @@ class YOLOPotholeDetector:
             logger.info(f"Loading YOLO Pothole Detection weights from: {self.model_path}")
             self._model = YOLO(self.model_path)
             self._model_loaded = True
+            self._last_error_message = ""
             logger.info("YOLO Pothole Detection model loaded successfully.")
             return self._model
         except ImportError:
-            logger.warning(
-                "Ultralytics library is not installed. Run `pip install ultralytics` to enable YOLO vision inference."
-            )
+            self._last_error_message = "Python package 'ultralytics' is not installed. Run `pip install ultralytics` to enable YOLO vision inference."
+            logger.warning(self._last_error_message)
             return None
         except Exception as e:
-            logger.error(f"Failed to load YOLO model from '{self.model_path}': {e}", exc_info=True)
+            self._last_error_message = f"Failed to load YOLO model: {e}"
+            logger.error(self._last_error_message, exc_info=True)
             return None
 
     def detect_potholes(
@@ -145,7 +145,8 @@ class YOLOPotholeDetector:
         model = self._get_or_load_model()
 
         if model is None:
-            # Fallback when weights file is not yet downloaded
+            # Fallback when weights file or library is missing
+            err_msg = self._last_error_message or "YOLO model weights file (pothole_yolo.pt) not found."
             return PotholeDetectionResult(
                 potholes_detected=False,
                 pothole_count=0,
@@ -156,7 +157,7 @@ class YOLOPotholeDetector:
                 suggested_category_slug=None,
                 model_used="none",
                 is_loaded=False,
-                message="YOLO model weights file (pothole_yolo.pt) not found. Place weights in ai_models/ to enable.",
+                message=err_msg,
             )
 
         # 3. Run Inference with Ultralytics YOLO

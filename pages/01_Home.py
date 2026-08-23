@@ -47,29 +47,30 @@ with cta_c1:
         "pages/02_Report_Problem.py",
         label="File Complaint (2 Min)",
         icon=":material/description:",
-        use_container_width=True,
+        width="stretch",
     )
 with cta_c2:
     st.page_link(
         "pages/03_Track_Complaint.py",
         label="Track Grievance Status",
         icon=":material/search:",
-        use_container_width=True,
+        width="stretch",
     )
 with cta_c3:
     st.page_link(
         "pages/11_Evaluation_Dossier.py",
         label="Evaluation & Tech Dossier",
         icon=":material/code:",
-        use_container_width=True,
+        width="stretch",
     )
 with cta_c4:
     st.page_link(
         "pages/07_Analytics.py",
         label="Public Transparency",
         icon=":material/visibility:",
-        use_container_width=True,
+        width="stretch",
     )
+
 st.write("")
 
 # -----------------------------------------------------------------------------
@@ -163,7 +164,7 @@ with r_c4:
     )
 
 st.write("")
-if st.button("Go to Sign In / Register", icon=":material/login:", type="primary", use_container_width=False):
+if st.button("Go to Sign In / Register", icon=":material/login:", type="primary", width="content"):
     st.switch_page("pages/10_Auth.py")
 
 st.divider()
