@@ -285,13 +285,14 @@ class AIService:
             normalized_combined = re.sub(rf"\b{w}\b", num, normalized_combined, flags=re.IGNORECASE)
 
         sec_m = re.search(
-            r"\b(?:at\s+|in\s+)?(sector\s*\d+[a-zA-Z]?|सेक्टर\s*\d+[a-zA-Z]?|plot\s*(?:no\.?|number)?\s*\d+|phase\s*\d+|road\s*(?:no\.?|number)?\s*\d+|ward\s*[a-zA-Z0-9]+)\b",
+            r"\b(?:at\s+|in\s+)?(sector[\s\-]*\d+[a-zA-Z]?|sec[\s\-]*\d+[a-zA-Z]?|सेक्टर[\s\-]*\d+[a-zA-Z]?|plot[\s\-]*(?:no\.?|number)?[\s\-]*\d+|phase[\s\-]*\d+|road[\s\-]*(?:no\.?|number)?[\s\-]*\d+|ward[\s\-]*[a-zA-Z0-9]+)\b",
             normalized_combined,
             re.IGNORECASE,
         )
         if sec_m:
             raw_sec = sec_m.group(1).strip()
-            sector = raw_sec.replace("सेक्टर", "Sector").title()
+            sec_clean = re.sub(r"^(?:sector|sec|सेक्टर)[\s\-]*", "Sector ", raw_sec, flags=re.IGNORECASE)
+            sector = sec_clean.title()
 
         # 3. Extract Known Area
         area = None
@@ -372,6 +373,8 @@ class AIService:
             address_parts.append(area)
         if not address_parts and landmark:
             address_parts.append(landmark)
+        if settings.DEFAULT_CITY and settings.DEFAULT_CITY not in ", ".join(address_parts):
+            address_parts.append(settings.DEFAULT_CITY)
 
         address = ", ".join(address_parts) if address_parts else (settings.DEFAULT_CITY)
 

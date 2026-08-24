@@ -97,7 +97,10 @@ with get_db_session() as session:
         with h2:
             st.markdown(f"**Status:**\n\n{format_status_badge(c.status)}")
         with h3:
-            st.markdown(f"**Severity:**\n\n{format_severity_badge(c.severity)}")
+            sev_badge = format_severity_badge(c.severity)
+            if getattr(c, "is_escalated", False):
+                sev_badge += " <span style='background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:4px; padding:1px 6px; font-size:0.75rem; font-weight:700;'>🔥 Escalated</span>"
+            st.markdown(f"**Severity:**\n\n{sev_badge}", unsafe_allow_html=True)
         with h4:
             sla_info = sla_service.check_sla_status(c)
             st.markdown(f"**SLA Target:**\n\n{sla_info['badge']}")
@@ -163,16 +166,25 @@ with get_db_session() as session:
                 unsafe_allow_html=True,
             )
         elif sla_info.get("is_breached"):
+            is_esc = getattr(c, "is_escalated", False)
+            header_title = "SLA RESOLUTION DEADLINE EXCEEDED — AUTO-ESCALATED TO DEPARTMENT ADMIN" if is_esc else "SLA RESOLUTION DEADLINE EXCEEDED — ACTION PENDING"
+            esc_banner_extra = """
+                <div style="margin-top:8px; display:inline-flex; align-items:center; gap:6px; background:#fee2e2; border:1px solid #f87171; border-radius:6px; padding:3px 10px; font-weight:700; font-size:0.8rem; color:#b91c1c;">
+                    ⚡ Auto-Escalated: Grievance has been escalated to senior department administration for expedited resolution.
+                </div>
+            """ if is_esc else ""
+
             st.markdown(
-                """
+                f"""
                 <div style="background:#fef2f2; border:2px solid #ef4444; border-radius:12px; padding:14px 18px; margin-bottom:1.5rem;">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:1.2rem;">🚨</span>
-                        <h4 style="color:#b91c1c; margin:0; font-size:1.05rem;">SLA RESOLUTION DEADLINE EXCEEDED — ACTION PENDING</h4>
+                        <h4 style="color:#b91c1c; margin:0; font-size:1.05rem;">{header_title}</h4>
                     </div>
                     <p style="color:#7f1d1d; font-size:0.88rem; margin:6px 0 0 0;">
                         This complaint has exceeded its committed SLA resolution window. The responsible department officer is mandated to inspect on-site and publish an official delay justification statement for public record.
                     </p>
+                    {esc_banner_extra}
                 </div>
                 """,
                 unsafe_allow_html=True,

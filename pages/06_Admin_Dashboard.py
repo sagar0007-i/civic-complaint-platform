@@ -733,6 +733,34 @@ with get_db_session() as session:
                     st.session_state["editing_sla_id"] = s.id
                     st.rerun()
 
+        # Automated Escalation Engine Control
+        st.divider()
+        st.markdown("#### ⚡ **Automated SLA Escalation Engine**")
+        st.caption("Scans civic grievances and automatically escalates active complaints exceeding the overdue threshold to Department Admins.")
+
+        esc_col1, esc_col2 = st.columns([2, 1])
+        with esc_col1:
+            threshold_hours = st.number_input(
+                "Auto-Escalation Overdue Threshold (Hours)",
+                min_value=1.0,
+                max_value=168.0,
+                value=24.0,
+                step=1.0,
+                help="Complaints whose SLA deadline was breached by at least this many hours will be escalated.",
+            )
+        with esc_col2:
+            st.write("")
+            st.write("")
+            if st.button("🚀 Run Auto-Escalation Scan", type="primary", width="stretch", key="run_esc_btn"):
+                from backend.services.sla_service import SLAService
+                sla_service_admin = SLAService(session)
+                escalated = sla_service_admin.check_and_escalate_overdue_complaints(min_overdue_hours=float(threshold_hours))
+                if escalated:
+                    st.success(f"✅ Auto-escalation completed: {len(escalated)} overdue grievance(s) were escalated to Department Admins.")
+                else:
+                    st.info(f"ℹ️ All grievances are within SLA or already escalated for threshold >= {threshold_hours:.0f}h.")
+                st.rerun()
+
     # 6. USERS & OFFICERS
     with tab_users:
         st.markdown("### 👥 **User Accounts & Field Officer Profiles**")

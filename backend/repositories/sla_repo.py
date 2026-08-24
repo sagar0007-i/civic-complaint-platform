@@ -129,16 +129,19 @@ class SLARepository:
         self.session.flush()
         return esc
 
-    def get_overdue_complaints(self) -> List[Complaint]:
-        """Fetch unresolved complaints past their SLA deadline."""
+    def get_overdue_complaints(self, min_overdue_hours: float = 0.0) -> List[Complaint]:
+        """Fetch unresolved complaints past their SLA deadline (optionally past min_overdue_hours)."""
+        from datetime import timedelta
         now_utc = datetime.now(timezone.utc)
         now_naive = datetime.now()
+        thresh_utc = now_utc - timedelta(hours=min_overdue_hours)
+        thresh_naive = now_naive - timedelta(hours=min_overdue_hours)
         return (
             self.session.query(Complaint)
             .filter(
                 Complaint.status.notin_([ComplaintStatus.RESOLVED.value, ComplaintStatus.REJECTED.value]),
                 Complaint.sla_deadline.isnot(None),
-                (Complaint.sla_deadline < now_utc) | (Complaint.sla_deadline < now_naive),
+                (Complaint.sla_deadline <= thresh_utc) | (Complaint.sla_deadline <= thresh_naive),
             )
             .all()
         )

@@ -27,9 +27,14 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Initialize DB on cold start ───────────────────────────────────────────────
+# ── Initialize DB on cold start & Auto-Escalate Overdue Complaints ───────────
 try:
     init_db()
+    from backend.database import get_db_session
+    from backend.services.sla_service import SLAService
+    with get_db_session() as esc_session:
+        sla_svc = SLAService(esc_session)
+        sla_svc.check_and_escalate_overdue_complaints(min_overdue_hours=24.0)
 except Exception as e:
     st.error(f"Database connection error: {e}")
 

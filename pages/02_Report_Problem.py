@@ -78,6 +78,8 @@ if "report_lng" not in st.session_state:
     st.session_state.report_lng = settings.DEFAULT_LONGITUDE
 if "report_address" not in st.session_state:
     st.session_state.report_address = ""
+if "report_sector" not in st.session_state:
+    st.session_state.report_sector = ""
 if "report_ward_id" not in st.session_state:
     st.session_state.report_ward_id = None
 if "uploaded_media_meta" not in st.session_state:
@@ -258,6 +260,8 @@ if st.session_state.report_step == 1:
                                     st.session_state.report_severity = parsed.get("suggested_severity", matched_category.default_severity)
                                 st.session_state.report_title = parsed["title"]
                                 st.session_state.report_description = parsed["description"]
+                                if parsed.get("sector"):
+                                    st.session_state.report_sector = parsed["sector"]
                                 if parsed["landmark"]:
                                     st.session_state.report_landmark = parsed["landmark"]
                                 if parsed["address"]:
@@ -273,6 +277,8 @@ if st.session_state.report_step == 1:
                                     st.session_state.report_severity = parsed.get("suggested_severity", matched_category.default_severity)
                                 st.session_state.report_title = parsed["title"]
                                 st.session_state.report_description = parsed["description"]
+                                if parsed.get("sector"):
+                                    st.session_state.report_sector = parsed["sector"]
                                 if parsed["landmark"]:
                                     st.session_state.report_landmark = parsed["landmark"]
                                 if parsed["address"]:
@@ -668,7 +674,11 @@ elif st.session_state.report_step == 4:
 
         # Reverse geocode address automatically
         rev = loc_service.reverse_geocode(c_lat, c_lng)
-        st.session_state.report_address = rev["address"]
+        rev_addr = rev["address"]
+        sec = st.session_state.get("report_sector", "")
+        if sec and sec.lower() not in rev_addr.lower():
+            rev_addr = f"{sec}, {rev_addr}"
+        st.session_state.report_address = rev_addr
 
         # Nearest ward
         nearest_w = loc_service.find_nearest_ward(c_lat, c_lng, wards)
@@ -688,13 +698,23 @@ elif st.session_state.report_step == 4:
                 st.session_state.report_lng = man_lng
                 c_lat, c_lng = man_lat, man_lng
                 rev = loc_service.reverse_geocode(c_lat, c_lng)
-                st.session_state.report_address = rev["address"]
+                rev_addr = rev["address"]
+                sec = st.session_state.get("report_sector", "")
+                if sec and sec.lower() not in rev_addr.lower():
+                    rev_addr = f"{sec}, {rev_addr}"
+                st.session_state.report_address = rev_addr
                 st.rerun()
 
     if not is_in_maharashtra(loc_service, c_lat, c_lng):
         st.warning("⚠️ The selected location is outside the State of Maharashtra municipal jurisdiction. Please select a location within Maharashtra.")
 
     # Address field
+    curr_addr = st.session_state.report_address
+    sec = st.session_state.get("report_sector", "")
+    if sec and sec.lower() not in (curr_addr or "").lower():
+        curr_addr = f"{sec}, {curr_addr}" if curr_addr else f"{sec}, {settings.DEFAULT_CITY}"
+        st.session_state.report_address = curr_addr
+
     addr_val = st.text_input(
         "Street Address / Locality",
         value=st.session_state.report_address or f"Near coordinates {c_lat:.4f}, {c_lng:.4f}, {settings.DEFAULT_CITY}",
